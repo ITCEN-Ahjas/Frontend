@@ -1,122 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "./shared/components/Header";
+import FloatingChatbot from "./shared/components/FloatingChatbot";
+import LodgingPage from "./domain/lodging/LodgingPage";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+// 팀원 페이지 완성되면 여기에 import 추가
+// import MapPage from "./domain/map/MapPage";
+// import FestivalPage from "./domain/festival/FestivalPage";
+// import CoursePage from "./domain/course/CoursePage";
+// import ClothingPage from "./domain/clothing/ClothingPage";
 
+function Placeholder({ title }) {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="placeholder">
+      <div className="placeholder-inner">
+        <p className="placeholder-icon">🚧</p>
+        <h2 className="placeholder-title">{title}</h2>
+        <p className="placeholder-desc">준비 중인 페이지입니다.</p>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  const [lang, setLang] = useState("ko");
+
+  return (
+    <BrowserRouter>
+      <div className="app-root">
+        {/* 언어 전환 버튼 */}
+        <div className="lang-switcher">
+          <button
+            type="button"
+            onClick={() => setLang("ko")}
+            className={`lang-btn ${lang === "ko" ? "lang-btn--active-ko" : ""}`}
+          >
+            KO
+          </button>
+          <button
+            type="button"
+            onClick={() => setLang("en")}
+            className={`lang-btn ${lang === "en" ? "lang-btn--active-en" : ""}`}
+          >
+            EN
+          </button>
+        </div>
+
+        {/* 공통 헤더 */}
+        <Header lang={lang} />
+
+        {/* 페이지 라우팅 */}
+        <Routes>
+          <Route path="/" element={<Placeholder title="메인 페이지" />} />
+          <Route
+            path="/guide"
+            element={<Placeholder title="사용설명서 페이지" />}
+          />
+          <Route path="/map" element={<Placeholder title="지도 페이지" />} />
+          <Route
+            path="/festival"
+            element={<Placeholder title="체험·축제 페이지" />}
+          />
+          <Route path="/lodging" element={<LodgingPage />} />
+          <Route
+            path="/course"
+            element={<Placeholder title="AI 추천 페이지" />}
+          />
+          <Route
+            path="/clothing"
+            element={<Placeholder title="날씨 의류 페이지" />}
+          />
+        </Routes>
+
+        {/* 플로팅 챗봇 */}
+        <FloatingChatbot lang={lang} />
+      </div>
+    </BrowserRouter>
+  );
+}
