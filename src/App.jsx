@@ -8,15 +8,15 @@ import LodgingPage from './pages/lodging/LodgingPage';
 import MainPage from './pages/main/MainPage';
 import MapPage from './pages/map/MapPage';
 import FloatingChatbot from './shared/components/FloatingChatbot';
-import Header from './shared/components/Header';
+import PageLayout from './shared/components/common/PageLayout';
 
 export default function App() {
   const [lang, setLang] = useState('ko');
 
   return (
     <BrowserRouter>
-      <div className="relative min-h-screen bg-[#f5f8fb]">
-        <div className="fixed right-7 top-24 z-50 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-1 py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+      <div className="min-h-screen bg-[#f5f8fb]">
+        <div className="absolute right-7 top-24 z-50 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-1 py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
           <button
             type="button"
             onClick={() => setLang('ko')}
@@ -37,17 +37,17 @@ export default function App() {
           </button>
         </div>
 
-        <Header lang={lang} />
-
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/guide" element={<GuidePage />} />
-          <Route path="/map" element={<MapPage />} />
-          <Route path="/festival" element={<FestivalPage />} />
-          <Route path="/lodging" element={<LodgingPage />} />
-          <Route path="/course" element={<CoursePage />} />
-          <Route path="/clothing" element={<ClothingPage />} />
-        </Routes>
+        <PageLayout lang={lang}>
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/guide" element={<GuidePage />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/festival" element={<FestivalPage />} />
+            <Route path="/lodging" element={<LodgingPage />} />
+            <Route path="/course" element={<CoursePage />} />
+            <Route path="/clothing" element={<ClothingPage />} />
+          </Routes>
+        </PageLayout>
 
         <FloatingChatbot lang={lang} />
       </div>
