@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { sendChatMessage } from '../../api/lodgingApi';
+import { sendChatMessage } from '../../../api/lodgingApi';
 
 const SAMPLES = [
   '청주에서 당일치기 숙소 추천해줘',

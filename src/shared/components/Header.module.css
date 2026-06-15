@@ -1,0 +1,104 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  border-bottom: 1px solid var(--color-slate-200);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.inner {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  height: 7.2rem;
+  margin: 0 auto;
+  padding: 0 var(--layout-side-padding);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  color: var(--color-chungbuk-cyan);
+}
+
+.logoCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1;
+}
+
+.logoTitle {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--color-slate-950);
+}
+
+.logoSubtitle {
+  margin-top: 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--color-slate-400);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  height: 100%;
+}
+
+.navLink {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-bottom: 0.3rem solid transparent;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--color-slate-800);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.navLink:hover {
+  color: var(--color-chungbuk-purple);
+}
+
+.navLinkActive {
+  border-bottom-color: var(--color-chungbuk-purple);
+  color: var(--color-chungbuk-purple);
+}
+
+@media (max-width: 900px) {
+  .inner {
+    height: 6.4rem;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .logoText {
+    font-size: 2.4rem;
+  }
+
+  .logoTitle {
+    font-size: 1.4rem;
+  }
+}
