@@ -1,7 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-async function requestJson(url, errorMessage) {
-  const response = await fetch(url);
+async function requestJson(url, errorMessage, options) {
+  const response = await fetch(url, options);
 
   if (!response.ok) {
     throw new Error(errorMessage);
@@ -13,7 +13,8 @@ async function requestJson(url, errorMessage) {
 function createFestivalQuery({
   page = 1,
   size = 10,
-  eventStartDate = '20230101',
+  eventStartDate,
+  eventEndDate,
   region = '전체',
   category = '전체',
   keyword = '',
@@ -22,7 +23,14 @@ function createFestivalQuery({
 
   params.append('page', String(page));
   params.append('size', String(size));
-  params.append('eventStartDate', String(eventStartDate));
+
+  if (eventStartDate) {
+    params.append('eventStartDate', String(eventStartDate));
+  }
+
+  if (eventEndDate) {
+    params.append('eventEndDate', String(eventEndDate));
+  }
 
   if (region !== '전체') {
     const trimmedRegion = String(region).trim();
@@ -78,23 +86,33 @@ function createExperienceQuery({
 export async function fetchFestivalList({
   page = 1,
   size = 10,
-  eventStartDate = '20230101',
+  eventStartDate,
+  eventEndDate,
   region = '전체',
   category = '전체',
   keyword = '',
+  signal,
 } = {}) {
-  const query = createFestivalQuery({ page, size, eventStartDate, region, category, keyword });
+  const query = createFestivalQuery({
+    page,
+    size,
+    eventStartDate,
+    eventEndDate,
+    region,
+    category,
+    keyword,
+  });
   const url = `${API_BASE_URL}/api/festivals${query}`;
-  return requestJson(url, '축제 목록 조회에 실패했습니다.');
+  return requestJson(url, '축제 목록 조회에 실패했습니다.', { signal });
 }
 
-export async function fetchFestivalDetail(contentId) {
+export async function fetchFestivalDetail(contentId, { signal } = {}) {
   if (!contentId) {
     throw new Error('contentId가 필요합니다.');
   }
 
   const url = `${API_BASE_URL}/api/festivals/${encodeURIComponent(contentId)}`;
-  return requestJson(url, '축제 상세 조회에 실패했습니다.');
+  return requestJson(url, '축제 상세 조회에 실패했습니다.', { signal });
 }
 
 export async function fetchExperienceList({
@@ -102,8 +120,9 @@ export async function fetchExperienceList({
   size = 10,
   region = '전체',
   contentTypeId = '전체',
+  signal,
 } = {}) {
   const query = createExperienceQuery({ page, size, region, contentTypeId });
   const url = `${API_BASE_URL}/api/festivals/experiences${query}`;
-  return requestJson(url, '체험/관광 콘텐츠 조회에 실패했습니다.');
+  return requestJson(url, '체험/관광 콘텐츠 조회에 실패했습니다.', { signal });
 }

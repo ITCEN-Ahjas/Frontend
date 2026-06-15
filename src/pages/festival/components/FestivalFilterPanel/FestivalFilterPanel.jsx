@@ -1,8 +1,5 @@
 import styles from './FestivalFilterPanel.module.css';
 
-const REGIONS = ['전체', '청주', '충주', '제천', '단양', '보은', '영동'];
-const CATEGORIES = ['전체', '문화축제', '먹거리', '자연체험', '액티비티', '야간행사', '전통시장'];
-
 function FilterRow({ label, options, selected, onChange, variant = 'purple' }) {
   return (
     <div className={styles.filterRow}>
@@ -32,6 +29,8 @@ function FilterRow({ label, options, selected, onChange, variant = 'purple' }) {
 
 export default function FestivalFilterPanel({
   keyword,
+  regionOptions,
+  categoryOptions,
   selectedRegion,
   selectedCategory,
   onKeywordChange,
@@ -69,14 +68,14 @@ export default function FestivalFilterPanel({
       <div className={styles.filterGroup}>
         <FilterRow
           label="지역"
-          options={REGIONS}
+          options={regionOptions}
           selected={selectedRegion}
           onChange={onRegionChange}
         />
 
         <FilterRow
           label="카테고리"
-          options={CATEGORIES}
+          options={categoryOptions}
           selected={selectedCategory}
           onChange={onCategoryChange}
           variant="cyan"

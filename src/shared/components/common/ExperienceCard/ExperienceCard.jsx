@@ -13,11 +13,33 @@ function getBadgeClass(variant) {
   return styles.badgeStatus;
 }
 
+function InfoLine({ text, label, className }) {
+  if (!text) return null;
+
+  const trimmedText = String(text).trim();
+  const separatorIndex = trimmedText.indexOf(':');
+  const resolvedLabel = label || (separatorIndex > 0 ? trimmedText.slice(0, separatorIndex) : '');
+  const resolvedText = label
+    ? trimmedText
+    : separatorIndex > 0
+      ? trimmedText.slice(separatorIndex + 1).trim()
+      : trimmedText;
+
+  return (
+    <p className={className}>
+      {resolvedLabel && <span className={styles.infoLabel}>{resolvedLabel}</span>}
+      {resolvedText}
+    </p>
+  );
+}
+
 export default function ExperienceCard({
   imageUrl,
   title,
   region,
   description,
+  descriptionLabel,
+  subInfo,
   period,
   tel,
   badges = [],
@@ -65,23 +87,33 @@ export default function ExperienceCard({
 
         <h3 className={styles.title}>{title}</h3>
 
-        <p className={styles.description}>{description}</p>
+        <div className={styles.infoBlock}>
+          <InfoLine
+            text={description}
+            label={descriptionLabel}
+            className={styles.description}
+          />
 
-        <div className={styles.metaList}>
-          {period && (
-            <div className={styles.metaItem}>
-              <span aria-hidden="true">🗓️</span>
-              <span>{period}</span>
-            </div>
-          )}
-
-          {tel && (
-            <div className={styles.metaItem}>
-              <span aria-hidden="true">☎️</span>
-              <span>{tel}</span>
-            </div>
-          )}
+          <InfoLine text={subInfo} className={styles.subInfo} />
         </div>
+
+        {(period || tel) && (
+          <div className={styles.metaList}>
+            {period && (
+              <div className={styles.metaItem}>
+                <span aria-hidden="true">🗓️</span>
+                <span>{period}</span>
+              </div>
+            )}
+
+            {tel && (
+              <div className={styles.metaItem}>
+                <span aria-hidden="true">☎️</span>
+                <span>{tel}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <button type="button" onClick={onClick} className={styles.actionButton}>
           상세보기
