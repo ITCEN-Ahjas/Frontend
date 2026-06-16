@@ -5,14 +5,6 @@ import styles from './FestivalDetailPage.module.css';
 import { formatPeriod } from './utils/festivalFormat';
 
 const DEFAULT_IMAGE_TEXT = 'CHUNGBUK FESTIVAL';
-const BANNED_SUMMARY_LABELS = [
-  '축제 테마',
-  '관광 유형',
-  '시설 유형',
-  '활동 유형',
-  '행사 유형',
-  '공연 유형',
-];
 
 function cleanText(value) {
   return String(value ?? '')
@@ -123,20 +115,6 @@ function extractHomepageUrl(value) {
   const resolvedUrl = hrefMatch?.[1] ?? urlMatch?.[0] ?? wwwMatch?.[0] ?? cleanText(rawText);
 
   return normalizeHomepageUrl(resolvedUrl);
-}
-
-function findMainInfoValue(mainInfo, labelKeywords) {
-  return (
-    mainInfo.find(
-      item =>
-        labelKeywords.some(keyword => item.label.includes(keyword)) &&
-        !isPlaceholderText(item.value),
-    )?.value ?? ''
-  );
-}
-
-function isBannedSummaryLabel(label) {
-  return BANNED_SUMMARY_LABELS.some(bannedLabel => cleanText(label) === bannedLabel);
 }
 
 function inferContentTypeId(category, fallbackContentTypeId) {
@@ -374,53 +352,6 @@ function buildKeyInfo(detail) {
   return (itemsByType[contentTypeId] ?? itemsByType[15]).filter(Boolean);
 }
 
-function buildHeroSummary(detail) {
-  if (!detail) {
-    return [];
-  }
-
-  const mainInfoTimeValue = findMainInfoValue(detail.mainInfo ?? [], [
-    '이용 시간',
-    '이용시간',
-    '관람 시간',
-    '관람시간',
-    '운영 시간',
-    '운영시간',
-    '축제 기간',
-    '축제 시간',
-    '행사 기간',
-    '행사 시간',
-    '공연 시간',
-  ]);
-
-  const detailTimeValue = !isPlaceholderText(detail.timeValue) ? detail.timeValue : '';
-
-  const timeItem = makeInfoItem(
-    '◷',
-    detail.timeLabel || '시간',
-    detailTimeValue ||
-      mainInfoTimeValue ||
-      (!isPlaceholderText(detail.playTime) ? detail.playTime : '') ||
-      detail.period,
-  );
-
-  const canUseExtraItem =
-    detail.extraLabel &&
-    !isBannedSummaryLabel(detail.extraLabel) &&
-    !isPlaceholderText(detail.extraValue);
-
-  const placeItem = makeInfoItem(
-    '⌖',
-    canUseExtraItem ? detail.extraLabel : '장소',
-    canUseExtraItem ? detail.extraValue : detail.place || detail.address,
-  );
-
-  const contactValue =
-    detail.tel || findMainInfoValue(detail.mainInfo ?? [], ['문의', '연락', '전화', '문의처']);
-
-  return [timeItem, placeItem, makeInfoItem('☎', '문의처', contactValue)].filter(Boolean);
-}
-
 function detailReducer(state, action) {
   switch (action.type) {
     case 'start':
@@ -507,7 +438,6 @@ export default function FestivalDetailPage() {
 
   const mapUrl = useMemo(() => buildGoogleMapsDirectionsUrl(detail), [detail]);
   const keyInfo = useMemo(() => buildKeyInfo(detail), [detail]);
-  const heroSummary = useMemo(() => buildHeroSummary(detail), [detail]);
   const homepageUrl = useMemo(() => normalizeHomepageUrl(detail?.homepage), [detail]);
 
   if (state.loading) {
@@ -568,27 +498,7 @@ export default function FestivalDetailPage() {
 
           <h1>{detail.title}</h1>
           <p className={styles.regionText}>{detail.region} 축제·체험 정보</p>
-
-          {heroSummary.length > 0 && (
-            <ul className={styles.summaryList}>
-              {heroSummary.map(item => (
-                <li key={`${item.label}-${item.value}`}>
-                  <span aria-hidden="true">{item.icon}</span>
-                  <strong>{item.label}</strong>
-                  {item.value}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      <section id="intro" className={styles.section}>
-        <div className={styles.introGrid}>
-          <div>
-            <h2>소개</h2>
-            <p>{introText}</p>
-          </div>
+          <p className={styles.heroIntroText}>{introText}</p>
         </div>
       </section>
 

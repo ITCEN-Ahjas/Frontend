@@ -105,33 +105,13 @@
   font-weight: 800;
 }
 
-.summaryList {
-  margin-top: 2.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.3rem;
+.heroIntroText {
+  margin-top: 2.2rem;
   color: var(--color-slate-700);
-  font-size: 1.6rem;
-  font-weight: 800;
-}
-
-.summaryList li {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-}
-
-.summaryList span {
-  width: 2.4rem;
-  color: var(--color-chungbuk-purple);
-  font-size: 2rem;
-  text-align: center;
-}
-
-.summaryList strong {
-  min-width: 6rem;
-  color: var(--color-slate-900);
-  font-weight: 900;
+  font-size: 1.58rem;
+  font-weight: 650;
+  line-height: 1.9;
+  word-break: keep-all;
 }
 
 .section {
@@ -143,19 +123,6 @@
   font-size: 2.3rem;
   font-weight: 900;
   letter-spacing: 0;
-}
-
-.introGrid {
-  max-width: 112rem;
-}
-
-.introGrid p {
-  margin-top: 1.8rem;
-  color: var(--color-slate-700);
-  font-size: 1.58rem;
-  font-weight: 650;
-  line-height: 1.9;
-  word-break: keep-all;
 }
 
 .infoGrid {
@@ -229,8 +196,10 @@
   min-height: 25rem;
   overflow: hidden;
   background:
-    linear-gradient(110deg, transparent 49%, rgba(148, 163, 184, 0.16) 49% 51%, transparent 51%) 0 0 / 9rem 9rem,
-    linear-gradient(20deg, transparent 49%, rgba(148, 163, 184, 0.14) 49% 51%, transparent 51%) 0 0 / 12rem 12rem,
+    linear-gradient(110deg, transparent 49%, rgba(148, 163, 184, 0.16) 49% 51%, transparent 51%) 0
+      0 / 9rem 9rem,
+    linear-gradient(20deg, transparent 49%, rgba(148, 163, 184, 0.14) 49% 51%, transparent 51%) 0
+      0 / 12rem 12rem,
     radial-gradient(circle at 24% 40%, rgba(0, 174, 187, 0.16), transparent 24rem),
     radial-gradient(circle at 72% 46%, rgba(114, 69, 152, 0.12), transparent 18rem),
     #f7fafc;
@@ -332,7 +301,6 @@
 
 @media (max-width: 1100px) {
   .heroSection,
-  .introGrid,
   .locationBox {
     grid-template-columns: 1fr;
   }
@@ -366,5 +334,4 @@
   .bottomActions {
     grid-template-columns: 1fr;
   }
-
 }

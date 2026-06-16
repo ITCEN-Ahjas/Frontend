@@ -299,21 +299,6 @@ function isBannedCardInfoLabel(label) {
   return BANNED_CARD_INFO_LABELS.map(normalizeCompareText).includes(normalizedLabel);
 }
 
-function formatCardInfoLine(info) {
-  if (!info || isPlaceholderInfo(info.value)) {
-    return '';
-  }
-
-  const label = String(info.label ?? '').trim();
-  const value = String(info.value ?? '').trim();
-
-  if (!label) {
-    return value;
-  }
-
-  return `${label} ${value}`;
-}
-
 function createFallbackPrimaryInfo({ category, startDate, endDate }) {
   const period = formatSummaryPeriod(startDate, endDate);
 
@@ -461,7 +446,7 @@ function normalizeFestival(item, options = {}) {
     item.region ?? item.area ?? item['개최지역'] ?? item['시군구명'] ?? item['시군명'] ?? '충북',
   );
 
-  const description = createCategoryDescription(item, contentTypeId);
+  const categoryDescription = createCategoryDescription(item, contentTypeId);
   const rawDisplayInfo = item.displayInfo ?? item.display_info ?? '';
   const rawSubInfo = item.subInfo ?? item.sub_info ?? '';
 
@@ -501,6 +486,9 @@ function normalizeFestival(item, options = {}) {
     tel,
   });
 
+  const hasPrimaryInfo = !isPlaceholderInfo(primaryInfo.value);
+  const hasSecondaryInfo = !isPlaceholderInfo(secondaryInfo.value);
+
   return {
     id: String(
       item.id ??
@@ -517,10 +505,12 @@ function normalizeFestival(item, options = {}) {
     contentTypeId,
     startDate,
     endDate,
-    description: formatCardInfoLine(primaryInfo) || fallbackDescription || description.text,
-    descriptionLabel: '',
-    subInfo: formatCardInfoLine(secondaryInfo) || subInfo,
-    subInfoLabel: '',
+    description: hasPrimaryInfo
+      ? primaryInfo.value
+      : fallbackDescription || categoryDescription.text,
+    descriptionLabel: hasPrimaryInfo ? primaryInfo.label : '',
+    subInfo: hasSecondaryInfo ? secondaryInfo.value : subInfo,
+    subInfoLabel: hasSecondaryInfo ? secondaryInfo.label : '',
     timeLabel,
     timeValue,
     extraLabel,
@@ -687,7 +677,9 @@ export default function FestivalPage() {
           item.category,
           item.themeCategory,
           item.description,
+          item.descriptionLabel,
           item.subInfo,
+          item.subInfoLabel,
           item.address,
           item.extraValue,
         ]
@@ -757,31 +749,6 @@ export default function FestivalPage() {
     };
   }, []);
 
-  const refreshFestivalItems = () => {
-    const controller = new AbortController();
-
-    dispatch({ type: 'start' });
-
-    fetchAllFestivalItems({ signal: controller.signal })
-      .then(normalizedItems => {
-        if (controller.signal.aborted) return;
-
-        dispatch({
-          type: 'success',
-          payload: { items: normalizedItems },
-        });
-        setCurrentPage(1);
-      })
-      .catch(error => {
-        if (error.name === 'AbortError') return;
-
-        dispatch({
-          type: 'error',
-          payload: error.message || '축제 목록 조회에 실패했습니다.',
-        });
-      });
-  };
-
   const resetFilters = () => {
     setKeyword('');
     setSelectedRegion('전체');
@@ -829,8 +796,6 @@ export default function FestivalPage() {
             setCurrentPage(1);
           }}
           onReset={resetFilters}
-          onRefresh={refreshFestivalItems}
-          refreshLoading={loading}
         />
 
         <FestivalSectionHeader count={filteredFestivals.length} />
