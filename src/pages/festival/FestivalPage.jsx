@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchExperienceList, fetchFestivalList } from '../../api/festivalApi';
 import FestivalFilterPanel from './components/FestivalFilterPanel';
 import FestivalGrid from './components/FestivalGrid';
@@ -416,6 +417,7 @@ function festivalRequestReducer(state, action) {
 }
 
 export default function FestivalPage() {
+  const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [selectedCategory, setSelectedCategory] = useState('전체');
@@ -517,8 +519,11 @@ export default function FestivalPage() {
     setCurrentPage(1);
   };
 
-  const handleClickDetail = id => {
-    console.log('상세보기', id);
+  const handleClickDetail = item => {
+    const contentId = item.contentId || item.id;
+    navigate(`/festival/${encodeURIComponent(contentId)}`, {
+      state: { festival: item },
+    });
   };
 
   return (

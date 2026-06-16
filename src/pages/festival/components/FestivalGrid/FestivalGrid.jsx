@@ -42,7 +42,7 @@ export default function FestivalGrid({ festivals, loading, errorMessage, onClick
           descriptionLabel={item.descriptionLabel}
           subInfo={item.subInfo}
           badges={getCardBadges(item)}
-          onClick={() => onClickDetail(item.id)}
+          onClick={() => onClickDetail(item)}
         />
       ))}
     </div>

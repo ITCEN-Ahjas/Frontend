@@ -18,7 +18,8 @@ function InfoLine({ text, label, className }) {
 
   const trimmedText = String(text).trim();
   const separatorIndex = trimmedText.indexOf(':');
-  const resolvedLabel = label || (separatorIndex > 0 ? trimmedText.slice(0, separatorIndex) : '');
+  const hasInlineLabel = separatorIndex > 0 && !label;
+  const resolvedLabel = label || (hasInlineLabel ? trimmedText.slice(0, separatorIndex) : '');
   const resolvedText = label
     ? trimmedText
     : separatorIndex > 0
@@ -27,7 +28,12 @@ function InfoLine({ text, label, className }) {
 
   return (
     <p className={className}>
-      {resolvedLabel && <span className={styles.infoLabel}>{resolvedLabel}</span>}
+      {resolvedLabel && (
+        <span className={styles.infoLabel}>
+          {resolvedLabel}
+          {hasInlineLabel ? ':' : ''}
+        </span>
+      )}
       {resolvedText}
     </p>
   );
