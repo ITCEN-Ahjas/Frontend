@@ -14,7 +14,6 @@ function createFestivalQuery({
   page = 1,
   size = 10,
   eventStartDate,
-  eventEndDate,
   region = '전체',
   category = '전체',
   keyword = '',
@@ -26,10 +25,6 @@ function createFestivalQuery({
 
   if (eventStartDate) {
     params.append('eventStartDate', String(eventStartDate));
-  }
-
-  if (eventEndDate) {
-    params.append('eventEndDate', String(eventEndDate));
   }
 
   if (region !== '전체') {
@@ -87,7 +82,6 @@ export async function fetchFestivalList({
   page = 1,
   size = 10,
   eventStartDate,
-  eventEndDate,
   region = '전체',
   category = '전체',
   keyword = '',
@@ -97,7 +91,6 @@ export async function fetchFestivalList({
     page,
     size,
     eventStartDate,
-    eventEndDate,
     region,
     category,
     keyword,

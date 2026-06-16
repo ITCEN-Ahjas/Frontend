@@ -2,7 +2,12 @@ import ExperienceCard from '../../../../shared/components/common/ExperienceCard'
 import styles from './FestivalGrid.module.css';
 
 function getCardBadges(item) {
-  return item.category ? [{ label: item.category, variant: 'category' }] : [];
+  return [
+    item.category ? { label: item.category, variant: 'category' } : null,
+    item.themeCategory && item.themeCategory !== item.category
+      ? { label: item.themeCategory, variant: 'dark' }
+      : null,
+  ].filter(Boolean);
 }
 
 export default function FestivalGrid({ festivals, loading, errorMessage, onClickDetail }) {
@@ -41,6 +46,7 @@ export default function FestivalGrid({ festivals, loading, errorMessage, onClick
           description={item.description}
           descriptionLabel={item.descriptionLabel}
           subInfo={item.subInfo}
+          subInfoLabel={item.subInfoLabel}
           badges={getCardBadges(item)}
           onClick={() => onClickDetail(item)}
         />

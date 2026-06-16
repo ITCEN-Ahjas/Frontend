@@ -37,6 +37,8 @@ export default function FestivalFilterPanel({
   onRegionChange,
   onCategoryChange,
   onReset,
+  onRefresh,
+  refreshLoading = false,
 }) {
   return (
     <section className={styles.panel} aria-label="축제와 체험 검색 필터">
@@ -60,9 +62,20 @@ export default function FestivalFilterPanel({
           </div>
         </form>
 
-        <button type="button" onClick={onReset} className={styles.resetButton}>
-          초기화
-        </button>
+        <div className={styles.actionGroup}>
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={refreshLoading}
+            className={styles.refreshButton}
+          >
+            {refreshLoading ? '새로고침 중' : '데이터 새로고침'}
+          </button>
+
+          <button type="button" onClick={onReset} className={styles.resetButton}>
+            초기화
+          </button>
+        </div>
       </div>
 
       <div className={styles.filterGroup}>

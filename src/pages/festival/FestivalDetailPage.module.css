@@ -57,16 +57,35 @@
   min-width: 0;
 }
 
-.categoryBadge {
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.categoryBadge,
+.themeBadge,
+.statusBadge {
   display: inline-flex;
   align-items: center;
   height: 3.8rem;
   border-radius: 999px;
   padding: 0 1.8rem;
-  background: var(--color-chungbuk-cyan);
   color: var(--color-white);
   font-size: 1.35rem;
   font-weight: 900;
+}
+
+.categoryBadge {
+  background: var(--color-chungbuk-cyan);
+}
+
+.themeBadge {
+  background: var(--color-chungbuk-dark-blue);
+}
+
+.statusBadge {
+  background: var(--color-chungbuk-purple);
 }
 
 .heroContent h1 {
@@ -84,16 +103,6 @@
   color: var(--color-slate-600);
   font-size: 1.8rem;
   font-weight: 800;
-}
-
-.heroDescription {
-  margin-top: 2rem;
-  max-width: 56rem;
-  color: var(--color-slate-700);
-  font-size: 1.65rem;
-  font-weight: 650;
-  line-height: 1.8;
-  word-break: keep-all;
 }
 
 .summaryList {
@@ -119,26 +128,10 @@
   text-align: center;
 }
 
-.tabNav {
-  margin-top: 5.6rem;
-  display: flex;
-  gap: 4rem;
-  border-bottom: 1px solid var(--color-slate-200);
-}
-
-.tabNav a {
-  min-width: 10rem;
-  padding: 0 0 1.8rem;
-  border-bottom: 0.3rem solid transparent;
-  color: var(--color-slate-800);
-  font-size: 1.7rem;
+.summaryList strong {
+  min-width: 6rem;
+  color: var(--color-slate-900);
   font-weight: 900;
-  text-align: center;
-}
-
-.tabNav a:first-child {
-  border-bottom-color: var(--color-chungbuk-purple);
-  color: var(--color-chungbuk-purple);
 }
 
 .section {
@@ -153,10 +146,7 @@
 }
 
 .introGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 38rem;
-  gap: 5.6rem;
-  align-items: start;
+  max-width: 112rem;
 }
 
 .introGrid p {
@@ -168,68 +158,48 @@
   word-break: keep-all;
 }
 
-.noticeBox {
-  border-radius: 1.8rem;
-  padding: 2.6rem 3rem;
-  background: linear-gradient(135deg, rgba(114, 69, 152, 0.12), rgba(114, 69, 152, 0.04));
-  color: var(--color-chungbuk-purple);
-}
-
-.noticeBox strong {
-  display: block;
-  font-size: 1.8rem;
-  font-weight: 900;
-}
-
-.noticeBox p {
-  margin-top: 1.2rem;
-  color: var(--color-chungbuk-purple);
-  font-size: 1.45rem;
-  font-weight: 750;
-  line-height: 1.7;
-}
-
 .infoGrid {
   margin-top: 2.4rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.6rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
 }
 
 .infoItem {
-  min-height: 14.8rem;
-  padding: 2.8rem 2.4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  min-height: 8.8rem;
+  padding: 1.8rem 2rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1.2rem;
+  align-items: start;
   border: 1px solid var(--color-slate-200);
-  border-radius: 1.6rem;
+  border-radius: 1.2rem;
   background: var(--color-white);
 }
 
 .infoIcon {
   color: var(--color-chungbuk-purple);
-  font-size: 3.2rem;
+  font-size: 1.8rem;
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.4;
 }
 
 .infoItem strong {
-  margin-top: 1.4rem;
-  color: var(--color-slate-800);
-  font-size: 1.45rem;
+  color: var(--color-slate-500);
+  font-size: 1.25rem;
   font-weight: 900;
+  line-height: 1.4;
 }
 
 .infoItem p {
-  margin-top: 1rem;
+  grid-column: 2;
+  margin-top: 0.5rem;
   color: var(--color-slate-950);
-  font-size: 1.45rem;
-  font-weight: 750;
+  font-size: 1.42rem;
+  font-weight: 850;
   line-height: 1.55;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .emptyInfoText {
@@ -317,29 +287,6 @@
   font-weight: 900;
 }
 
-.linkBox {
-  min-height: 8.8rem;
-  margin-top: 2.4rem;
-  padding: 0 3rem;
-  display: grid;
-  grid-template-columns: auto 18rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 2.2rem;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1.8rem;
-  background: var(--color-white);
-  color: var(--color-chungbuk-purple);
-  font-size: 1.55rem;
-  font-weight: 850;
-}
-
-.linkBox span:nth-child(3) {
-  overflow: hidden;
-  color: var(--color-slate-700);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .bottomActions {
   margin-top: 5.6rem;
   display: grid;
@@ -420,8 +367,4 @@
     grid-template-columns: 1fr;
   }
 
-  .linkBox {
-    grid-template-columns: 1fr;
-    padding: 2.4rem;
-  }
 }
