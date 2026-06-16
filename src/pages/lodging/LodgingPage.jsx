@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { getLodgings } from "../../shared/api/lodgingApi";
-import LodgingCard from "./LodgingCard";
-import LodgingModal from "./LodgingModal";
+import { useEffect, useState } from 'react';
+import { getLodgings } from '../../api/lodgingApi';
+import LodgingCard from './components/LodgingCard';
+import LodgingModal from './components/LodgingModal';
 
-const AREAS = ["전체", "청주", "제천", "단양", "충주"];
+const AREAS = ['전체', '청주', '제천', '단양', '충주'];
 
 export default function LodgingPage() {
-  const [area, setArea] = useState("전체");
+  const [area, setArea] = useState('전체');
   const [lodgings, setLodgings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -21,25 +21,23 @@ export default function LodgingPage() {
   return (
     <>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
-      <div
-        style={{ minHeight: "100vh", background: "#f5f8fb", paddingTop: 80 }}
-      >
-        <div style={{ padding: "32px 48px" }}>
+      <div style={{ minHeight: '100vh', background: '#f5f8fb', paddingTop: 80 }}>
+        <div style={{ padding: '32px 48px' }}>
           {/* 페이지 헤더 */}
           <div
             style={{
-              background: "white",
+              background: 'white',
               borderRadius: 36,
-              padding: "36px 40px",
+              padding: '36px 40px',
               marginBottom: 28,
             }}
           >
             <span
               style={{
-                background: "#e0f2fe",
-                color: "#0369a1",
+                background: '#e0f2fe',
+                color: '#0369a1',
                 borderRadius: 999,
-                padding: "6px 16px",
+                padding: '6px 16px',
                 fontSize: 13,
                 fontWeight: 800,
               }}
@@ -50,9 +48,9 @@ export default function LodgingPage() {
               style={{
                 fontSize: 44,
                 fontWeight: 900,
-                letterSpacing: "-0.08em",
-                margin: "16px 0 0",
-                color: "#0f172a",
+                letterSpacing: '-0.08em',
+                margin: '16px 0 0',
+                color: '#0f172a',
                 lineHeight: 1.2,
               }}
             >
@@ -61,29 +59,28 @@ export default function LodgingPage() {
             <p
               style={{
                 fontSize: 16,
-                color: "#64748b",
+                color: '#64748b',
                 lineHeight: 1.8,
-                margin: "12px 0 24px",
+                margin: '12px 0 24px',
               }}
             >
-              Tripadvisor 실제 리뷰를 AI가 분석해 요약을 제공합니다. 상세보기를
-              눌러 확인하세요.
+              Tripadvisor 실제 리뷰를 AI가 분석해 요약을 제공합니다. 상세보기를 눌러 확인하세요.
             </p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {AREAS.map((a) => (
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {AREAS.map(a => (
                 <button
                   key={a}
                   onClick={() => setArea(a)}
                   style={{
-                    background: area === a ? "#059669" : "#f1f5f9",
-                    color: area === a ? "white" : "#64748b",
-                    border: "none",
+                    background: area === a ? '#059669' : '#f1f5f9',
+                    color: area === a ? 'white' : '#64748b',
+                    border: 'none',
                     borderRadius: 999,
-                    padding: "8px 20px",
+                    padding: '8px 20px',
                     fontSize: 13,
                     fontWeight: 800,
-                    cursor: "pointer",
-                    transition: "all 0.15s",
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
                   }}
                 >
                   {a}
@@ -95,27 +92,27 @@ export default function LodgingPage() {
           {/* 카드 그리드 */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
               gap: 24,
             }}
           >
             {loading ? (
-              [1, 2, 3].map((i) => (
+              [1, 2, 3].map(i => (
                 <div
                   key={i}
                   style={{
-                    background: "white",
+                    background: 'white',
                     borderRadius: 32,
-                    overflow: "hidden",
-                    border: "1px solid #e2e8f0",
+                    overflow: 'hidden',
+                    border: '1px solid #e2e8f0',
                   }}
                 >
                   <div
                     style={{
                       height: 220,
-                      background: "#f1f5f9",
-                      animation: "pulse 1.5s infinite",
+                      background: '#f1f5f9',
+                      animation: 'pulse 1.5s infinite',
                     }}
                   />
                   <div style={{ padding: 20 }}>
@@ -125,10 +122,10 @@ export default function LodgingPage() {
                         style={{
                           width: `${w}%`,
                           height: 14,
-                          background: "#f1f5f9",
+                          background: '#f1f5f9',
                           borderRadius: 6,
                           marginBottom: 10,
-                          animation: "pulse 1.5s infinite",
+                          animation: 'pulse 1.5s infinite',
                         }}
                       />
                     ))}
@@ -138,21 +135,17 @@ export default function LodgingPage() {
             ) : lodgings.length === 0 ? (
               <div
                 style={{
-                  gridColumn: "1/-1",
-                  textAlign: "center",
-                  padding: "80px 0",
-                  color: "#94a3b8",
+                  gridColumn: '1/-1',
+                  textAlign: 'center',
+                  padding: '80px 0',
+                  color: '#94a3b8',
                 }}
               >
                 해당 지역의 숙소 정보가 없습니다.
               </div>
             ) : (
-              lodgings.map((l) => (
-                <LodgingCard
-                  key={l.id}
-                  lodging={l}
-                  onDetailClick={setSelectedId}
-                />
+              lodgings.map(l => (
+                <LodgingCard key={l.id} lodging={l} onDetailClick={setSelectedId} />
               ))
             )}
           </div>
@@ -160,10 +153,7 @@ export default function LodgingPage() {
       </div>
 
       {selectedId !== null && (
-        <LodgingModal
-          lodgingId={selectedId}
-          onClose={() => setSelectedId(null)}
-        />
+        <LodgingModal lodgingId={selectedId} onClose={() => setSelectedId(null)} />
       )}
     </>
   );

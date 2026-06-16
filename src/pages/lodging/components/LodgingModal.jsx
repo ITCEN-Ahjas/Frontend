@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { getLodgingById } from "../../shared/api/lodgingApi";
+import { useEffect, useState } from 'react';
+import { getLodgingById } from '../../../api/lodgingApi';
 
 function Skeleton() {
   return (
-    <div style={{ background: "#f8fafc", borderRadius: 20, padding: 20 }}>
+    <div style={{ background: '#f8fafc', borderRadius: 20, padding: 20 }}>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
       {[100, 85, 70].map((w, i) => (
         <div
@@ -12,13 +12,13 @@ function Skeleton() {
             width: `${w}%`,
             height: 14,
             borderRadius: 6,
-            background: "#e2e8f0",
+            background: '#e2e8f0',
             marginBottom: 8,
-            animation: "pulse 1.5s infinite",
+            animation: 'pulse 1.5s infinite',
           }}
         />
       ))}
-      <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
         {[80, 70, 90].map((w, i) => (
           <div
             key={i}
@@ -26,8 +26,8 @@ function Skeleton() {
               width: w,
               height: 26,
               borderRadius: 999,
-              background: "#e2e8f0",
-              animation: "pulse 1.5s infinite",
+              background: '#e2e8f0',
+              animation: 'pulse 1.5s infinite',
             }}
           />
         ))}
@@ -51,39 +51,39 @@ export default function LodgingModal({ lodgingId, onClose }) {
     <>
       <style>{`@keyframes modalIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} } @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
       <div
-        onClick={(e) => e.target === e.currentTarget && onClose()}
+        onClick={e => e.target === e.currentTarget && onClose()}
         style={{
-          position: "fixed",
+          position: 'fixed',
           inset: 0,
           zIndex: 150,
-          background: "rgba(15,23,42,0.6)",
-          backdropFilter: "blur(4px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          background: 'rgba(15,23,42,0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           padding: 24,
         }}
       >
         <div
           style={{
-            width: "100%",
+            width: '100%',
             maxWidth: 860,
-            maxHeight: "88vh",
+            maxHeight: '88vh',
             borderRadius: 36,
-            background: "white",
-            boxShadow: "0 32px 64px rgba(0,0,0,0.25)",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            animation: "modalIn 0.25s ease",
+            background: 'white',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.25)',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            animation: 'modalIn 0.25s ease',
           }}
         >
           {/* 히어로 */}
           <div
             style={{
-              position: "relative",
+              position: 'relative',
               height: 220,
-              background: "#0f172a",
+              background: '#0f172a',
               flexShrink: 0,
             }}
           >
@@ -92,38 +92,37 @@ export default function LodgingModal({ lodgingId, onClose }) {
                 src={detail.imageUrl}
                 alt={detail.name}
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
                   opacity: 0.45,
                 }}
               />
             )}
             <div
               style={{
-                position: "absolute",
+                position: 'absolute',
                 inset: 0,
-                background:
-                  "linear-gradient(to right, #0f172a, rgba(15,23,42,0.6), transparent)",
+                background: 'linear-gradient(to right, #0f172a, rgba(15,23,42,0.6), transparent)',
               }}
             />
             <button
               onClick={onClose}
               style={{
-                position: "absolute",
+                position: 'absolute',
                 right: 20,
                 top: 20,
                 width: 40,
                 height: 40,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                color: "white",
-                cursor: "pointer",
-                display: "grid",
-                placeItems: "center",
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'grid',
+                placeItems: 'center',
                 fontSize: 18,
               }}
             >
@@ -132,21 +131,21 @@ export default function LodgingModal({ lodgingId, onClose }) {
             {detail && (
               <div
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   bottom: 20,
                   left: 28,
-                  color: "white",
+                  color: 'white',
                 }}
               >
-                <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                  {detail.tags?.map((t) => (
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  {detail.tags?.map(t => (
                     <span
                       key={t}
                       style={{
-                        background: "rgba(255,255,255,0.15)",
-                        border: "1px solid rgba(255,255,255,0.25)",
+                        background: 'rgba(255,255,255,0.15)',
+                        border: '1px solid rgba(255,255,255,0.25)',
                         borderRadius: 999,
-                        padding: "3px 12px",
+                        padding: '3px 12px',
                         fontSize: 12,
                         fontWeight: 700,
                       }}
@@ -159,8 +158,8 @@ export default function LodgingModal({ lodgingId, onClose }) {
                   style={{
                     fontSize: 28,
                     fontWeight: 900,
-                    letterSpacing: "-0.07em",
-                    margin: "0 0 4px",
+                    letterSpacing: '-0.07em',
+                    margin: '0 0 4px',
                   }}
                 >
                   {detail.name}
@@ -168,7 +167,7 @@ export default function LodgingModal({ lodgingId, onClose }) {
                 <p
                   style={{
                     fontSize: 13,
-                    color: "rgba(255,255,255,0.7)",
+                    color: 'rgba(255,255,255,0.7)',
                     margin: 0,
                   }}
                 >
@@ -181,10 +180,10 @@ export default function LodgingModal({ lodgingId, onClose }) {
           {/* 바디 */}
           <div
             style={{
-              overflowY: "auto",
+              overflowY: 'auto',
               padding: 28,
-              display: "flex",
-              flexDirection: "column",
+              display: 'flex',
+              flexDirection: 'column',
               gap: 24,
             }}
           >
@@ -195,16 +194,16 @@ export default function LodgingModal({ lodgingId, onClose }) {
                 {/* AI 요약 */}
                 <div
                   style={{
-                    background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)",
+                    background: 'linear-gradient(135deg,#f0fdf4,#ecfdf5)',
                     borderRadius: 20,
                     padding: 20,
-                    border: "1px solid #bbf7d0",
+                    border: '1px solid #bbf7d0',
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 8,
                       marginBottom: 12,
                     }}
@@ -214,10 +213,10 @@ export default function LodgingModal({ lodgingId, onClose }) {
                         width: 28,
                         height: 28,
                         borderRadius: 8,
-                        background: "#059669",
-                        display: "grid",
-                        placeItems: "center",
-                        color: "white",
+                        background: '#059669',
+                        display: 'grid',
+                        placeItems: 'center',
+                        color: 'white',
                         fontSize: 14,
                       }}
                     >
@@ -227,7 +226,7 @@ export default function LodgingModal({ lodgingId, onClose }) {
                       style={{
                         fontSize: 13,
                         fontWeight: 800,
-                        color: "#059669",
+                        color: '#059669',
                         margin: 0,
                       }}
                     >
@@ -235,41 +234,40 @@ export default function LodgingModal({ lodgingId, onClose }) {
                     </p>
                     <span
                       style={{
-                        marginLeft: "auto",
+                        marginLeft: 'auto',
                         fontSize: 11,
-                        color: "#94a3b8",
+                        color: '#94a3b8',
                       }}
                     >
-                      리뷰 {detail.reviewCount?.toLocaleString()}개 기반 · 출처:
-                      Tripadvisor
+                      리뷰 {detail.reviewCount?.toLocaleString()}개 기반 · 출처: Tripadvisor
                     </span>
                   </div>
                   <p
                     style={{
                       fontSize: 14,
-                      color: "#1e293b",
+                      color: '#1e293b',
                       lineHeight: 1.8,
-                      margin: "0 0 14px",
+                      margin: '0 0 14px',
                     }}
                   >
                     {detail.aiSummary}
                   </p>
                   <div
                     style={{
-                      display: "flex",
-                      flexWrap: "wrap",
+                      display: 'flex',
+                      flexWrap: 'wrap',
                       gap: 8,
                       marginBottom: detail.cautionTags?.length ? 10 : 0,
                     }}
                   >
-                    {detail.positiveTags?.map((tag) => (
+                    {detail.positiveTags?.map(tag => (
                       <span
                         key={tag}
                         style={{
-                          background: "#d1fae5",
-                          color: "#065f46",
+                          background: '#d1fae5',
+                          color: '#065f46',
                           borderRadius: 999,
-                          padding: "4px 12px",
+                          padding: '4px 12px',
                           fontSize: 12,
                           fontWeight: 700,
                         }}
@@ -279,15 +277,15 @@ export default function LodgingModal({ lodgingId, onClose }) {
                     ))}
                   </div>
                   {detail.cautionTags?.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {detail.cautionTags.map((tag) => (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {detail.cautionTags.map(tag => (
                         <span
                           key={tag}
                           style={{
-                            background: "#fef9c3",
-                            color: "#854d0e",
+                            background: '#fef9c3',
+                            color: '#854d0e',
                             borderRadius: 999,
-                            padding: "4px 12px",
+                            padding: '4px 12px',
                             fontSize: 12,
                             fontWeight: 700,
                           }}
@@ -302,31 +300,31 @@ export default function LodgingModal({ lodgingId, onClose }) {
                 {/* 기본 정보 */}
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr",
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
                     gap: 12,
                   }}
                 >
                   {[
-                    ["평점", `⭐ ${detail.rating}`],
-                    ["리뷰 수", `${detail.reviewCount?.toLocaleString()}개`],
-                    ["1박 요금", `${detail.priceFrom?.toLocaleString()}원~`],
+                    ['평점', `⭐ ${detail.rating}`],
+                    ['리뷰 수', `${detail.reviewCount?.toLocaleString()}개`],
+                    ['1박 요금', `${detail.priceFrom?.toLocaleString()}원~`],
                   ].map(([label, value]) => (
                     <div
                       key={label}
                       style={{
-                        background: "#f8fafc",
+                        background: '#f8fafc',
                         borderRadius: 16,
-                        padding: "14px 16px",
-                        border: "1px solid #f1f5f9",
+                        padding: '14px 16px',
+                        border: '1px solid #f1f5f9',
                       }}
                     >
                       <p
                         style={{
                           fontSize: 11,
-                          color: "#94a3b8",
+                          color: '#94a3b8',
                           fontWeight: 700,
-                          margin: "0 0 4px",
+                          margin: '0 0 4px',
                         }}
                       >
                         {label}
@@ -342,13 +340,13 @@ export default function LodgingModal({ lodgingId, onClose }) {
                     style={{
                       fontSize: 16,
                       fontWeight: 900,
-                      margin: "0 0 14px",
+                      margin: '0 0 14px',
                     }}
                   >
-                    실제 리뷰{" "}
+                    실제 리뷰{' '}
                     <span
                       style={{
-                        color: "#94a3b8",
+                        color: '#94a3b8',
                         fontWeight: 600,
                         fontSize: 13,
                       }}
@@ -358,8 +356,8 @@ export default function LodgingModal({ lodgingId, onClose }) {
                   </h3>
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
+                      display: 'flex',
+                      flexDirection: 'column',
                       gap: 12,
                     }}
                   >
@@ -367,16 +365,16 @@ export default function LodgingModal({ lodgingId, onClose }) {
                       <div
                         key={i}
                         style={{
-                          background: "#f8fafc",
+                          background: '#f8fafc',
                           borderRadius: 16,
-                          padding: "14px 16px",
-                          border: "1px solid #f1f5f9",
+                          padding: '14px 16px',
+                          border: '1px solid #f1f5f9',
                         }}
                       >
                         <div
                           style={{
-                            display: "flex",
-                            justifyContent: "space-between",
+                            display: 'flex',
+                            justifyContent: 'space-between',
                             marginBottom: 8,
                           }}
                         >
@@ -384,7 +382,7 @@ export default function LodgingModal({ lodgingId, onClose }) {
                             style={{
                               fontSize: 13,
                               fontWeight: 800,
-                              color: "#475569",
+                              color: '#475569',
                             }}
                           >
                             {review.author}
@@ -392,20 +390,18 @@ export default function LodgingModal({ lodgingId, onClose }) {
                           <span
                             style={{
                               fontSize: 12,
-                              color: "#f59e0b",
+                              color: '#f59e0b',
                               fontWeight: 700,
                             }}
                           >
-                            {"⭐".repeat(review.rating)}{" "}
-                            <span style={{ color: "#94a3b8" }}>
-                              {review.writtenAt}
-                            </span>
+                            {'⭐'.repeat(review.rating)}{' '}
+                            <span style={{ color: '#94a3b8' }}>{review.writtenAt}</span>
                           </span>
                         </div>
                         <p
                           style={{
                             fontSize: 13,
-                            color: "#475569",
+                            color: '#475569',
                             lineHeight: 1.7,
                             margin: 0,
                           }}
@@ -418,18 +414,18 @@ export default function LodgingModal({ lodgingId, onClose }) {
                 </div>
 
                 {/* CTA */}
-                <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ display: 'flex', gap: 12 }}>
                   <button
                     style={{
                       flex: 1,
-                      background: "#0f172a",
-                      color: "white",
-                      border: "none",
+                      background: '#0f172a',
+                      color: 'white',
+                      border: 'none',
                       borderRadius: 16,
                       padding: 16,
                       fontSize: 14,
                       fontWeight: 800,
-                      cursor: "pointer",
+                      cursor: 'pointer',
                     }}
                   >
                     Tripadvisor에서 예약하기
@@ -437,14 +433,14 @@ export default function LodgingModal({ lodgingId, onClose }) {
                   <button
                     style={{
                       flex: 1,
-                      background: "white",
-                      color: "#334155",
-                      border: "1px solid #e2e8f0",
+                      background: 'white',
+                      color: '#334155',
+                      border: '1px solid #e2e8f0',
                       borderRadius: 16,
                       padding: 16,
                       fontSize: 14,
                       fontWeight: 800,
-                      cursor: "pointer",
+                      cursor: 'pointer',
                     }}
                   >
                     AI 여행 코스에 추가하기
@@ -452,7 +448,7 @@ export default function LodgingModal({ lodgingId, onClose }) {
                 </div>
               </>
             ) : (
-              <p style={{ textAlign: "center", color: "#94a3b8" }}>
+              <p style={{ textAlign: 'center', color: '#94a3b8' }}>
                 숙소 정보를 불러올 수 없습니다.
               </p>
             )}
