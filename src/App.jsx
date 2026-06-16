@@ -4,6 +4,7 @@ import CoursePage from './pages/course/CoursePage';
 import FestivalDetailPage from './pages/festival/FestivalDetailPage';
 import FestivalPage from './pages/festival/FestivalPage';
 import GuidePage from './pages/guide/GuidePage';
+import LodgingDetailPage from './pages/lodging/LodgingDetailPage';
 import LodgingPage from './pages/lodging/LodgingPage';
 import MainPage from './pages/main/MainPage';
 import MapPage from './pages/map/MapPage';
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/festival" element={<FestivalPage />} />
           <Route path="/festival/:contentId" element={<FestivalDetailPage />} />
           <Route path="/lodging" element={<LodgingPage />} />
+          <Route path="/lodging/:contentId" element={<LodgingDetailPage />} />
           <Route path="/course" element={<CoursePage />} />
           <Route path="/clothing" element={<ClothingPage />} />
         </Routes>

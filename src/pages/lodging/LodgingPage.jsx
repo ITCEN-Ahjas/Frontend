@@ -1,160 +1,203 @@
-import { useEffect, useState } from 'react';
-import { getLodgings } from '../../api/lodgingApi';
-import LodgingCard from './components/LodgingCard';
-import LodgingModal from './components/LodgingModal';
+import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { fetchAccommodationList } from '../../api/lodgingApi';
+import LodgingFilterPanel from './components/LodgingFilterPanel';
+import LodgingGrid from './components/LodgingGrid';
+import LodgingHero from './components/LodgingHero';
+import LodgingPagination from './components/LodgingPagination';
+import LodgingSectionHeader from './components/LodgingSectionHeader';
+import styles from './LodgingPage.module.css';
 
-const AREAS = ['전체', '청주', '제천', '단양', '충주'];
+const PAGE_SIZE = 9;
+
+const CHUNGBUK_REGIONS = [
+  '청주',
+  '충주',
+  '제천',
+  '보은',
+  '옥천',
+  '영동',
+  '증평',
+  '진천',
+  '괴산',
+  '음성',
+  '단양',
+];
+
+function pickArray(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.content)) return payload.content;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+}
+
+function pickTotalCount(payload, fallbackCount) {
+  return payload?.totalCount ?? payload?.total ?? fallbackCount;
+}
+
+function normalizeAccommodation(item) {
+  const region = String(item.region ?? '').trim() || '충북';
+
+  return {
+    id: String(item.id ?? item.contentId ?? item.contentid ?? item.title),
+    contentId: String(item.id ?? item.contentId ?? item.contentid ?? ''),
+    title: item.title ?? '이름 없는 숙소',
+    region,
+    category: item.category ?? item.cat3 ?? item.cat2 ?? '숙박',
+    description: item.address ?? '',
+    descriptionLabel: '주소',
+    subInfo: item.tel ?? '',
+    subInfoLabel: '문의',
+    imageUrl: item.imageUrl ?? '',
+    tel: item.tel ?? '',
+    mapX: item.mapX ?? '',
+    mapY: item.mapY ?? '',
+    address: item.address ?? '',
+  };
+}
+
+const initialRequestState = {
+  lodgings: [],
+  totalCount: 0,
+  loading: true,
+  errorMessage: '',
+};
+
+function lodgingRequestReducer(state, action) {
+  switch (action.type) {
+    case 'start':
+      return {
+        ...state,
+        loading: true,
+        errorMessage: '',
+      };
+
+    case 'success':
+      return {
+        lodgings: action.payload.items,
+        totalCount: action.payload.totalCount,
+        loading: false,
+        errorMessage: '',
+      };
+
+    case 'error':
+      return {
+        lodgings: [],
+        totalCount: 0,
+        loading: false,
+        errorMessage: action.payload,
+      };
+
+    default:
+      return state;
+  }
+}
 
 export default function LodgingPage() {
-  const [area, setArea] = useState('전체');
-  const [lodgings, setLodgings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedId, setSelectedId] = useState(null);
+  const navigate = useNavigate();
+
+  const [keyword, setKeyword] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [{ lodgings, totalCount, loading, errorMessage }, dispatch] = useReducer(
+    lodgingRequestReducer,
+    initialRequestState,
+  );
+
+  const regionOptions = useMemo(() => ['전체', ...CHUNGBUK_REGIONS], []);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   useEffect(() => {
-    setLoading(true);
-    getLodgings({ area })
-      .then(setLodgings)
-      .finally(() => setLoading(false));
-  }, [area]);
+    const controller = new AbortController();
+
+    dispatch({ type: 'start' });
+
+    fetchAccommodationList({
+      page: currentPage,
+      size: PAGE_SIZE,
+      region: selectedRegion,
+      keyword,
+      signal: controller.signal,
+    })
+      .then(payload => {
+        if (controller.signal.aborted) return;
+
+        const items = pickArray(payload).map(normalizeAccommodation);
+
+        dispatch({
+          type: 'success',
+          payload: {
+            items,
+            totalCount: pickTotalCount(payload, items.length),
+          },
+        });
+      })
+      .catch(error => {
+        if (error.name === 'AbortError') return;
+
+        dispatch({
+          type: 'error',
+          payload: error.message || '숙박 목록 조회에 실패했습니다.',
+        });
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [currentPage, selectedRegion, keyword]);
+
+  const resetFilters = () => {
+    setKeyword('');
+    setSelectedRegion('전체');
+    setCurrentPage(1);
+  };
+
+  const handleClickDetail = item => {
+    const contentId = item.contentId || item.id;
+
+    navigate(`/lodging/${encodeURIComponent(contentId)}`, {
+      state: { lodging: item },
+    });
+  };
 
   return (
-    <>
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
-      <div style={{ minHeight: '100vh', background: '#f5f8fb', paddingTop: 80 }}>
-        <div style={{ padding: '32px 48px' }}>
-          {/* 페이지 헤더 */}
-          <div
-            style={{
-              background: 'white',
-              borderRadius: 36,
-              padding: '36px 40px',
-              marginBottom: 28,
-            }}
-          >
-            <span
-              style={{
-                background: '#e0f2fe',
-                color: '#0369a1',
-                borderRadius: 999,
-                padding: '6px 16px',
-                fontSize: 13,
-                fontWeight: 800,
-              }}
-            >
-              🛏️ 숙박 정보
-            </span>
-            <h1
-              style={{
-                fontSize: 44,
-                fontWeight: 900,
-                letterSpacing: '-0.08em',
-                margin: '16px 0 0',
-                color: '#0f172a',
-                lineHeight: 1.2,
-              }}
-            >
-              충북 숙소를 리뷰와 함께 비교해요
-            </h1>
-            <p
-              style={{
-                fontSize: 16,
-                color: '#64748b',
-                lineHeight: 1.8,
-                margin: '12px 0 24px',
-              }}
-            >
-              Tripadvisor 실제 리뷰를 AI가 분석해 요약을 제공합니다. 상세보기를 눌러 확인하세요.
-            </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              {AREAS.map(a => (
-                <button
-                  key={a}
-                  onClick={() => setArea(a)}
-                  style={{
-                    background: area === a ? '#059669' : '#f1f5f9',
-                    color: area === a ? 'white' : '#64748b',
-                    border: 'none',
-                    borderRadius: 999,
-                    padding: '8px 20px',
-                    fontSize: 13,
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
+    <div className={styles.page}>
+      <LodgingHero />
 
-          {/* 카드 그리드 */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 24,
-            }}
-          >
-            {loading ? (
-              [1, 2, 3].map(i => (
-                <div
-                  key={i}
-                  style={{
-                    background: 'white',
-                    borderRadius: 32,
-                    overflow: 'hidden',
-                    border: '1px solid #e2e8f0',
-                  }}
-                >
-                  <div
-                    style={{
-                      height: 220,
-                      background: '#f1f5f9',
-                      animation: 'pulse 1.5s infinite',
-                    }}
-                  />
-                  <div style={{ padding: 20 }}>
-                    {[70, 50, 100].map((w, j) => (
-                      <div
-                        key={j}
-                        style={{
-                          width: `${w}%`,
-                          height: 14,
-                          background: '#f1f5f9',
-                          borderRadius: 6,
-                          marginBottom: 10,
-                          animation: 'pulse 1.5s infinite',
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))
-            ) : lodgings.length === 0 ? (
-              <div
-                style={{
-                  gridColumn: '1/-1',
-                  textAlign: 'center',
-                  padding: '80px 0',
-                  color: '#94a3b8',
-                }}
-              >
-                해당 지역의 숙소 정보가 없습니다.
-              </div>
-            ) : (
-              lodgings.map(l => (
-                <LodgingCard key={l.id} lodging={l} onDetailClick={setSelectedId} />
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+      <main className={styles.content}>
+        <LodgingFilterPanel
+          keyword={keyword}
+          regionOptions={regionOptions}
+          selectedRegion={selectedRegion}
+          onKeywordChange={value => {
+            setKeyword(value);
+            setCurrentPage(1);
+          }}
+          onRegionChange={value => {
+            setSelectedRegion(value);
+            setCurrentPage(1);
+          }}
+          onReset={resetFilters}
+        />
 
-      {selectedId !== null && (
-        <LodgingModal lodgingId={selectedId} onClose={() => setSelectedId(null)} />
-      )}
-    </>
+        <LodgingSectionHeader count={totalCount} />
+
+        <LodgingGrid
+          lodgings={lodgings}
+          loading={loading}
+          errorMessage={errorMessage}
+          onClickDetail={handleClickDetail}
+        />
+
+        <LodgingPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </main>
+    </div>
   );
 }
