@@ -314,23 +314,6 @@ function formatCardInfoLine(info) {
   return `${label} ${value}`;
 }
 
-function createFallbackSecondaryInfo({ eventPlace, extraLabel, extraValue, address, region, tel }) {
-  if (!isPlaceholderInfo(eventPlace)) return { label: '장소', value: eventPlace };
-
-  if (
-    ['장소', '위치'].some(keyword => String(extraLabel ?? '').includes(keyword)) &&
-    !isPlaceholderInfo(extraValue)
-  ) {
-    return { label: extraLabel || '장소', value: extraValue };
-  }
-
-  if (!isPlaceholderInfo(address)) return { label: '장소', value: address };
-  if (!isPlaceholderInfo(region)) return { label: '위치', value: region };
-  if (!isPlaceholderInfo(tel)) return { label: '문의', value: tel };
-
-  return { label: '', value: '' };
-}
-
 function createFallbackPrimaryInfo({ category, startDate, endDate }) {
   const period = formatSummaryPeriod(startDate, endDate);
 
@@ -341,6 +324,33 @@ function createFallbackPrimaryInfo({ category, startDate, endDate }) {
   if (category === '축제') return { label: '축제 기간', value: period };
   if (category === '공연') return { label: '공연 시간', value: period };
   return { label: '행사 시간', value: period };
+}
+
+function createFallbackSecondaryInfo({ eventPlace, extraLabel, extraValue, address, region, tel }) {
+  if (!isPlaceholderInfo(eventPlace)) {
+    return { label: '장소', value: eventPlace };
+  }
+
+  if (
+    ['장소', '위치'].some(keyword => String(extraLabel ?? '').includes(keyword)) &&
+    !isPlaceholderInfo(extraValue)
+  ) {
+    return { label: extraLabel || '장소', value: extraValue };
+  }
+
+  if (!isPlaceholderInfo(address)) {
+    return { label: '장소', value: address };
+  }
+
+  if (!isPlaceholderInfo(region)) {
+    return { label: '위치', value: region };
+  }
+
+  if (!isPlaceholderInfo(tel)) {
+    return { label: '문의', value: tel };
+  }
+
+  return { label: '', value: '' };
 }
 
 function createCardInfo({
@@ -451,6 +461,7 @@ function normalizeFestival(item, options = {}) {
     item.region ?? item.area ?? item['개최지역'] ?? item['시군구명'] ?? item['시군명'] ?? '충북',
   );
 
+  const description = createCategoryDescription(item, contentTypeId);
   const rawDisplayInfo = item.displayInfo ?? item.display_info ?? '';
   const rawSubInfo = item.subInfo ?? item.sub_info ?? '';
 
@@ -506,7 +517,7 @@ function normalizeFestival(item, options = {}) {
     contentTypeId,
     startDate,
     endDate,
-    description: formatCardInfoLine(primaryInfo) || fallbackDescription,
+    description: formatCardInfoLine(primaryInfo) || fallbackDescription || description.text,
     descriptionLabel: '',
     subInfo: formatCardInfoLine(secondaryInfo) || subInfo,
     subInfoLabel: '',
