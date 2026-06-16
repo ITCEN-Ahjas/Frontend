@@ -60,9 +60,11 @@ export default function FestivalFilterPanel({
           </div>
         </form>
 
-        <button type="button" onClick={onReset} className={styles.resetButton}>
-          초기화
-        </button>
+        <div className={styles.actionGroup}>
+          <button type="button" onClick={onReset} className={styles.resetButton}>
+            초기화
+          </button>
+        </div>
       </div>
 
       <div className={styles.filterGroup}>

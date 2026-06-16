@@ -57,16 +57,35 @@
   min-width: 0;
 }
 
-.categoryBadge {
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.categoryBadge,
+.themeBadge,
+.statusBadge {
   display: inline-flex;
   align-items: center;
   height: 3.8rem;
   border-radius: 999px;
   padding: 0 1.8rem;
-  background: var(--color-chungbuk-cyan);
   color: var(--color-white);
   font-size: 1.35rem;
   font-weight: 900;
+}
+
+.categoryBadge {
+  background: var(--color-chungbuk-cyan);
+}
+
+.themeBadge {
+  background: var(--color-chungbuk-dark-blue);
+}
+
+.statusBadge {
+  background: var(--color-chungbuk-purple);
 }
 
 .heroContent h1 {
@@ -86,59 +105,13 @@
   font-weight: 800;
 }
 
-.heroDescription {
-  margin-top: 2rem;
-  max-width: 56rem;
+.heroIntroText {
+  margin-top: 2.2rem;
   color: var(--color-slate-700);
-  font-size: 1.65rem;
+  font-size: 1.58rem;
   font-weight: 650;
-  line-height: 1.8;
+  line-height: 1.9;
   word-break: keep-all;
-}
-
-.summaryList {
-  margin-top: 2.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.3rem;
-  color: var(--color-slate-700);
-  font-size: 1.6rem;
-  font-weight: 800;
-}
-
-.summaryList li {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-}
-
-.summaryList span {
-  width: 2.4rem;
-  color: var(--color-chungbuk-purple);
-  font-size: 2rem;
-  text-align: center;
-}
-
-.tabNav {
-  margin-top: 5.6rem;
-  display: flex;
-  gap: 4rem;
-  border-bottom: 1px solid var(--color-slate-200);
-}
-
-.tabNav a {
-  min-width: 10rem;
-  padding: 0 0 1.8rem;
-  border-bottom: 0.3rem solid transparent;
-  color: var(--color-slate-800);
-  font-size: 1.7rem;
-  font-weight: 900;
-  text-align: center;
-}
-
-.tabNav a:first-child {
-  border-bottom-color: var(--color-chungbuk-purple);
-  color: var(--color-chungbuk-purple);
 }
 
 .section {
@@ -152,84 +125,48 @@
   letter-spacing: 0;
 }
 
-.introGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 38rem;
-  gap: 5.6rem;
-  align-items: start;
-}
-
-.introGrid p {
-  margin-top: 1.8rem;
-  color: var(--color-slate-700);
-  font-size: 1.58rem;
-  font-weight: 650;
-  line-height: 1.9;
-  word-break: keep-all;
-}
-
-.noticeBox {
-  border-radius: 1.8rem;
-  padding: 2.6rem 3rem;
-  background: linear-gradient(135deg, rgba(114, 69, 152, 0.12), rgba(114, 69, 152, 0.04));
-  color: var(--color-chungbuk-purple);
-}
-
-.noticeBox strong {
-  display: block;
-  font-size: 1.8rem;
-  font-weight: 900;
-}
-
-.noticeBox p {
-  margin-top: 1.2rem;
-  color: var(--color-chungbuk-purple);
-  font-size: 1.45rem;
-  font-weight: 750;
-  line-height: 1.7;
-}
-
 .infoGrid {
   margin-top: 2.4rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.6rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
 }
 
 .infoItem {
-  min-height: 14.8rem;
-  padding: 2.8rem 2.4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  min-height: 8.8rem;
+  padding: 1.8rem 2rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1.2rem;
+  align-items: start;
   border: 1px solid var(--color-slate-200);
-  border-radius: 1.6rem;
+  border-radius: 1.2rem;
   background: var(--color-white);
 }
 
 .infoIcon {
   color: var(--color-chungbuk-purple);
-  font-size: 3.2rem;
+  font-size: 1.8rem;
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.4;
 }
 
 .infoItem strong {
-  margin-top: 1.4rem;
-  color: var(--color-slate-800);
-  font-size: 1.45rem;
+  color: var(--color-slate-500);
+  font-size: 1.25rem;
   font-weight: 900;
+  line-height: 1.4;
 }
 
 .infoItem p {
-  margin-top: 1rem;
+  grid-column: 2;
+  margin-top: 0.5rem;
   color: var(--color-slate-950);
-  font-size: 1.45rem;
-  font-weight: 750;
+  font-size: 1.42rem;
+  font-weight: 850;
   line-height: 1.55;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .emptyInfoText {
@@ -259,8 +196,10 @@
   min-height: 25rem;
   overflow: hidden;
   background:
-    linear-gradient(110deg, transparent 49%, rgba(148, 163, 184, 0.16) 49% 51%, transparent 51%) 0 0 / 9rem 9rem,
-    linear-gradient(20deg, transparent 49%, rgba(148, 163, 184, 0.14) 49% 51%, transparent 51%) 0 0 / 12rem 12rem,
+    linear-gradient(110deg, transparent 49%, rgba(148, 163, 184, 0.16) 49% 51%, transparent 51%) 0
+      0 / 9rem 9rem,
+    linear-gradient(20deg, transparent 49%, rgba(148, 163, 184, 0.14) 49% 51%, transparent 51%) 0
+      0 / 12rem 12rem,
     radial-gradient(circle at 24% 40%, rgba(0, 174, 187, 0.16), transparent 24rem),
     radial-gradient(circle at 72% 46%, rgba(114, 69, 152, 0.12), transparent 18rem),
     #f7fafc;
@@ -317,29 +256,6 @@
   font-weight: 900;
 }
 
-.linkBox {
-  min-height: 8.8rem;
-  margin-top: 2.4rem;
-  padding: 0 3rem;
-  display: grid;
-  grid-template-columns: auto 18rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 2.2rem;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1.8rem;
-  background: var(--color-white);
-  color: var(--color-chungbuk-purple);
-  font-size: 1.55rem;
-  font-weight: 850;
-}
-
-.linkBox span:nth-child(3) {
-  overflow: hidden;
-  color: var(--color-slate-700);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .bottomActions {
   margin-top: 5.6rem;
   display: grid;
@@ -385,7 +301,6 @@
 
 @media (max-width: 1100px) {
   .heroSection,
-  .introGrid,
   .locationBox {
     grid-template-columns: 1fr;
   }
@@ -418,10 +333,5 @@
   .infoGrid,
   .bottomActions {
     grid-template-columns: 1fr;
-  }
-
-  .linkBox {
-    grid-template-columns: 1fr;
-    padding: 2.4rem;
   }
 }

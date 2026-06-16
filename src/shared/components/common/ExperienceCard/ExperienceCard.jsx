@@ -46,6 +46,7 @@ export default function ExperienceCard({
   description,
   descriptionLabel,
   subInfo,
+  subInfoLabel,
   period,
   tel,
   badges = [],
@@ -100,7 +101,7 @@ export default function ExperienceCard({
             className={styles.description}
           />
 
-          <InfoLine text={subInfo} className={styles.subInfo} />
+          <InfoLine text={subInfo} label={subInfoLabel} className={styles.subInfo} />
         </div>
 
         {(period || tel) && (
