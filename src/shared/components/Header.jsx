@@ -15,13 +15,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <NavLink to="/" className={styles.logoLink} aria-label="메인으로 이동">
-          <span className={styles.logoText}>충북</span>
-
-          <span className={styles.logoCopy}>
-            <span className={styles.logoTitle}>AI TOURISM GUIDE</span>
-
-            <span className={styles.logoSubtitle}>자연과 함께하는 여행</span>
-          </span>
+          <img src="/images/Logo3.png" alt="충북 AI Tourism Guide" className={styles.logoImage} />
         </NavLink>
 
         <nav className={styles.nav} aria-label="주요 메뉴">
