@@ -6,7 +6,8 @@ const NAV_ITEMS = [
   { label: '지도', path: '/map' },
   { label: '체험·축제', path: '/festival' },
   { label: '숙박', path: '/lodging' },
-  { label: 'AI 추천', path: '/clothing' },
+  { label: 'AI 코스 추천', path: '/course' },
+  { label: 'AI 옷차림 추천', path: '/clothing' },
 ];
 
 export default function Header() {
