@@ -268,6 +268,13 @@ function createCategoryDescription(item, contentTypeId, category) {
 }
 
 function createPrimaryInfo({ item, category, startDate, endDate, contentTypeId }) {
+  if (contentTypeId === '28') {
+    return {
+      label: '',
+      value: '',
+    };
+  }
+
   const timeLabel = pickText(item.timeLabel, item.time_label);
   const timeValue = pickText(item.timeValue, item.time_value);
 
@@ -299,11 +306,11 @@ function isBannedExtraLabel(label) {
   );
 }
 
-function createSecondaryInfo({ item, address, eventPlace, region, tel }) {
+function createSecondaryInfo({ item, address, eventPlace, region, tel, contentTypeId }) {
   const extraLabel = pickText(item.extraLabel, item.extra_label);
   const extraValue = pickText(item.extraValue, item.extra_value);
 
-  if (extraValue && !isBannedExtraLabel(extraLabel)) {
+  if (contentTypeId !== '28' && extraValue && !isBannedExtraLabel(extraLabel)) {
     return {
       label: extraLabel,
       value: extraValue,
@@ -397,7 +404,14 @@ function normalizeFestival(item, options = {}) {
   const status = pickStatus(item, options.status, contentTypeId, startDate);
   const tel = pickText(item.tel, item.phone, item.telNo);
   const primaryInfo = createPrimaryInfo({ item, category, startDate, endDate, contentTypeId });
-  const secondaryInfo = createSecondaryInfo({ item, address, eventPlace, region, tel });
+  const secondaryInfo = createSecondaryInfo({
+    item,
+    address,
+    eventPlace,
+    region,
+    tel,
+    contentTypeId,
+  });
 
   const contentId = pickText(item.contentId, item.contentid, item.id, item.festivalId);
 
