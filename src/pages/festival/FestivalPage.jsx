@@ -9,7 +9,7 @@ import FestivalSectionHeader from './components/FestivalSectionHeader';
 import styles from './FestivalPage.module.css';
 
 const PAGE_SIZE = 8;
-const API_FETCH_SIZE = 1000;
+const API_FETCH_SIZE = 100;
 const RANGE_START_YEAR_OFFSET = 3;
 const CHUNGBUK_KEYWORDS = ['충북', '충청북도'];
 const CHUNGBUK_REGIONS = [
@@ -64,6 +64,25 @@ function pickArray(payload) {
   if (payload?.response?.body?.items?.item) return [payload.response.body.items.item];
 
   return [];
+}
+
+function pickTotalCount(payload, fallbackCount = 0) {
+  const candidates = [
+    payload?.totalCount,
+    payload?.totalElements,
+    payload?.total,
+    payload?.count,
+    payload?.data?.totalCount,
+    payload?.data?.totalElements,
+    payload?.body?.totalCount,
+    payload?.response?.body?.totalCount,
+  ];
+
+  const totalCount = candidates
+    .map(value => Number(value))
+    .find(value => Number.isFinite(value) && value >= 0);
+
+  return totalCount ?? fallbackCount;
 }
 
 function getRollingDateRange() {
@@ -127,33 +146,32 @@ function pickFirstText(...values) {
 
 function pickPlaytime(item) {
   return pickFirstText(
-    item.playtime ??
-      item.playTime ??
-      item.play_time ??
-      item.usetime ??
-      item.useTime ??
-      item.usetimeculture ??
-      item.useTimeCulture ??
-      item.usetimeleports ??
-      item.useTimeLeports ??
-      item.openperiod ??
-      item.openPeriod ??
-      item.restdate ??
-      item.restDate ??
-      item.restdateculture ??
-      item.restDateCulture ??
-      item.restdateleports ??
-      item.restDateLeports ??
-      item.spendtime ??
-      item.spendTime ??
-      item['공연시간'] ??
-      item['행사시간'] ??
-      item['운영시간'] ??
-      item['관람시간'] ??
-      item['이용시간'] ??
-      item['개방시간'] ??
-      item['휴무일'] ??
-      '',
+    item.playtime,
+    item.playTime,
+    item.play_time,
+    item.usetime,
+    item.useTime,
+    item.usetimeculture,
+    item.useTimeCulture,
+    item.usetimeleports,
+    item.useTimeLeports,
+    item.openperiod,
+    item.openPeriod,
+    item.restdate,
+    item.restDate,
+    item.restdateculture,
+    item.restDateCulture,
+    item.restdateleports,
+    item.restDateLeports,
+    item.spendtime,
+    item.spendTime,
+    item['공연시간'],
+    item['행사시간'],
+    item['운영시간'],
+    item['관람시간'],
+    item['이용시간'],
+    item['개방시간'],
+    item['휴무일'],
   );
 }
 
@@ -443,7 +461,7 @@ function normalizeFestival(item, options = {}) {
     item.eventPlace ?? item.eventplace ?? item['행사장소'] ?? item['공연장소'] ?? '';
 
   const region = normalizeRegionName(
-    item.region ?? item.area ?? item['개최지역'] ?? item['시군구명'] ?? item['시군명'] ?? '충북',
+    item.region ?? item.area ?? item['개최지역'] ?? item['시군구명'] ?? item['시군명'] ?? '',
   );
 
   const categoryDescription = createCategoryDescription(item, contentTypeId);
@@ -544,15 +562,31 @@ function normalizeFestivalResponse(payload, options) {
 
   return {
     items: [...items].sort(compareFestivalDate),
+    totalCount: pickTotalCount(payload, items.length),
   };
 }
 
-async function fetchFestivalRange({ eventStartDate, signal }) {
+async function fetchAllPages(fetchPage) {
+  const firstPage = await fetchPage(1);
+  const totalPages = Math.max(1, Math.ceil(firstPage.totalCount / API_FETCH_SIZE));
+
+  if (totalPages <= 1) {
+    return firstPage.items;
+  }
+
+  const restPages = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) => fetchPage(index + 2)),
+  );
+
+  return [firstPage, ...restPages].flatMap(pageResult => pageResult.items);
+}
+
+async function fetchFestivalPage({ page, eventStartDate, signal }) {
   const payload = await fetchFestivalList({
-    page: 1,
+    page,
     size: API_FETCH_SIZE,
     eventStartDate,
-    region: '충북',
+    region: '전체',
     signal,
   });
 
@@ -560,14 +594,14 @@ async function fetchFestivalRange({ eventStartDate, signal }) {
     category: '축제',
     contentTypeId: '15',
     status: '축제',
-  }).items;
+  });
 }
 
-async function fetchExperienceRange({ contentTypeId, category, status, signal }) {
+async function fetchExperiencePage({ page, contentTypeId, category, status, signal }) {
   const payload = await fetchExperienceList({
-    page: 1,
+    page,
     size: API_FETCH_SIZE,
-    region: '충북',
+    region: '전체',
     contentTypeId,
     signal,
   });
@@ -576,34 +610,41 @@ async function fetchExperienceRange({ contentTypeId, category, status, signal })
     category,
     contentTypeId,
     status,
-  }).items;
+  });
 }
 
 async function fetchAllFestivalItems({ signal }) {
   const { eventStartDate } = getRollingDateRange();
 
   const rangeItems = await Promise.all([
-    fetchFestivalRange({ eventStartDate, signal }),
-    ...CONTENT_TYPES.filter(type => type.id !== '15').map(type =>
-      fetchExperienceRange({
-        contentTypeId: type.id,
-        category: type.category,
-        status: type.status,
+    fetchAllPages(page =>
+      fetchFestivalPage({
+        page,
+        eventStartDate,
         signal,
       }),
     ),
+    ...CONTENT_TYPES.filter(type => type.id !== '15').map(type =>
+      fetchAllPages(page =>
+        fetchExperiencePage({
+          page,
+          contentTypeId: type.id,
+          category: type.category,
+          status: type.status,
+          signal,
+        }),
+      ),
+    ),
   ]);
 
-  const items = dedupeFestivals(rangeItems.flat()).sort(compareFestivalDate);
-
-  return dedupeFestivals(items).filter(isChungbukFestival).sort(compareFestivalDate);
+  return dedupeFestivals(rangeItems.flat()).filter(isChungbukFestival).sort(compareFestivalDate);
 }
 
 function dedupeFestivals(items) {
   const seen = new Set();
 
   return items.filter(item => {
-    const key = item.id || `${item.title}-${item.startDate}`;
+    const key = item.contentId || item.id || `${item.title}-${item.startDate}-${item.category}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
