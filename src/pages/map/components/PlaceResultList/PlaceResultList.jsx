@@ -21,11 +21,13 @@ function formatRatingCount(count) {
 
 export default function PlaceResultList({
   places,
+  selectedPlaceId,
   isLoading,
   isLoadingMore,
   errorMessage,
   hasSearched,
   nextPageToken,
+  onSelectPlace,
   onRetry,
   onLoadMore,
 }) {
@@ -83,32 +85,46 @@ export default function PlaceResultList({
               const ratingCount = formatRatingCount(place.userRatingCount);
 
               return (
-                <li key={`${place.placeId}-${index}`} className={styles.item}>
-                  <div
-                    className={`${styles.thumbnail} ${styles[meta.tone]}`}
-                    aria-hidden="true"
+                <li key={`${place.placeId}-${index}`}>
+                  <button
+                    id={`place-result-${place.placeId}`}
+                    type="button"
+                    className={`${styles.item} ${
+                      selectedPlaceId === place.placeId ? styles.itemSelected : ''
+                    }`}
+                    aria-pressed={selectedPlaceId === place.placeId}
+                    onClick={() => onSelectPlace(place)}
                   >
-                    {meta.icon}
-                  </div>
-
-                  <div className={styles.info}>
-                    <div className={styles.metaRow}>
-                      <span className={styles.category}>{place.category || '장소'}</span>
-                      {Number.isFinite(place.rating) && (
-                        <span className={styles.rating}>
-                          <span aria-hidden="true">★</span>
-                          {place.rating.toFixed(1)}
-                          {ratingCount && <small>({ratingCount})</small>}
-                        </span>
-                      )}
+                    <div
+                      className={`${styles.thumbnail} ${styles[meta.tone]}`}
+                      aria-hidden="true"
+                    >
+                      {meta.icon}
                     </div>
 
-                    <h3>{place.name || '이름 없는 장소'}</h3>
-                    <p className={styles.type}>
-                      {place.primaryTypeName || place.primaryType || '장소 정보'}
-                    </p>
-                    <p className={styles.address}>{place.address || '주소 정보 없음'}</p>
-                  </div>
+                    <div className={styles.info}>
+                      <div className={styles.metaRow}>
+                        <span className={styles.category}>{place.category || '장소'}</span>
+                        {Number.isFinite(place.rating) && (
+                          <span className={styles.rating}>
+                            <span aria-hidden="true">★</span>
+                            {place.rating.toFixed(1)}
+                            {ratingCount && <small>({ratingCount})</small>}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3>{place.name || '이름 없는 장소'}</h3>
+                      <p className={styles.type}>
+                        {place.primaryTypeName || place.primaryType || '장소 정보'}
+                      </p>
+                      <p className={styles.address}>{place.address || '주소 정보 없음'}</p>
+                    </div>
+
+                    <span className={styles.selectGuide}>
+                      {selectedPlaceId === place.placeId ? '목적지 선택됨' : '지도에서 보기'}
+                    </span>
+                  </button>
                 </li>
               );
             })}

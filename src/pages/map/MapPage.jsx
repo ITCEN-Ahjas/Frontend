@@ -3,6 +3,7 @@ import { fetchPlaces } from '../../api/placeApi';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
+import SelectedPlaceCard from './components/SelectedPlaceCard/SelectedPlaceCard';
 import styles from './MapPage.module.css';
 
 const CHUNGBUK_CENTER = {
@@ -18,6 +19,7 @@ const DEFAULT_SEARCH = {
 export default function MapPage() {
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const markerInstancesRef = useRef(new Map());
   const searchAbortControllerRef = useRef(null);
   const [mapStatus, setMapStatus] = useState('loading');
   const [mapErrorMessage, setMapErrorMessage] = useState('');
@@ -30,6 +32,10 @@ export default function MapPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchErrorMessage, setSearchErrorMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
+
+  const selectedPlace =
+    places.find(place => place.placeId === selectedPlaceId) || null;
 
   useEffect(() => {
     let isCancelled = false;
@@ -75,6 +81,113 @@ export default function MapPage() {
     };
   }, []);
 
+  const handleSelectPlace = useCallback((place, scrollToResult = false) => {
+    if (!place?.placeId) {
+      return;
+    }
+
+    setSelectedPlaceId(place.placeId);
+
+    const position = {
+      lat: Number(place.latitude),
+      lng: Number(place.longitude),
+    };
+
+    if (Number.isFinite(position.lat) && Number.isFinite(position.lng)) {
+      mapInstanceRef.current?.panTo(position);
+
+      if ((mapInstanceRef.current?.getZoom() || 0) < 14) {
+        mapInstanceRef.current?.setZoom(14);
+      }
+    }
+
+    if (scrollToResult) {
+      window.requestAnimationFrame(() => {
+        document
+          .getElementById(`place-result-${place.placeId}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mapStatus !== 'ready' || !mapInstanceRef.current) {
+      return undefined;
+    }
+
+    const markerInstances = markerInstancesRef.current;
+
+    markerInstances.forEach(marker => marker.setMap(null));
+    markerInstances.clear();
+
+    const bounds = new window.google.maps.LatLngBounds();
+    let validPlaceCount = 0;
+
+    places.forEach((place, index) => {
+      const position = {
+        lat: Number(place.latitude),
+        lng: Number(place.longitude),
+      };
+
+      if (!Number.isFinite(position.lat) || !Number.isFinite(position.lng)) {
+        return;
+      }
+
+      const marker = new window.google.maps.Marker({
+        map: mapInstanceRef.current,
+        position,
+        title: place.name || '장소',
+        label: {
+          text: String(index + 1),
+          color: '#ffffff',
+          fontSize: '12px',
+          fontWeight: '900',
+        },
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          fillColor: '#724598',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3,
+          scale: 12,
+        },
+      });
+
+      marker.addListener('click', () => handleSelectPlace(place, true));
+      markerInstances.set(place.placeId, marker);
+      bounds.extend(position);
+      validPlaceCount += 1;
+    });
+
+    if (validPlaceCount === 1) {
+      mapInstanceRef.current.setCenter(bounds.getCenter());
+      mapInstanceRef.current.setZoom(14);
+    } else if (validPlaceCount > 1) {
+      mapInstanceRef.current.fitBounds(bounds, 72);
+    }
+
+    return () => {
+      markerInstances.forEach(marker => marker.setMap(null));
+      markerInstances.clear();
+    };
+  }, [handleSelectPlace, mapStatus, places]);
+
+  useEffect(() => {
+    markerInstancesRef.current.forEach((marker, placeId) => {
+      const isSelected = placeId === selectedPlaceId;
+
+      marker.setIcon({
+        path: window.google.maps.SymbolPath.CIRCLE,
+        fillColor: isSelected ? '#00aebb' : '#724598',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: isSelected ? 4 : 3,
+        scale: isSelected ? 16 : 12,
+      });
+      marker.setZIndex(isSelected ? 1000 : undefined);
+    });
+  }, [selectedPlaceId]);
+
   const requestPlaces = useCallback(async ({ search, pageToken, append = false }) => {
     if (!append) {
       searchAbortControllerRef.current?.abort();
@@ -89,6 +202,7 @@ export default function MapPage() {
       setIsLoading(true);
       setPlaces([]);
       setNextPageToken(null);
+      setSelectedPlaceId(null);
     }
 
     setSearchErrorMessage('');
@@ -184,11 +298,13 @@ export default function MapPage() {
 
           <PlaceResultList
             places={places}
+            selectedPlaceId={selectedPlaceId}
             isLoading={isLoading}
             isLoadingMore={isLoadingMore}
             errorMessage={searchErrorMessage}
             hasSearched={hasSearched}
             nextPageToken={nextPageToken}
+            onSelectPlace={handleSelectPlace}
             onRetry={handleRetry}
             onLoadMore={handleLoadMore}
           />
@@ -200,7 +316,7 @@ export default function MapPage() {
               <p className={styles.mapEyebrow}>GOOGLE MAPS</p>
               <h2>검색 장소 지도</h2>
             </div>
-            <p>검색 결과의 지도 마커와 목적지 선택은 다음 단계에서 연결됩니다.</p>
+            <p>검색 목록이나 지도 마커를 선택해 길찾기 목적지를 지정할 수 있습니다.</p>
           </div>
 
           <div className={styles.mapCard}>
@@ -231,6 +347,11 @@ export default function MapPage() {
                 )}
               </div>
             )}
+
+            <SelectedPlaceCard
+              place={selectedPlace}
+              onClear={() => setSelectedPlaceId(null)}
+            />
           </div>
         </div>
       </div>
