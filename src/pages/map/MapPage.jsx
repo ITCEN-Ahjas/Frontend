@@ -38,18 +38,12 @@ function createMarkerIcon(isSelected = false) {
 }
 
 function createDirectionsUrl(place) {
-  const params = new URLSearchParams({
-    api: '1',
-    travelmode: 'driving',
-  });
-  const lat = Number(place?.latitude);
-  const lng = Number(place?.longitude);
+  const params = new URLSearchParams({ api: '1' });
+  const destination = [place?.name, place?.address]
+    .filter(Boolean)
+    .join(' ');
 
-  if (Number.isFinite(lat) && Number.isFinite(lng)) {
-    params.set('destination', `${lat},${lng}`);
-  } else {
-    params.set('destination', place?.address || place?.name || '');
-  }
+  params.set('destination', destination || place?.address || place?.name || '');
 
   if (place?.placeId) {
     params.set('destination_place_id', place.placeId);
