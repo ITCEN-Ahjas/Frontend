@@ -21,12 +21,12 @@ function formatRatingCount(count) {
 
 export default function PlaceResultList({
   places,
+  totalPlaceCount,
   selectedPlaceId,
   isLoading,
-  isLoadingMore,
   errorMessage,
   hasSearched,
-  nextPageToken,
+  hasMoreResults,
   onSelectPlace,
   onRetry,
   onLoadMore,
@@ -39,7 +39,7 @@ export default function PlaceResultList({
           <h2 id="place-result-title">검색 결과</h2>
         </div>
         {!isLoading && !errorMessage && (
-          <span className={styles.resultCount}>{places.length}개 장소</span>
+          <span className={styles.resultCount}>{totalPlaceCount}개 장소</span>
         )}
       </div>
 
@@ -139,14 +139,13 @@ export default function PlaceResultList({
             </div>
           )}
 
-          {nextPageToken && !errorMessage && (
+          {hasMoreResults && !errorMessage && (
             <button
               type="button"
               className={styles.loadMoreButton}
-              disabled={isLoadingMore}
               onClick={onLoadMore}
             >
-              {isLoadingMore ? '불러오는 중...' : '더 많은 결과 보기'}
+              더 많은 결과 보기
             </button>
           )}
         </>

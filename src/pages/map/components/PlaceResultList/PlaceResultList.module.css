@@ -42,9 +42,9 @@
 }
 
 .item {
-  position: relative;
   display: grid;
-  grid-template-columns: 8.8rem minmax(0, 1fr);
+  grid-template-columns: 8.8rem minmax(0, 1fr) auto;
+  align-items: stretch;
   gap: 1.4rem;
   width: 100%;
   padding: 1.4rem;
@@ -182,11 +182,13 @@
 }
 
 .selectGuide {
-  position: absolute;
-  right: 1.4rem;
-  bottom: 1.1rem;
+  align-self: end;
+  justify-self: end;
+  max-width: 9.2rem;
   font-size: 1.05rem;
   font-weight: 900;
+  line-height: 1.35;
+  text-align: right;
   color: var(--color-chungbuk-purple);
 }
 
@@ -312,5 +314,12 @@
   .thumbnail {
     width: 7.2rem;
     min-height: 8.8rem;
+  }
+
+  .selectGuide {
+    grid-column: 2;
+    justify-self: start;
+    max-width: none;
+    text-align: left;
   }
 }

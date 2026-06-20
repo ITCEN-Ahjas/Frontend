@@ -57,28 +57,34 @@
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: 1.4rem;
-}
-
-.actions span {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--color-slate-400);
+  gap: 1rem;
 }
 
 .actions button {
   min-height: 4rem;
   padding: 0 1.5rem;
   border-radius: 1.2rem;
-  background: var(--color-slate-100);
   font-size: 1.2rem;
   font-weight: 900;
+}
+
+.secondaryButton {
+  background: var(--color-slate-100);
   color: var(--color-slate-600);
 }
 
-.actions button:hover {
+.secondaryButton:hover {
   background: rgba(114, 69, 152, 0.1);
   color: var(--color-chungbuk-purple);
+}
+
+.primaryButton {
+  background: var(--color-chungbuk-purple);
+  color: var(--color-white);
+}
+
+.primaryButton:hover {
+  background: var(--color-chungbuk-dark-blue);
 }
 
 @media (max-width: 720px) {
@@ -95,10 +101,7 @@
 }
 
 @media (max-width: 480px) {
-  .actions span {
-    display: none;
-  }
-
+  .actions,
   .actions button {
     width: 100%;
   }

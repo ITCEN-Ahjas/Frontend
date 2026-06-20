@@ -1,6 +1,6 @@
 import styles from './SelectedPlaceCard.module.css';
 
-export default function SelectedPlaceCard({ place, onClear }) {
+export default function SelectedPlaceCard({ place, onOpenDirections, onClear }) {
   if (!place) {
     return null;
   }
@@ -14,9 +14,11 @@ export default function SelectedPlaceCard({ place, onClear }) {
       </div>
 
       <div className={styles.actions}>
-        <span>다음 단계에서 길찾기를 연결합니다.</span>
-        <button type="button" onClick={onClear}>
+        <button type="button" className={styles.secondaryButton} onClick={onClear}>
           선택 취소
+        </button>
+        <button type="button" className={styles.primaryButton} onClick={onOpenDirections}>
+          길찾기
         </button>
       </div>
     </aside>

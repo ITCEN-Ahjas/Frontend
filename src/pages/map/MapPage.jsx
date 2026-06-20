@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { fetchPlaces } from '../../api/placeApi';
+import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
@@ -16,6 +16,104 @@ const DEFAULT_SEARCH = {
   category: 'ALL',
 };
 
+const PLACE_FETCH_SIZE = 20;
+const RESULT_PAGE_SIZE = 5;
+const SEARCH_CATEGORY_VALUES = PLACE_CATEGORIES
+  .filter(category => category.value !== 'ALL')
+  .map(category => category.value);
+
+function createMarkerIcon(isSelected = false) {
+  const color = isSelected ? '#00aebb' : '#724598';
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52">
+        <path fill="${color}" stroke="#ffffff" stroke-width="4" d="M20 2C10.06 2 2 10.06 2 20c0 13.5 18 29 18 29s18-15.5 18-29C38 10.06 29.94 2 20 2Z"/>
+        <circle cx="20" cy="20" r="6.5" fill="#ffffff"/>
+      </svg>
+    `)}`,
+    scaledSize: new window.google.maps.Size(isSelected ? 44 : 38, isSelected ? 57 : 49),
+    anchor: new window.google.maps.Point(isSelected ? 22 : 19, isSelected ? 57 : 49),
+  };
+}
+
+function createDirectionsUrl(place) {
+  const params = new URLSearchParams({
+    api: '1',
+    travelmode: 'driving',
+  });
+  const lat = Number(place?.latitude);
+  const lng = Number(place?.longitude);
+
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    params.set('destination', `${lat},${lng}`);
+  } else {
+    params.set('destination', place?.address || place?.name || '');
+  }
+
+  if (place?.placeId) {
+    params.set('destination_place_id', place.placeId);
+  }
+
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
+function mergeUniquePlaces(placeGroups) {
+  const placeMap = new Map();
+
+  placeGroups.flat().forEach(place => {
+    if (!place?.placeId || placeMap.has(place.placeId)) {
+      return;
+    }
+
+    placeMap.set(place.placeId, place);
+  });
+
+  return Array.from(placeMap.values());
+}
+
+async function fetchAllPlacesForCategory({ keyword, category, signal }) {
+  const places = [];
+  let pageToken;
+
+  do {
+    const response = await fetchPlaces({
+      keyword,
+      category,
+      size: PLACE_FETCH_SIZE,
+      pageToken,
+      signal,
+    });
+
+    places.push(...response.items);
+    pageToken = response.nextPageToken;
+  } while (pageToken);
+
+  return places;
+}
+
+async function fetchAllPlaces({ search, signal }) {
+  if (search.category !== 'ALL') {
+    return fetchAllPlacesForCategory({
+      keyword: search.keyword,
+      category: search.category,
+      signal,
+    });
+  }
+
+  const placeGroups = await Promise.all(
+    SEARCH_CATEGORY_VALUES.map(category =>
+      fetchAllPlacesForCategory({
+        keyword: search.keyword,
+        category,
+        signal,
+      }),
+    ),
+  );
+
+  return mergeUniquePlaces(placeGroups);
+}
+
 export default function MapPage() {
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -27,15 +125,32 @@ export default function MapPage() {
   const [category, setCategory] = useState('ALL');
   const [appliedSearch, setAppliedSearch] = useState(DEFAULT_SEARCH);
   const [places, setPlaces] = useState([]);
-  const [nextPageToken, setNextPageToken] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchErrorMessage, setSearchErrorMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState(null);
+  const [visibleResultCount, setVisibleResultCount] = useState(RESULT_PAGE_SIZE);
 
   const selectedPlace =
     places.find(place => place.placeId === selectedPlaceId) || null;
+  const visiblePlaces = places.slice(0, visibleResultCount);
+  const hasMoreResults = visibleResultCount < places.length;
+
+  const handleOpenDirections = useCallback(() => {
+    if (!selectedPlace) {
+      return;
+    }
+
+    const directionsWindow = window.open(
+      createDirectionsUrl(selectedPlace),
+      '_blank',
+      'noopener,noreferrer',
+    );
+
+    if (directionsWindow) {
+      directionsWindow.opener = null;
+    }
+  }, [selectedPlace]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -123,7 +238,7 @@ export default function MapPage() {
     const bounds = new window.google.maps.LatLngBounds();
     let validPlaceCount = 0;
 
-    places.forEach((place, index) => {
+    places.forEach(place => {
       const position = {
         lat: Number(place.latitude),
         lng: Number(place.longitude),
@@ -137,20 +252,7 @@ export default function MapPage() {
         map: mapInstanceRef.current,
         position,
         title: place.name || '장소',
-        label: {
-          text: String(index + 1),
-          color: '#ffffff',
-          fontSize: '12px',
-          fontWeight: '900',
-        },
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          fillColor: '#724598',
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 3,
-          scale: 12,
-        },
+        icon: createMarkerIcon(),
       });
 
       marker.addListener('click', () => handleSelectPlace(place, true));
@@ -176,50 +278,30 @@ export default function MapPage() {
     markerInstancesRef.current.forEach((marker, placeId) => {
       const isSelected = placeId === selectedPlaceId;
 
-      marker.setIcon({
-        path: window.google.maps.SymbolPath.CIRCLE,
-        fillColor: isSelected ? '#00aebb' : '#724598',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: isSelected ? 4 : 3,
-        scale: isSelected ? 16 : 12,
-      });
+      marker.setIcon(createMarkerIcon(isSelected));
       marker.setZIndex(isSelected ? 1000 : undefined);
     });
   }, [selectedPlaceId]);
 
-  const requestPlaces = useCallback(async ({ search, pageToken, append = false }) => {
-    if (!append) {
-      searchAbortControllerRef.current?.abort();
-    }
+  const requestPlaces = useCallback(async ({ search }) => {
+    searchAbortControllerRef.current?.abort();
 
     const controller = new AbortController();
     searchAbortControllerRef.current = controller;
 
-    if (append) {
-      setIsLoadingMore(true);
-    } else {
-      setIsLoading(true);
-      setPlaces([]);
-      setNextPageToken(null);
-      setSelectedPlaceId(null);
-    }
-
+    setIsLoading(true);
+    setPlaces([]);
+    setSelectedPlaceId(null);
+    setVisibleResultCount(RESULT_PAGE_SIZE);
     setSearchErrorMessage('');
 
     try {
-      const response = await fetchPlaces({
-        keyword: search.keyword,
-        category: search.category,
-        size: 10,
-        pageToken,
+      const responseItems = await fetchAllPlaces({
+        search,
         signal: controller.signal,
       });
 
-      setPlaces(currentPlaces =>
-        append ? [...currentPlaces, ...response.items] : response.items,
-      );
-      setNextPageToken(response.nextPageToken);
+      setPlaces(responseItems);
       setHasSearched(true);
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
@@ -232,7 +314,6 @@ export default function MapPage() {
     } finally {
       if (searchAbortControllerRef.current === controller) {
         setIsLoading(false);
-        setIsLoadingMore(false);
       }
     }
   }, []);
@@ -272,15 +353,11 @@ export default function MapPage() {
   }
 
   function handleLoadMore() {
-    if (!nextPageToken || isLoadingMore) {
-      return;
+    if (visibleResultCount < places.length) {
+      setVisibleResultCount(currentCount =>
+        Math.min(currentCount + RESULT_PAGE_SIZE, places.length),
+      );
     }
-
-    requestPlaces({
-      search: appliedSearch,
-      pageToken: nextPageToken,
-      append: true,
-    });
   }
 
   return (
@@ -297,13 +374,13 @@ export default function MapPage() {
           />
 
           <PlaceResultList
-            places={places}
+            places={visiblePlaces}
+            totalPlaceCount={places.length}
             selectedPlaceId={selectedPlaceId}
             isLoading={isLoading}
-            isLoadingMore={isLoadingMore}
             errorMessage={searchErrorMessage}
             hasSearched={hasSearched}
-            nextPageToken={nextPageToken}
+            hasMoreResults={hasMoreResults}
             onSelectPlace={handleSelectPlace}
             onRetry={handleRetry}
             onLoadMore={handleLoadMore}
@@ -350,6 +427,7 @@ export default function MapPage() {
 
             <SelectedPlaceCard
               place={selectedPlace}
+              onOpenDirections={handleOpenDirections}
               onClear={() => setSelectedPlaceId(null)}
             />
           </div>
