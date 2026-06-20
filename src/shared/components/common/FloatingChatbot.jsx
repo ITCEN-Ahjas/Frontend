@@ -34,9 +34,12 @@ export default function FloatingChatbot() {
   const [loading, setLoading] = useState(false);
 
   const [pos, setPos] = useState({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+  const [panelSize, setPanelSize] = useState({ width: 380, height: 360 });
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const hasDragged = useRef(false);
+  const resizing = useRef(false);
+  const resizeStart = useRef({ x: 0, y: 0, w: 380, h: 360 });
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -54,13 +57,35 @@ export default function FloatingChatbot() {
     e.preventDefault();
   }, [pos]);
 
+  const onResizeMouseDown = useCallback(e => {
+    e.stopPropagation();
+    resizing.current = true;
+    resizeStart.current = {
+      x: e.clientX, y: e.clientY,
+      w: panelSize.width, h: panelSize.height,
+    };
+    e.preventDefault();
+  }, [panelSize]);
+
   useEffect(() => {
     const onMouseMove = e => {
-      if (!dragging.current) return;
-      hasDragged.current = true;
-      setPos({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
+      if (dragging.current) {
+        hasDragged.current = true;
+        setPos({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
+      }
+      if (resizing.current) {
+        const dx = resizeStart.current.x - e.clientX;
+        const dy = resizeStart.current.y - e.clientY;
+        setPanelSize({
+          width: Math.max(300, Math.min(600, resizeStart.current.w + dx)),
+          height: Math.max(280, Math.min(600, resizeStart.current.h + dy)),
+        });
+      }
     };
-    const onMouseUp = () => { dragging.current = false; };
+    const onMouseUp = () => {
+      dragging.current = false;
+      resizing.current = false;
+    };
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
     return () => {
@@ -136,7 +161,7 @@ export default function FloatingChatbot() {
             position: 'absolute',
             bottom: 80,
             right: 0,
-            width: 'min(380px, 90vw)',
+            width: `min(${panelSize.width}px, 90vw)`,
             borderRadius: 24,
             background: '#fff',
             boxShadow: '0 32px 80px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06)',
@@ -146,6 +171,27 @@ export default function FloatingChatbot() {
             flexDirection: 'column',
             animation: 'panelIn 0.22s cubic-bezier(0.34,1.56,0.64,1)',
           }}>
+            {/* 리사이즈 핸들 */}
+            <div
+              onMouseDown={onResizeMouseDown}
+              title="드래그해서 크기 조절"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 20,
+                height: 20,
+                cursor: 'nw-resize',
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1 9L9 1M1 5L5 1M5 9L9 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
 
             {/* 헤더 */}
             <div style={{
@@ -185,7 +231,7 @@ export default function FloatingChatbot() {
 
             {/* 메시지 */}
             <div className="cb-scroll" style={{
-              height: 360,
+              height: panelSize.height,
               overflowY: 'auto',
               background: '#f8fafc',
               padding: '18px 14px',
