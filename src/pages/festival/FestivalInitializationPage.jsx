@@ -3,6 +3,8 @@ import { ensureFestivalInitialized, fetchFestivalSyncStatus } from '../../api/fe
 import styles from './FestivalInitializationPage.module.css';
 import FestivalPage from './FestivalPage';
 
+const STATUS_POLL_INTERVAL_MS = 5000;
+
 const INITIAL_STATE = {
   loading: true,
   status: null,
@@ -11,16 +13,22 @@ const INITIAL_STATE = {
 
 let initializationStatusRequest = null;
 
-function mergeInitializationStatus(initializationResponse, statusResponse) {
-  const mergedStatus = {
-    ...(initializationResponse ?? {}),
-    ...(statusResponse ?? {}),
+function normalizeStatus(status) {
+  const normalizedStatus = {
+    ...(status ?? {}),
   };
 
   return {
-    ...mergedStatus,
-    ready: mergedStatus.ready === true || mergedStatus.initialSyncPhase === 'READY',
+    ...normalizedStatus,
+    ready: normalizedStatus.ready === true || normalizedStatus.initialSyncPhase === 'READY',
   };
+}
+
+function mergeInitializationStatus(initializationResponse, statusResponse) {
+  return normalizeStatus({
+    ...(initializationResponse ?? {}),
+    ...(statusResponse ?? {}),
+  });
 }
 
 function requestInitializationStatus({ force = false } = {}) {
@@ -62,6 +70,23 @@ function requestInitializationStatus({ force = false } = {}) {
 
 function isReady(status) {
   return status?.ready === true || status?.initialSyncPhase === 'READY';
+}
+
+function shouldPollStatus(status) {
+  if (isReady(status)) {
+    return false;
+  }
+
+  if (
+    status?.initialSyncExecutionStatus === 'WAITING' ||
+    status?.initialSyncExecutionStatus === 'FAILED'
+  ) {
+    return false;
+  }
+
+  return ['NOT_STARTED', 'LIST_SYNCING', 'DETAIL_SYNCING', 'IMAGE_SYNCING'].includes(
+    status?.initialSyncPhase,
+  );
 }
 
 function getWaitingDescription(pauseReason) {
@@ -152,23 +177,86 @@ function getScreenContent({ loading, status, errorMessage }) {
 
 export default function FestivalInitializationPage() {
   const [state, setState] = useState(INITIAL_STATE);
+  const [retryVersion, setRetryVersion] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
+    let pollingTimerId = null;
+    let latestStatus = null;
 
-    requestInitializationStatus()
-      .then(status => {
+    function clearPollingTimer() {
+      if (pollingTimerId !== null) {
+        window.clearTimeout(pollingTimerId);
+        pollingTimerId = null;
+      }
+    }
+
+    function scheduleNextPoll() {
+      clearPollingTimer();
+
+      pollingTimerId = window.setTimeout(() => {
+        void pollFestivalInitializationStatus();
+      }, STATUS_POLL_INTERVAL_MS);
+    }
+
+    async function pollFestivalInitializationStatus() {
+      try {
+        const status = normalizeStatus(await fetchFestivalSyncStatus());
+
         if (!isMounted) {
           return;
         }
+
+        latestStatus = status;
 
         setState({
           loading: false,
           status,
           errorMessage: '',
         });
-      })
-      .catch(error => {
+
+        if (shouldPollStatus(status)) {
+          scheduleNextPoll();
+        }
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setState(previousState => ({
+          ...previousState,
+          loading: false,
+          errorMessage: error.message || '축제·체험 초기 적재 상태를 다시 확인하지 못했습니다.',
+        }));
+
+        if (shouldPollStatus(latestStatus)) {
+          scheduleNextPoll();
+        }
+      }
+    }
+
+    async function loadInitialStatus() {
+      try {
+        const status = await requestInitializationStatus({
+          force: retryVersion > 0,
+        });
+
+        if (!isMounted) {
+          return;
+        }
+
+        latestStatus = status;
+
+        setState({
+          loading: false,
+          status,
+          errorMessage: '',
+        });
+
+        if (shouldPollStatus(status)) {
+          scheduleNextPoll();
+        }
+      } catch (error) {
         if (!isMounted) {
           return;
         }
@@ -178,12 +266,16 @@ export default function FestivalInitializationPage() {
           status: null,
           errorMessage: error.message || '축제·체험 초기 적재 상태를 확인하지 못했습니다.',
         });
-      });
+      }
+    }
+
+    void loadInitialStatus();
 
     return () => {
       isMounted = false;
+      clearPollingTimer();
     };
-  }, []);
+  }, [retryVersion]);
 
   const retryInitialization = () => {
     setState(previousState => ({
@@ -192,21 +284,7 @@ export default function FestivalInitializationPage() {
       errorMessage: '',
     }));
 
-    requestInitializationStatus({ force: true })
-      .then(status => {
-        setState({
-          loading: false,
-          status,
-          errorMessage: '',
-        });
-      })
-      .catch(error => {
-        setState({
-          loading: false,
-          status: null,
-          errorMessage: error.message || '축제·체험 초기 적재 상태를 확인하지 못했습니다.',
-        });
-      });
+    setRetryVersion(previousVersion => previousVersion + 1);
   };
 
   if (isReady(state.status)) {
