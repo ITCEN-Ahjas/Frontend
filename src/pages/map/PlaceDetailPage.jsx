@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { fetchPlaceDetail } from '../../api/placeApi';
+import { createPlacePhotoUrl, fetchPlaceDetail } from '../../api/placeApi';
 import styles from './PlaceDetailPage.module.css';
 
 const DEFAULT_IMAGE_TEXT = 'CHUNGBUK PLACE';
@@ -149,6 +149,11 @@ function detailReducer(state, action) {
   }
 }
 
+function handlePhotoError(event) {
+  event.currentTarget.hidden = true;
+  event.currentTarget.nextElementSibling?.removeAttribute('hidden');
+}
+
 export default function PlaceDetailPage() {
   const { placeId } = useParams();
   const navigate = useNavigate();
@@ -186,6 +191,7 @@ export default function PlaceDetailPage() {
   const detail = state.detail;
   const infoItems = useMemo(() => buildInfoItems(detail), [detail]);
   const directionsUrl = useMemo(() => buildDirectionsUrl(detail), [detail]);
+  const photoUrl = useMemo(() => createPlacePhotoUrl(detail?.photoName, 900), [detail]);
   const ratingCount = formatRatingCount(detail?.userRatingCount);
 
   if (state.loading) {
@@ -224,12 +230,31 @@ export default function PlaceDetailPage() {
 
       <section className={styles.heroSection}>
         <div className={styles.heroImageBox}>
-          <div className={styles.heroFallback}>{DEFAULT_IMAGE_TEXT}</div>
+          {photoUrl ? (
+            <>
+              <img
+                src={photoUrl}
+                alt={detail.name}
+                className={styles.heroImage}
+                onError={handlePhotoError}
+              />
+              <div className={styles.heroFallback} hidden>
+                {DEFAULT_IMAGE_TEXT}
+              </div>
+            </>
+          ) : (
+            <div className={styles.heroFallback}>{DEFAULT_IMAGE_TEXT}</div>
+          )}
         </div>
 
         <div className={styles.heroContent}>
           <div className={styles.badgeRow}>
             <span className={styles.categoryBadge}>{detail.primaryTypeName}</span>
+            {detail.types.map(type => (
+              <span key={type} className={styles.typeBadge}>
+                {type}
+              </span>
+            ))}
             {Number.isFinite(detail.rating) && (
               <span className={styles.ratingBadge}>
                 ★ {detail.rating.toFixed(1)}
@@ -273,17 +298,6 @@ export default function PlaceDetailPage() {
           <p className={styles.emptyInfoText}>제공된 주요 정보가 없습니다.</p>
         )}
       </section>
-
-      {detail.types.length > 0 && (
-        <section className={styles.section}>
-          <h2>장소 유형</h2>
-          <div className={styles.typeList}>
-            {detail.types.map(type => (
-              <span key={type}>{type}</span>
-            ))}
-          </div>
-        </section>
-      )}
 
       <div className={styles.bottomActions}>
         <button type="button" onClick={() => navigate('/map')} className={styles.backButton}>

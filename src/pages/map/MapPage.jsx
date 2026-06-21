@@ -18,7 +18,7 @@ const DEFAULT_SEARCH = {
 };
 
 const PLACE_FETCH_SIZE = 20;
-const RESULT_PAGE_SIZE = 5;
+const RESULT_PAGE_SIZE = 4;
 const SEARCH_CATEGORY_VALUES = PLACE_CATEGORIES
   .filter(category => category.value !== 'ALL')
   .map(category => category.value);
@@ -325,6 +325,10 @@ export default function MapPage() {
     }
   }, []);
 
+  useEffect(() => {
+    requestPlaces({ search: DEFAULT_SEARCH });
+  }, [requestPlaces]);
+
   useEffect(
     () => () => {
       searchAbortControllerRef.current?.abort();
@@ -396,14 +400,6 @@ export default function MapPage() {
         </div>
 
         <div className={styles.mapColumn}>
-          <div className={styles.mapHeader}>
-            <div>
-              <p className={styles.mapEyebrow}>GOOGLE MAPS</p>
-              <h2>검색 장소 지도</h2>
-            </div>
-            <p>검색 목록이나 지도 마커를 선택해 길찾기 목적지를 지정할 수 있습니다.</p>
-          </div>
-
           <div className={styles.mapCard}>
             <div
               ref={mapElementRef}
