@@ -11,6 +11,7 @@ import PlaceDetailPage from './pages/map/PlaceDetailPage';
 import MapPage from './pages/map/MapPage';
 import FloatingChatbot from './shared/components/common/FloatingChatbot';
 import PageLayout from './shared/layout/PageLayout';
+import FestivalPage from './pages/festival/FestivalPage';
 
 export default function App() {
   return (
