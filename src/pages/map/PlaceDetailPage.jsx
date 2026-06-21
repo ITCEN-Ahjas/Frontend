@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useReducer } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { createPlacePhotoUrl, fetchPlaceDetail } from '../../api/placeApi';
 import styles from './PlaceDetailPage.module.css';
 
 const DEFAULT_IMAGE_TEXT = 'CHUNGBUK PLACE';
+const REVIEW_PREVIEW_COUNT = 3;
 const PLACE_TYPE_LABELS = {
   tourist_attraction: '관광 명소',
   point_of_interest: '관심 장소',
@@ -36,6 +37,32 @@ function formatRatingCount(count) {
   }
 
   return count.toLocaleString('ko-KR');
+}
+
+function formatReviewPublishTime(review) {
+  const relativeTime = pickText(review?.relativePublishTimeDescription);
+
+  if (relativeTime) {
+    return relativeTime;
+  }
+
+  const publishTime = pickText(review?.publishTime);
+
+  if (!publishTime) {
+    return '';
+  }
+
+  const date = new Date(publishTime);
+
+  if (Number.isNaN(date.getTime())) {
+    return publishTime;
+  }
+
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 
 function normalizeUrl(url) {
@@ -84,6 +111,34 @@ function buildDirectionsUrl(detail) {
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
+function normalizeReview(rawReview, index) {
+  const review = rawReview ?? {};
+  const text = pickText(review.text, review.originalText);
+  const originalText = pickText(review.originalText);
+
+  return {
+    reviewId: pickText(review.reviewId, `review-${index}`),
+    authorName: pickText(review.authorName, 'Google 사용자'),
+    authorUri: normalizeUrl(review.authorUri),
+    authorPhotoUri: normalizeUrl(review.authorPhotoUri),
+    rating: toFiniteNumber(review.rating),
+    text,
+    originalText,
+    languageCode: pickText(review.languageCode),
+    publishLabel: formatReviewPublishTime(review),
+  };
+}
+
+function normalizeReviews(reviews) {
+  if (!Array.isArray(reviews)) {
+    return [];
+  }
+
+  return reviews
+    .map(normalizeReview)
+    .filter(review => review.text || Number.isFinite(review.rating) || review.authorName);
+}
+
 function normalizeDetail(rawDetail) {
   const detail = rawDetail ?? {};
   const photoNames = Array.isArray(detail.photoNames)
@@ -118,6 +173,7 @@ function normalizeDetail(rawDetail) {
     websiteUri: normalizeUrl(detail.websiteUri),
     weekdayDescriptions,
     summary: pickText(detail.summary),
+    reviews: normalizeReviews(detail.reviews),
   };
 }
 
@@ -157,6 +213,7 @@ function handlePhotoError(event) {
 export default function PlaceDetailPage() {
   const { placeId } = useParams();
   const navigate = useNavigate();
+  const [visibleReviewCount, setVisibleReviewCount] = useState(REVIEW_PREVIEW_COUNT);
   const [state, dispatch] = useReducer(detailReducer, {
     detail: null,
     loading: true,
@@ -166,6 +223,7 @@ export default function PlaceDetailPage() {
   useEffect(() => {
     const controller = new AbortController();
 
+    setVisibleReviewCount(REVIEW_PREVIEW_COUNT);
     dispatch({ type: 'start' });
 
     fetchPlaceDetail(placeId, { signal: controller.signal })
@@ -193,6 +251,9 @@ export default function PlaceDetailPage() {
   const directionsUrl = useMemo(() => buildDirectionsUrl(detail), [detail]);
   const photoUrl = useMemo(() => createPlacePhotoUrl(detail?.photoName, 900), [detail]);
   const ratingCount = formatRatingCount(detail?.userRatingCount);
+  const visibleReviews = detail?.reviews.slice(0, visibleReviewCount) ?? [];
+  const canToggleReviews = Boolean(detail && detail.reviews.length > REVIEW_PREVIEW_COUNT);
+  const isReviewExpanded = Boolean(detail && visibleReviewCount >= detail.reviews.length);
 
   if (state.loading) {
     return (
@@ -296,6 +357,67 @@ export default function PlaceDetailPage() {
           </div>
         ) : (
           <p className={styles.emptyInfoText}>제공된 주요 정보가 없습니다.</p>
+        )}
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionTitleRow}>
+          <h2>리뷰</h2>
+          <span>{detail.reviews.length}개</span>
+        </div>
+
+        {detail.reviews.length > 0 ? (
+          <>
+            <ul className={styles.reviewList}>
+              {visibleReviews.map(review => (
+                <li key={review.reviewId} className={styles.reviewCard}>
+                  <div className={styles.reviewHeader}>
+                    <div className={styles.reviewAuthor}>
+                      {review.authorPhotoUri ? (
+                        <img src={review.authorPhotoUri} alt="" loading="lazy" />
+                      ) : (
+                        <span aria-hidden="true">{review.authorName.charAt(0)}</span>
+                      )}
+
+                      <div>
+                        {review.authorUri ? (
+                          <a href={review.authorUri} target="_blank" rel="noopener noreferrer">
+                            {review.authorName}
+                          </a>
+                        ) : (
+                          <strong>{review.authorName}</strong>
+                        )}
+                        {review.publishLabel && <p>{review.publishLabel}</p>}
+                      </div>
+                    </div>
+
+                    {Number.isFinite(review.rating) && (
+                      <span className={styles.reviewRating}>★ {review.rating.toFixed(1)}</span>
+                    )}
+                  </div>
+
+                  {review.text && <p className={styles.reviewText}>{review.text}</p>}
+                  {review.originalText && review.originalText !== review.text && (
+                    <p className={styles.reviewOriginalText}>원문: {review.originalText}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            {canToggleReviews && (
+              <button
+                type="button"
+                className={styles.reviewMoreButton}
+                onClick={() =>
+                  setVisibleReviewCount(isReviewExpanded ? REVIEW_PREVIEW_COUNT : detail.reviews.length)
+                }
+              >
+                {isReviewExpanded ? '리뷰 접기' : '리뷰 더보기'}
+              </button>
+            )}
+          </>
+        ) : (
+          <p className={styles.emptyInfoText}>아직 제공된 리뷰가 없습니다.</p>
         )}
       </section>
 
