@@ -27,14 +27,9 @@ function isEmptyText(value) {
     text === '없습니다' ||
     text === '정보 없음' ||
     text === '정보 준비 중' ||
-    text === '상세 정보를 확인해 주세요'
+    text === '상세 정보를 확인해 주세요' ||
+    text === '상세페이지에서 확인'
   );
-}
-
-function isPlaceholderText(value) {
-  const text = cleanText(value);
-
-  return isEmptyText(text) || text === '상세페이지에서 확인';
 }
 
 function pickText(...values) {
@@ -76,7 +71,7 @@ function normalizeMainInfo(value) {
       label: cleanText(item?.label),
       value: cleanText(item?.value),
     }))
-    .filter(item => !isEmptyText(item.label) && !isPlaceholderText(item.value));
+    .filter(item => !isEmptyText(item.label) && !isEmptyText(item.value));
 }
 
 function normalizeHomepageUrl(homepage) {
@@ -157,7 +152,7 @@ function buildFallbackDescription(detail) {
   const category = pickText(detail?.category, '관광 콘텐츠');
   const themeCategory = pickText(detail?.themeCategory, category);
 
-  return `${title}은(는) ${region}에서 만날 수 있는 ${themeCategory} 성격의 ${category}입니다. 운영 시간, 위치, 이용 정보 등을 확인하고 방문 계획을 세울 수 있습니다.`;
+  return `${title}은(는) ${region}에서 만날 수 있는 ${themeCategory} 성격의 ${category}입니다. 위치, 운영 정보, 문의 정보를 확인하고 방문 계획을 세울 수 있습니다.`;
 }
 
 function getFestivalDetail(rawDetail, fallbackItem) {
@@ -202,21 +197,28 @@ function getFestivalDetail(rawDetail, fallbackItem) {
   const title = pickText(detail.title, fallback.title, '축제 상세');
   const region = pickText(detail.region, fallback.region, '충북');
   const category = pickText(detail.category, fallback.category, '행사');
-  const themeCategory = pickText(detail.themeCategory, fallback.themeCategory);
+  const themeCategory = pickText(detail.themeCategory, fallback.themeCategory, category);
 
   const contentTypeId = inferContentTypeId(
     category,
     pickText(getField(detail, 'contentTypeId', 'contenttypeid'), fallback.contentTypeId),
   );
 
-  const description = pickText(
+  const detailDescription = pickText(
     getField(detail, 'description'),
     getField(detail, 'overview'),
     getField(detail, 'eventIntro', 'eventintro'),
     getField(detail, 'eventText', 'eventtext'),
+  );
+
+  const fallbackDescription = pickText(
     fallback.description,
     fallback.overview,
+    fallback.subInfo,
+    fallback.extraValue,
   );
+
+  const mainInfo = normalizeMainInfo(detail.mainInfo);
 
   const normalizedDetail = {
     id: pickText(detail.id, detail.contentId, detail.contentid, fallback.contentId, fallback.id),
@@ -241,17 +243,17 @@ function getFestivalDetail(rawDetail, fallbackItem) {
     ),
     imageUrl,
     imageUrls,
-    overview: pickText(detail.overview, description),
-    description,
+    overview: pickText(detail.overview, detailDescription, fallbackDescription),
+    description: pickText(detailDescription, fallbackDescription),
     descriptionSource: pickText(detail.descriptionSource, detail.description_source),
-    playTime: pickText(detail.playTime, detail.playtime),
+    playTime: pickText(detail.playTime, detail.playtime, fallback.timeValue),
     useTimeFestival: pickText(detail.useTimeFestival, detail.usetimefestival),
     sponsor: pickText(detail.sponsor),
     timeLabel: pickText(detail.timeLabel, fallback.timeLabel),
     timeValue: pickText(detail.timeValue, fallback.timeValue),
     extraLabel: pickText(detail.extraLabel, fallback.extraLabel),
     extraValue: pickText(detail.extraValue, fallback.extraValue),
-    mainInfo: normalizeMainInfo(detail.mainInfo),
+    mainInfo,
     mapX: normalizeMapCoord(detail.mapX ?? detail.mapx ?? fallback.mapX ?? fallback.mapx),
     mapY: normalizeMapCoord(detail.mapY ?? detail.mapy ?? fallback.mapY ?? fallback.mapy),
     raw: {
@@ -260,9 +262,16 @@ function getFestivalDetail(rawDetail, fallbackItem) {
     },
   };
 
+  const description = pickText(
+    normalizedDetail.description,
+    normalizedDetail.overview,
+    buildFallbackDescription(normalizedDetail),
+  );
+
   return {
     ...normalizedDetail,
-    description: description || buildFallbackDescription(normalizedDetail),
+    description,
+    overview: pickText(normalizedDetail.overview, description),
   };
 }
 
@@ -286,7 +295,7 @@ function buildGoogleMapsDirectionsUrl(item) {
 function makeInfoItem(icon, label, value) {
   const cleanedValue = cleanText(value);
 
-  if (isPlaceholderText(cleanedValue)) {
+  if (isEmptyText(cleanedValue)) {
     return null;
   }
 
@@ -317,35 +326,47 @@ function buildKeyInfo(detail) {
     15: [
       makeInfoItem('▣', '기간', detail.period),
       makeInfoItem('◷', '운영시간', getField(item, 'playTime', 'playtime') || detail.playTime),
-      makeInfoItem('◎', '이용요금', getField(item, 'useTimeFestival', 'usetimefestival')),
       makeInfoItem('⌖', '행사장소', getField(item, 'eventPlace', 'eventplace') || detail.place),
       makeInfoItem('◇', '주최/주관', getField(item, 'sponsor') || detail.sponsor),
-      makeInfoItem('◌', '소요시간', getField(item, 'spendTimeFestival', 'spendtimefestival')),
+      makeInfoItem('☎', '문의', detail.tel),
     ],
     12: [
-      makeInfoItem('◷', '이용시간', getField(item, 'useTime', 'usetime')),
+      makeInfoItem('◷', '이용시간', getField(item, 'useTime', 'usetime') || detail.playTime),
       makeInfoItem('▣', '휴무일', getField(item, 'restDate', 'restdate')),
       makeInfoItem('◇', '체험안내', getField(item, 'expGuide', 'expguide')),
       makeInfoItem('▤', '주차', getField(item, 'parking')),
-      makeInfoItem('☎', '문의', getField(item, 'infoCenter', 'infocenter')),
-      makeInfoItem('⌘', '반려동물', getField(item, 'chkPet', 'chkpet')),
+      makeInfoItem('☎', '문의', getField(item, 'infoCenter', 'infocenter') || detail.tel),
     ],
     14: [
-      makeInfoItem('◷', '관람시간', getField(item, 'useTimeCulture', 'usetimeculture')),
+      makeInfoItem(
+        '◷',
+        '관람시간',
+        getField(item, 'useTimeCulture', 'usetimeculture') || detail.playTime,
+      ),
       makeInfoItem('▣', '휴무일', getField(item, 'restDateCulture', 'restdateculture')),
       makeInfoItem('◎', '이용요금', getField(item, 'useFee', 'usefee')),
-      makeInfoItem('◌', '관람소요시간', getField(item, 'spendTime', 'spendtime')),
       makeInfoItem('▤', '주차', getField(item, 'parkingCulture', 'parkingculture')),
-      makeInfoItem('☎', '문의', getField(item, 'infoCenterCulture', 'infocenterculture')),
+      makeInfoItem(
+        '☎',
+        '문의',
+        getField(item, 'infoCenterCulture', 'infocenterculture') || detail.tel,
+      ),
     ],
     28: [
-      makeInfoItem('▣', '운영기간', getField(item, 'openPeriod', 'openperiod')),
-      makeInfoItem('◷', '이용시간', getField(item, 'useTimeLeports', 'usetimeleports')),
+      makeInfoItem('▣', '운영기간', getField(item, 'openPeriod', 'openperiod') || detail.period),
+      makeInfoItem(
+        '◷',
+        '이용시간',
+        getField(item, 'useTimeLeports', 'usetimeleports') || detail.playTime,
+      ),
       makeInfoItem('◎', '이용요금', getField(item, 'useFeeLeports', 'usefeeleports')),
       makeInfoItem('◇', '예약', getField(item, 'reservation')),
       makeInfoItem('▤', '주차', getField(item, 'parkingLeports', 'parkingleports')),
-      makeInfoItem('☎', '문의', getField(item, 'infoCenterLeports', 'infocenterleports')),
-      makeInfoItem('⌘', '체험연령', getField(item, 'expAgeRangeLeports', 'expagerangeleports')),
+      makeInfoItem(
+        '☎',
+        '문의',
+        getField(item, 'infoCenterLeports', 'infocenterleports') || detail.tel,
+      ),
     ],
   };
 
@@ -354,13 +375,6 @@ function buildKeyInfo(detail) {
 
 function detailReducer(state, action) {
   switch (action.type) {
-    case 'start':
-      return {
-        detail: null,
-        loading: true,
-        errorMessage: '',
-      };
-
     case 'success':
       return {
         detail: action.payload,
@@ -370,9 +384,9 @@ function detailReducer(state, action) {
 
     case 'error':
       return {
-        detail: null,
+        detail: action.payload ?? null,
         loading: false,
-        errorMessage: action.payload,
+        errorMessage: action.payload ? '' : action.message,
       };
 
     default:
@@ -387,17 +401,18 @@ export default function FestivalDetailPage() {
 
   const fallbackItem = location.state?.festival;
   const festivalListState = location.state?.festivalListState;
+  const fallbackDetail = useMemo(() => {
+    return fallbackItem ? getFestivalDetail(null, fallbackItem) : null;
+  }, [fallbackItem]);
 
   const [state, dispatch] = useReducer(detailReducer, {
-    detail: null,
-    loading: true,
+    detail: fallbackDetail,
+    loading: !fallbackDetail,
     errorMessage: '',
   });
 
   useEffect(() => {
     const controller = new AbortController();
-
-    dispatch({ type: 'start' });
 
     fetchFestivalDetail(contentId, { signal: controller.signal })
       .then(detail => {
@@ -415,24 +430,24 @@ export default function FestivalDetailPage() {
           return;
         }
 
-        if (fallbackItem) {
+        if (fallbackDetail) {
           dispatch({
-            type: 'success',
-            payload: getFestivalDetail(null, fallbackItem),
+            type: 'error',
+            payload: fallbackDetail,
           });
           return;
         }
 
         dispatch({
           type: 'error',
-          payload: error.message || '축제 상세 조회에 실패했습니다.',
+          message: error.message || '축제 상세 조회에 실패했습니다.',
         });
       });
 
     return () => {
       controller.abort();
     };
-  }, [contentId, fallbackItem]);
+  }, [contentId, fallbackItem, fallbackDetail]);
 
   const detail = state.detail;
 
@@ -440,7 +455,7 @@ export default function FestivalDetailPage() {
   const keyInfo = useMemo(() => buildKeyInfo(detail), [detail]);
   const homepageUrl = useMemo(() => normalizeHomepageUrl(detail?.homepage), [detail]);
 
-  if (state.loading) {
+  if (state.loading && !detail) {
     return (
       <div className={styles.page}>
         <div className={styles.stateBox}>축제 상세 정보를 불러오는 중입니다.</div>
@@ -464,7 +479,7 @@ export default function FestivalDetailPage() {
     );
   }
 
-  const introText = pickText(detail.description, detail.overview, '소개 정보가 없습니다.');
+  const introText = pickText(detail.description, detail.overview, buildFallbackDescription(detail));
 
   return (
     <div className={styles.page}>
@@ -518,7 +533,9 @@ export default function FestivalDetailPage() {
             ))}
           </div>
         ) : (
-          <p className={styles.emptyInfoText}>제공된 상세 정보가 없습니다.</p>
+          <p className={styles.emptyInfoText}>
+            제공된 상세 정보가 부족해 기본 소개 정보로 표시합니다.
+          </p>
         )}
       </section>
 
