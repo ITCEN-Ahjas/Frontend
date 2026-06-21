@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
+import { CHUNGBUK_BOUNDARY_PATH } from '../../data/chungbukBoundary';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
@@ -113,6 +114,7 @@ export default function MapPage() {
   const navigate = useNavigate();
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const boundaryPolygonRef = useRef(null);
   const markerInstancesRef = useRef(new Map());
   const searchAbortControllerRef = useRef(null);
   const [mapStatus, setMapStatus] = useState('loading');
@@ -181,6 +183,17 @@ export default function MapPage() {
           gestureHandling: 'greedy',
         });
 
+        boundaryPolygonRef.current = new window.google.maps.Polygon({
+          paths: CHUNGBUK_BOUNDARY_PATH,
+          strokeColor: '#724598',
+          strokeOpacity: 0.95,
+          strokeWeight: 4,
+          fillColor: '#724598',
+          fillOpacity: 0.08,
+          clickable: false,
+          map: mapInstanceRef.current,
+        });
+
         setMapStatus('ready');
       } catch (error) {
         if (isCancelled) {
@@ -200,6 +213,8 @@ export default function MapPage() {
 
     return () => {
       isCancelled = true;
+      boundaryPolygonRef.current?.setMap(null);
+      boundaryPolygonRef.current = null;
     };
   }, []);
 
