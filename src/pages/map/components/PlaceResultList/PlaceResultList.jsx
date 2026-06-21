@@ -34,6 +34,7 @@ export default function PlaceResultList({
   hasSearched,
   hasMoreResults,
   onSelectPlace,
+  onOpenPlaceDetail,
   onRetry,
   onLoadMore,
 }) {
@@ -90,55 +91,68 @@ export default function PlaceResultList({
               const meta = getPlaceMeta(place);
               const ratingCount = formatRatingCount(place.userRatingCount);
               const photoUrl = createPlacePhotoUrl(place.photoName);
+              const isSelected = selectedPlaceId === place.placeId;
 
               return (
                 <li key={`${place.placeId}-${index}`}>
-                  <button
-                    id={`place-result-${place.placeId}`}
-                    type="button"
-                    className={`${styles.item} ${
-                      selectedPlaceId === place.placeId ? styles.itemSelected : ''
-                    }`}
-                    aria-pressed={selectedPlaceId === place.placeId}
-                    onClick={() => onSelectPlace(place)}
+                  <div
+                    className={`${styles.item} ${isSelected ? styles.itemSelected : ''}`}
                   >
-                    <div
-                      className={`${styles.thumbnail} ${styles[meta.tone]}`}
-                      aria-hidden="true"
+                    <button
+                      id={`place-result-${place.placeId}`}
+                      type="button"
+                      className={styles.itemMain}
+                      aria-pressed={isSelected}
+                      onClick={() => onSelectPlace(place)}
                     >
-                      {photoUrl ? (
-                        <>
-                          <img src={photoUrl} alt="" loading="lazy" onError={handlePhotoError} />
-                          <span hidden>{meta.icon}</span>
-                        </>
-                      ) : (
-                        <span>{meta.icon}</span>
-                      )}
-                    </div>
-
-                    <div className={styles.info}>
-                      <div className={styles.metaRow}>
-                        <span className={styles.category}>{place.category || '장소'}</span>
-                        {Number.isFinite(place.rating) && (
-                          <span className={styles.rating}>
-                            <span aria-hidden="true">★</span>
-                            {place.rating.toFixed(1)}
-                            {ratingCount && <small>({ratingCount})</small>}
-                          </span>
+                      <div
+                        className={`${styles.thumbnail} ${styles[meta.tone]}`}
+                        aria-hidden="true"
+                      >
+                        {photoUrl ? (
+                          <>
+                            <img src={photoUrl} alt="" loading="lazy" onError={handlePhotoError} />
+                            <span hidden>{meta.icon}</span>
+                          </>
+                        ) : (
+                          <span>{meta.icon}</span>
                         )}
                       </div>
 
-                      <h3>{place.name || '이름 없는 장소'}</h3>
-                      <p className={styles.type}>
-                        {place.primaryTypeName || place.primaryType || '장소 정보'}
-                      </p>
-                      <p className={styles.address}>{place.address || '주소 정보 없음'}</p>
-                    </div>
+                      <div className={styles.info}>
+                        <div className={styles.metaRow}>
+                          <span className={styles.category}>{place.category || '장소'}</span>
+                          {Number.isFinite(place.rating) && (
+                            <span className={styles.rating}>
+                              <span aria-hidden="true">★</span>
+                              {place.rating.toFixed(1)}
+                              {ratingCount && <small>({ratingCount})</small>}
+                            </span>
+                          )}
+                        </div>
 
-                    <span className={styles.selectGuide}>
-                      {selectedPlaceId === place.placeId ? '목적지 선택됨' : '지도에서 보기'}
-                    </span>
-                  </button>
+                        <h3>{place.name || '이름 없는 장소'}</h3>
+                        <p className={styles.type}>
+                          {place.primaryTypeName || place.primaryType || '장소 정보'}
+                        </p>
+                        <p className={styles.address}>{place.address || '주소 정보 없음'}</p>
+                      </div>
+
+                      <span className={styles.selectGuide}>
+                        {isSelected ? '목적지 선택됨' : '지도에서 보기'}
+                      </span>
+                    </button>
+
+                    {isSelected && (
+                      <button
+                        type="button"
+                        className={styles.detailButton}
+                        onClick={() => onOpenPlaceDetail(place)}
+                      >
+                        상세보기
+                      </button>
+                    )}
+                  </div>
                 </li>
               );
             })}

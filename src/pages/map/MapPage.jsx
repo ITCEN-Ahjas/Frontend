@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
@@ -109,6 +110,7 @@ async function fetchAllPlaces({ search, signal }) {
 }
 
 export default function MapPage() {
+  const navigate = useNavigate();
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerInstancesRef = useRef(new Map());
@@ -145,6 +147,17 @@ export default function MapPage() {
       directionsWindow.opener = null;
     }
   }, [selectedPlace]);
+
+  const handleOpenPlaceDetail = useCallback(
+    place => {
+      if (!place?.placeId) {
+        return;
+      }
+
+      navigate(`/map/places/${encodeURIComponent(place.placeId)}`);
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     let isCancelled = false;
@@ -376,6 +389,7 @@ export default function MapPage() {
             hasSearched={hasSearched}
             hasMoreResults={hasMoreResults}
             onSelectPlace={handleSelectPlace}
+            onOpenPlaceDetail={handleOpenPlaceDetail}
             onRetry={handleRetry}
             onLoadMore={handleLoadMore}
           />

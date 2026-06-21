@@ -7,6 +7,7 @@ import GuidePage from './pages/guide/GuidePage';
 import LodgingDetailPage from './pages/lodging/LodgingDetailPage';
 import LodgingPage from './pages/lodging/LodgingPage';
 import MainPage from './pages/main/MainPage';
+import PlaceDetailPage from './pages/map/PlaceDetailPage';
 import MapPage from './pages/map/MapPage';
 import FloatingChatbot from './shared/components/common/FloatingChatbot';
 import PageLayout from './shared/layout/PageLayout';
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<MainPage />} />
           <Route path="/guide" element={<GuidePage />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/map/places/:placeId" element={<PlaceDetailPage />} />
           <Route path="/festival" element={<FestivalPage />} />
           <Route path="/festival/:contentId" element={<FestivalDetailPage />} />
           <Route path="/lodging" element={<LodgingPage />} />
