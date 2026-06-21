@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
@@ -17,7 +18,7 @@ const DEFAULT_SEARCH = {
 };
 
 const PLACE_FETCH_SIZE = 20;
-const RESULT_PAGE_SIZE = 5;
+const RESULT_PAGE_SIZE = 4;
 const SEARCH_CATEGORY_VALUES = PLACE_CATEGORIES
   .filter(category => category.value !== 'ALL')
   .map(category => category.value);
@@ -109,6 +110,7 @@ async function fetchAllPlaces({ search, signal }) {
 }
 
 export default function MapPage() {
+  const navigate = useNavigate();
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerInstancesRef = useRef(new Map());
@@ -145,6 +147,17 @@ export default function MapPage() {
       directionsWindow.opener = null;
     }
   }, [selectedPlace]);
+
+  const handleOpenPlaceDetail = useCallback(
+    place => {
+      if (!place?.placeId) {
+        return;
+      }
+
+      navigate(`/map/places/${encodeURIComponent(place.placeId)}`);
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     let isCancelled = false;
@@ -312,6 +325,10 @@ export default function MapPage() {
     }
   }, []);
 
+  useEffect(() => {
+    requestPlaces({ search: DEFAULT_SEARCH });
+  }, [requestPlaces]);
+
   useEffect(
     () => () => {
       searchAbortControllerRef.current?.abort();
@@ -376,20 +393,13 @@ export default function MapPage() {
             hasSearched={hasSearched}
             hasMoreResults={hasMoreResults}
             onSelectPlace={handleSelectPlace}
+            onOpenPlaceDetail={handleOpenPlaceDetail}
             onRetry={handleRetry}
             onLoadMore={handleLoadMore}
           />
         </div>
 
         <div className={styles.mapColumn}>
-          <div className={styles.mapHeader}>
-            <div>
-              <p className={styles.mapEyebrow}>GOOGLE MAPS</p>
-              <h2>검색 장소 지도</h2>
-            </div>
-            <p>검색 목록이나 지도 마커를 선택해 길찾기 목적지를 지정할 수 있습니다.</p>
-          </div>
-
           <div className={styles.mapCard}>
             <div
               ref={mapElementRef}
