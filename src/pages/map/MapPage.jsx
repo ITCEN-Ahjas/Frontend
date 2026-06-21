@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
+import { CHUNGBUK_BOUNDARY_PATH } from '../../data/chungbukBoundary';
+import { getChungbukRegionLabel } from '../../data/chungbukRegions';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
@@ -15,10 +17,13 @@ const CHUNGBUK_CENTER = {
 const DEFAULT_SEARCH = {
   keyword: '',
   category: 'ALL',
+  region: 'ALL',
 };
 
 const PLACE_FETCH_SIZE = 20;
 const RESULT_PAGE_SIZE = 4;
+const OLIVE_YOUNG_CATEGORY = 'OLIVE_YOUNG';
+const OLIVE_YOUNG_SEARCH_KEYWORD = '올리브영';
 const SEARCH_CATEGORY_VALUES = PLACE_CATEGORIES
   .filter(category => category.value !== 'ALL')
   .map(category => category.value);
@@ -67,30 +72,64 @@ function mergeUniquePlaces(placeGroups) {
   return Array.from(placeMap.values());
 }
 
-async function fetchAllPlacesForCategory({ keyword, category, signal }) {
+function getApiCategory(category) {
+  return category === OLIVE_YOUNG_CATEGORY ? 'ALL' : category;
+}
+
+function getDisplayCategory(category) {
+  return PLACE_CATEGORIES.find(item => item.value === category)?.label || '';
+}
+
+async function fetchAllPlacesForCategory({ keyword, category, displayCategory, signal }) {
   const places = [];
   let pageToken;
 
   do {
     const response = await fetchPlaces({
       keyword,
-      category,
+      category: getApiCategory(category),
       size: PLACE_FETCH_SIZE,
       pageToken,
       signal,
     });
 
-    places.push(...response.items);
+    places.push(
+      ...response.items.map(place => ({
+        ...place,
+        category: displayCategory || place.category,
+      })),
+    );
     pageToken = response.nextPageToken;
   } while (pageToken);
 
   return places;
 }
 
+function createSearchKeyword(search, category) {
+  const keyword = String(search.keyword ?? '').trim();
+  const regionLabel = getChungbukRegionLabel(search.region);
+  const categoryKeyword = category === OLIVE_YOUNG_CATEGORY ? OLIVE_YOUNG_SEARCH_KEYWORD : '';
+
+  return [
+    search.region === 'ALL' ? '' : regionLabel,
+    categoryKeyword,
+    keyword,
+  ].filter(Boolean).join(' ');
+}
+
+function fetchAllPlacesForSearchCategory({ search, category, signal }) {
+  return fetchAllPlacesForCategory({
+    keyword: createSearchKeyword(search, category),
+    category,
+    displayCategory: getDisplayCategory(category),
+    signal,
+  });
+}
+
 async function fetchAllPlaces({ search, signal }) {
   if (search.category !== 'ALL') {
-    return fetchAllPlacesForCategory({
-      keyword: search.keyword,
+    return fetchAllPlacesForSearchCategory({
+      search,
       category: search.category,
       signal,
     });
@@ -98,8 +137,8 @@ async function fetchAllPlaces({ search, signal }) {
 
   const placeGroups = await Promise.all(
     SEARCH_CATEGORY_VALUES.map(category =>
-      fetchAllPlacesForCategory({
-        keyword: search.keyword,
+      fetchAllPlacesForSearchCategory({
+        search,
         category,
         signal,
       }),
@@ -113,12 +152,14 @@ export default function MapPage() {
   const navigate = useNavigate();
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const boundaryPolygonRef = useRef(null);
   const markerInstancesRef = useRef(new Map());
   const searchAbortControllerRef = useRef(null);
   const [mapStatus, setMapStatus] = useState('loading');
   const [mapErrorMessage, setMapErrorMessage] = useState('');
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('ALL');
+  const [region, setRegion] = useState('ALL');
   const [appliedSearch, setAppliedSearch] = useState(DEFAULT_SEARCH);
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -181,6 +222,17 @@ export default function MapPage() {
           gestureHandling: 'greedy',
         });
 
+        boundaryPolygonRef.current = new window.google.maps.Polygon({
+          paths: CHUNGBUK_BOUNDARY_PATH,
+          strokeColor: '#724598',
+          strokeOpacity: 0.95,
+          strokeWeight: 4,
+          fillColor: '#724598',
+          fillOpacity: 0.08,
+          clickable: false,
+          map: mapInstanceRef.current,
+        });
+
         setMapStatus('ready');
       } catch (error) {
         if (isCancelled) {
@@ -200,6 +252,8 @@ export default function MapPage() {
 
     return () => {
       isCancelled = true;
+      boundaryPolygonRef.current?.setMap(null);
+      boundaryPolygonRef.current = null;
     };
   }, []);
 
@@ -342,6 +396,7 @@ export default function MapPage() {
     const nextSearch = {
       keyword: keyword.trim(),
       category,
+      region,
     };
 
     setAppliedSearch(nextSearch);
@@ -352,9 +407,22 @@ export default function MapPage() {
     const nextSearch = {
       keyword: keyword.trim(),
       category: nextCategory,
+      region,
     };
 
     setCategory(nextCategory);
+    setAppliedSearch(nextSearch);
+    requestPlaces({ search: nextSearch });
+  }
+
+  function handleRegionChange(nextRegion) {
+    const nextSearch = {
+      keyword: keyword.trim(),
+      category,
+      region: nextRegion,
+    };
+
+    setRegion(nextRegion);
     setAppliedSearch(nextSearch);
     requestPlaces({ search: nextSearch });
   }
@@ -378,9 +446,11 @@ export default function MapPage() {
           <PlaceSearchPanel
             keyword={keyword}
             category={category}
+            region={region}
             isLoading={isLoading}
             onKeywordChange={setKeyword}
             onCategoryChange={handleCategoryChange}
+            onRegionChange={handleRegionChange}
             onSubmit={handleSearchSubmit}
           />
 

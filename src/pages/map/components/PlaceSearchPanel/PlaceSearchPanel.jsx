@@ -1,12 +1,15 @@
 import { PLACE_CATEGORIES } from '../../../../api/placeApi';
+import { CHUNGBUK_REGIONS } from '../../../../data/chungbukRegions';
 import styles from './PlaceSearchPanel.module.css';
 
 export default function PlaceSearchPanel({
   keyword,
   category,
+  region,
   isLoading,
   onKeywordChange,
   onCategoryChange,
+  onRegionChange,
   onSubmit,
 }) {
   return (
@@ -39,21 +42,44 @@ export default function PlaceSearchPanel({
         </button>
       </form>
 
-      <div className={styles.categories} aria-label="장소 카테고리">
-        {PLACE_CATEGORIES.map(item => (
-          <button
-            key={item.value}
-            type="button"
-            className={`${styles.categoryButton} ${
-              category === item.value ? styles.categoryButtonActive : ''
-            }`}
-            aria-pressed={category === item.value}
-            disabled={isLoading}
-            onClick={() => onCategoryChange(item.value)}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div className={styles.filterGroup}>
+        <strong>지역</strong>
+        <div className={styles.categories} aria-label="충북 시군">
+          {CHUNGBUK_REGIONS.map(item => (
+            <button
+              key={item.value}
+              type="button"
+              className={`${styles.categoryButton} ${
+                region === item.value ? styles.categoryButtonActive : ''
+              }`}
+              aria-pressed={region === item.value}
+              disabled={isLoading}
+              onClick={() => onRegionChange(item.value)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <strong>카테고리</strong>
+        <div className={styles.categories} aria-label="장소 카테고리">
+          {PLACE_CATEGORIES.map(item => (
+            <button
+              key={item.value}
+              type="button"
+              className={`${styles.categoryButton} ${
+                category === item.value ? styles.categoryButtonActive : ''
+              }`}
+              aria-pressed={category === item.value}
+              disabled={isLoading}
+              onClick={() => onCategoryChange(item.value)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
