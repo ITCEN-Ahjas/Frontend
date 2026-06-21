@@ -110,11 +110,22 @@
   opacity: 0.55;
 }
 
+.filterGroup {
+  margin-top: 1.6rem;
+}
+
+.filterGroup > strong {
+  display: block;
+  margin-bottom: 0.9rem;
+  color: var(--color-slate-700);
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
 .categories {
   display: flex;
   flex-wrap: wrap;
   gap: 0.8rem;
-  margin-top: 1.6rem;
 }
 
 .categoryButton {

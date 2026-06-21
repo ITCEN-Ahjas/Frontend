@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { CHUNGBUK_BOUNDARY_PATH } from '../../data/chungbukBoundary';
+import { getChungbukRegionLabel } from '../../data/chungbukRegions';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
@@ -16,6 +17,7 @@ const CHUNGBUK_CENTER = {
 const DEFAULT_SEARCH = {
   keyword: '',
   category: 'ALL',
+  region: 'ALL',
 };
 
 const PLACE_FETCH_SIZE = 20;
@@ -88,10 +90,23 @@ async function fetchAllPlacesForCategory({ keyword, category, signal }) {
   return places;
 }
 
+function createSearchKeyword(search) {
+  const keyword = String(search.keyword ?? '').trim();
+  const regionLabel = getChungbukRegionLabel(search.region);
+
+  if (!regionLabel || search.region === 'ALL') {
+    return keyword;
+  }
+
+  return [regionLabel, keyword].filter(Boolean).join(' ');
+}
+
 async function fetchAllPlaces({ search, signal }) {
+  const keyword = createSearchKeyword(search);
+
   if (search.category !== 'ALL') {
     return fetchAllPlacesForCategory({
-      keyword: search.keyword,
+      keyword,
       category: search.category,
       signal,
     });
@@ -100,7 +115,7 @@ async function fetchAllPlaces({ search, signal }) {
   const placeGroups = await Promise.all(
     SEARCH_CATEGORY_VALUES.map(category =>
       fetchAllPlacesForCategory({
-        keyword: search.keyword,
+        keyword,
         category,
         signal,
       }),
@@ -121,6 +136,7 @@ export default function MapPage() {
   const [mapErrorMessage, setMapErrorMessage] = useState('');
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('ALL');
+  const [region, setRegion] = useState('ALL');
   const [appliedSearch, setAppliedSearch] = useState(DEFAULT_SEARCH);
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -357,6 +373,7 @@ export default function MapPage() {
     const nextSearch = {
       keyword: keyword.trim(),
       category,
+      region,
     };
 
     setAppliedSearch(nextSearch);
@@ -367,9 +384,22 @@ export default function MapPage() {
     const nextSearch = {
       keyword: keyword.trim(),
       category: nextCategory,
+      region,
     };
 
     setCategory(nextCategory);
+    setAppliedSearch(nextSearch);
+    requestPlaces({ search: nextSearch });
+  }
+
+  function handleRegionChange(nextRegion) {
+    const nextSearch = {
+      keyword: keyword.trim(),
+      category,
+      region: nextRegion,
+    };
+
+    setRegion(nextRegion);
     setAppliedSearch(nextSearch);
     requestPlaces({ search: nextSearch });
   }
@@ -393,9 +423,11 @@ export default function MapPage() {
           <PlaceSearchPanel
             keyword={keyword}
             category={category}
+            region={region}
             isLoading={isLoading}
             onKeywordChange={setKeyword}
             onCategoryChange={handleCategoryChange}
+            onRegionChange={handleRegionChange}
             onSubmit={handleSearchSubmit}
           />
 
