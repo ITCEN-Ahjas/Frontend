@@ -6,6 +6,7 @@ export const PLACE_CATEGORIES = [
   { value: 'TOURIST_ATTRACTION', label: '관광지' },
   { value: 'RESTAURANT', label: '음식점' },
   { value: 'SHOPPING', label: '쇼핑' },
+  { value: 'OLIVE_YOUNG', label: '올리브영' },
 ];
 
 function createPlaceQuery({

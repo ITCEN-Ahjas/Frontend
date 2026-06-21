@@ -5,6 +5,7 @@ const CATEGORY_META = {
   관광지: { icon: '景', tone: 'purple' },
   음식점: { icon: '味', tone: 'green' },
   쇼핑: { icon: '店', tone: 'pink' },
+  올리브영: { icon: 'OL', tone: 'green' },
   전체: { icon: '地', tone: 'blue' },
 };
 
