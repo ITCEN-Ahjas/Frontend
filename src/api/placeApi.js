@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const DEFAULT_PLACE_PHOTO_WIDTH = 320;
 
 export const PLACE_CATEGORIES = [
   { value: 'ALL', label: '전체' },
@@ -61,4 +62,19 @@ export async function fetchPlaces({
     size: Number(data.size) || 0,
     nextPageToken: data.nextPageToken || null,
   };
+}
+
+export function createPlacePhotoUrl(photoName, maxWidthPx = DEFAULT_PLACE_PHOTO_WIDTH) {
+  const normalizedPhotoName = String(photoName ?? '').trim();
+
+  if (!normalizedPhotoName) {
+    return '';
+  }
+
+  const params = new URLSearchParams({
+    name: normalizedPhotoName,
+    maxWidthPx: String(maxWidthPx),
+  });
+
+  return `${API_BASE_URL}/api/places/photo?${params.toString()}`;
 }

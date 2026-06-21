@@ -1,3 +1,4 @@
+import { createPlacePhotoUrl } from '../../../../api/placeApi';
 import styles from './PlaceResultList.module.css';
 
 const CATEGORY_META = {
@@ -17,6 +18,11 @@ function formatRatingCount(count) {
   }
 
   return count.toLocaleString('ko-KR');
+}
+
+function handlePhotoError(event) {
+  event.currentTarget.hidden = true;
+  event.currentTarget.nextElementSibling?.removeAttribute('hidden');
 }
 
 export default function PlaceResultList({
@@ -83,6 +89,7 @@ export default function PlaceResultList({
             {places.map((place, index) => {
               const meta = getPlaceMeta(place);
               const ratingCount = formatRatingCount(place.userRatingCount);
+              const photoUrl = createPlacePhotoUrl(place.photoName);
 
               return (
                 <li key={`${place.placeId}-${index}`}>
@@ -99,7 +106,14 @@ export default function PlaceResultList({
                       className={`${styles.thumbnail} ${styles[meta.tone]}`}
                       aria-hidden="true"
                     >
-                      {meta.icon}
+                      {photoUrl ? (
+                        <>
+                          <img src={photoUrl} alt="" loading="lazy" onError={handlePhotoError} />
+                          <span hidden>{meta.icon}</span>
+                        </>
+                      ) : (
+                        <span>{meta.icon}</span>
+                      )}
                     </div>
 
                     <div className={styles.info}>
