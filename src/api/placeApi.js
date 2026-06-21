@@ -64,6 +64,25 @@ export async function fetchPlaces({
   };
 }
 
+export async function fetchPlaceDetail(placeId, { signal } = {}) {
+  const normalizedPlaceId = String(placeId ?? '').trim();
+
+  if (!normalizedPlaceId) {
+    throw new Error('장소 ID가 없습니다.');
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/places/${encodeURIComponent(normalizedPlaceId)}`,
+    { signal },
+  );
+
+  if (!response.ok) {
+    throw new Error(await parseErrorResponse(response));
+  }
+
+  return response.json();
+}
+
 export function createPlacePhotoUrl(photoName, maxWidthPx = DEFAULT_PLACE_PHOTO_WIDTH) {
   const normalizedPhotoName = String(photoName ?? '').trim();
 
