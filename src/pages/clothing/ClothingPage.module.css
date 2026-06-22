@@ -1,0 +1,294 @@
+.page {
+  min-height: 100vh;
+  padding-top: 72px;
+  background: #f6f8fc;
+  color: #1d2940;
+}
+
+.content {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.pageHeader {
+  padding: 56px 0;
+  background: #ffffff;
+  border-bottom: 1px solid #e8ebf2;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.pageHeader p {
+  margin: 16px 0 0;
+  color: #66738a;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.stateCard,
+.dataCard,
+.errorBox {
+  margin-top: 24px;
+  padding: 28px;
+  border: 1px solid #e5e8ef;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.stateCard h2,
+.dataCard h2,
+.errorBox h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.helperText,
+.statusText,
+.errorBox p {
+  margin: 10px 0 0;
+  color: #718097;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.choiceButton {
+  border: 1px solid #dce1eb;
+  border-radius: 999px;
+  padding: 10px 15px;
+  background: #ffffff;
+  color: #546078;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.choiceButton:hover {
+  border-color: #9b83eb;
+  color: #6846d9;
+}
+
+.choiceButtonActive {
+  border-color: #6846d9;
+  background: #6846d9;
+  color: #ffffff;
+}
+
+.recommendButton {
+  margin-top: 22px;
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 18px;
+  background: #6846d9;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.recommendButton:hover:not(:disabled) {
+  background: #5733c9;
+}
+
+.recommendButton:disabled {
+  background: #c5bddf;
+  cursor: not-allowed;
+}
+
+.errorBox {
+  border-color: #ffd9de;
+  background: #fff8f8;
+}
+
+.errorBox h2,
+.errorBox p {
+  color: #ba2941;
+}
+
+.retryButton {
+  margin-top: 16px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #ba2941;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cardEyebrow {
+  margin: 0 0 7px;
+  color: #6846d9;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.updatedAt {
+  margin: 0;
+  color: #8290a5;
+  font-size: 14px;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.metricItem {
+  padding: 17px;
+  border-radius: 14px;
+  background: #f6f8fc;
+}
+
+.metricItem span {
+  display: block;
+  color: #78849a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.metricItem strong {
+  display: block;
+  margin-top: 12px;
+  color: #263149;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.feelsLikeBox {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #dce8ff;
+  border-radius: 14px;
+  background: #f8fbff;
+}
+
+.feelsLikeBox h3 {
+  margin: 0;
+  color: #4178d1;
+  font-size: 17px;
+}
+
+.feelsLikeBox p {
+  margin: 9px 0 0;
+  color: #5d6a80;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.outfitGrid,
+.preparationGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.outfitCard,
+.preparationCard {
+  padding: 20px;
+  border-radius: 16px;
+  background: #f7f9fc;
+}
+
+.outfitCard span {
+  color: #6846d9;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.outfitCard h3,
+.preparationCard h3 {
+  margin: 13px 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.outfitCard p,
+.preparationCard p {
+  margin: 12px 0 0;
+  color: #69768c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.preparationCard {
+  border: 1px solid #e6dfff;
+  background: #fbfaff;
+}
+
+@media (max-width: 960px) {
+  .metricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .outfitGrid,
+  .preparationGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-top: 64px;
+  }
+
+  .content {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .pageHeader {
+    padding: 42px 0;
+  }
+
+  .pageHeader h1 {
+    font-size: 34px;
+  }
+
+  .stateCard,
+  .dataCard,
+  .errorBox {
+    padding: 20px;
+  }
+
+  .cardHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metricItem:last-child {
+    grid-column: span 2;
+  }
+
+  .outfitGrid,
+  .preparationGrid {
+    grid-template-columns: 1fr;
+  }
+}
