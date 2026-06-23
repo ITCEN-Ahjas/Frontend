@@ -1,5 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchOutfitRecommendation, fetchWeatherRegions, WeatherApiError } from '../api/weatherApi';
+import { fetchBatchOutfitRecommendations, WeatherApiError } from '../api/weatherApi';
+
+export const CHUNGBUK_REGIONS = [
+  '청주',
+  '충주',
+  '제천',
+  '보은',
+  '옥천',
+  '영동',
+  '증평',
+  '진천',
+  '괴산',
+  '음성',
+  '단양',
+];
 
 export const TRAVEL_STYLES = [
   '기본 추천',
@@ -10,17 +24,10 @@ export const TRAVEL_STYLES = [
   '비 오는 날 대비',
 ];
 
-const INITIAL_REGIONS_STATE = {
-  status: 'loading',
-  data: [],
-  error: '',
-};
+const DEFAULT_REGION = '청주';
 
-const INITIAL_RECOMMENDATIONS_STATE = {
-  status: 'idle',
-  data: {},
-  error: '',
-};
+const regionBatchCache = new Map();
+const pendingRegionRequests = new Map();
 
 function normalizeOutfitCard(card) {
   if (!card?.name) {
@@ -28,24 +35,23 @@ function normalizeOutfitCard(card) {
   }
 
   return {
+    code: card.code || '',
     name: card.name,
     description: card.description || '',
   };
 }
 
-function normalizeRecommendation(payload) {
+function normalizeRecommendation(payload, region, travelStyle, source) {
   const outfitCards = payload?.outfitCards;
 
-  if (!payload?.region || !payload?.currentWeather || !payload?.feelsLikeWeather || !outfitCards) {
+  if (!outfitCards) {
     throw new WeatherApiError('AI 옷차림 추천 응답 형식이 올바르지 않습니다.');
   }
 
   return {
-    region: payload.region,
-    updatedAt: payload.updatedAt || null,
-    travelStyle: payload.travelStyle || '기본 추천',
-    currentWeather: payload.currentWeather,
-    feelsLikeWeather: payload.feelsLikeWeather,
+    region: payload.region || region,
+    travelStyle: payload.travelStyle || travelStyle,
+    source: payload.source || source || 'fallback',
     outfitCards: {
       outerwear: normalizeOutfitCard(outfitCards.outerwear),
       top: normalizeOutfitCard(outfitCards.top),
@@ -58,225 +64,192 @@ function normalizeRecommendation(payload) {
   };
 }
 
+function normalizeBatchPayload(payload) {
+  if (
+    !payload?.region ||
+    !payload?.currentWeather ||
+    !payload?.feelsLikeWeather ||
+    !payload?.recommendations
+  ) {
+    throw new WeatherApiError('배치 옷차림 추천 응답 형식이 올바르지 않습니다.');
+  }
+
+  const recommendations = {};
+
+  TRAVEL_STYLES.forEach(travelStyle => {
+    const recommendation = payload.recommendations[travelStyle];
+
+    if (!recommendation) {
+      throw new WeatherApiError(`${travelStyle} 추천 결과가 없습니다.`);
+    }
+
+    recommendations[travelStyle] = normalizeRecommendation(
+      recommendation,
+      payload.region,
+      travelStyle,
+      payload.source,
+    );
+  });
+
+  return {
+    region: payload.region,
+    updatedAt: payload.updatedAt || null,
+    source: payload.source || 'fallback',
+    currentWeather: payload.currentWeather,
+    feelsLikeWeather: payload.feelsLikeWeather,
+    recommendations,
+  };
+}
+
+function requestBatchRecommendation(region, forceRefresh) {
+  if (!forceRefresh && regionBatchCache.has(region)) {
+    return Promise.resolve(regionBatchCache.get(region));
+  }
+
+  if (!forceRefresh && pendingRegionRequests.has(region)) {
+    return pendingRegionRequests.get(region);
+  }
+
+  const requestPromise = fetchBatchOutfitRecommendations({ region })
+    .then(normalizeBatchPayload)
+    .then(batchData => {
+      regionBatchCache.set(region, batchData);
+      return batchData;
+    })
+    .finally(() => {
+      pendingRegionRequests.delete(region);
+    });
+
+  pendingRegionRequests.set(region, requestPromise);
+
+  return requestPromise;
+}
+
 export function useOutfitRecommendation() {
-  const [regionsState, setRegionsState] = useState(INITIAL_REGIONS_STATE);
+  const [selectedRegion, setSelectedRegion] = useState(DEFAULT_REGION);
 
-  const [recommendationsState, setRecommendationsState] = useState(INITIAL_RECOMMENDATIONS_STATE);
-
-  const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedTravelStyle, setSelectedTravelStyle] = useState(TRAVEL_STYLES[0]);
-  const [regionsRequestVersion, setRegionsRequestVersion] = useState(0);
 
-  const recommendationsAbortControllerRef = useRef(null);
-  const regionCacheRef = useRef(new Map());
+  const [batchState, setBatchState] = useState({
+    status: 'loading',
+    data: null,
+    error: '',
+  });
 
-  const preloadRegionRecommendations = useCallback(
-    async (region, { forceRefresh = false } = {}) => {
-      const cachedRecommendations = regionCacheRef.current.get(region);
+  const requestVersionRef = useRef(0);
 
-      if (cachedRecommendations && !forceRefresh) {
-        setRecommendationsState({
-          status: 'success',
-          data: cachedRecommendations,
-          error: '',
-        });
-        return;
-      }
+  const loadRegionRecommendation = useCallback(async (region, { forceRefresh = false } = {}) => {
+    const requestVersion = requestVersionRef.current + 1;
+    requestVersionRef.current = requestVersion;
 
-      recommendationsAbortControllerRef.current?.abort();
+    const cachedData = regionBatchCache.get(region);
 
-      const controller = new AbortController();
-      recommendationsAbortControllerRef.current = controller;
-
-      setRecommendationsState({
-        status: 'loading',
-        data: {},
+    if (cachedData && !forceRefresh) {
+      setBatchState({
+        status: 'success',
+        data: cachedData,
         error: '',
       });
+      return;
+    }
 
-      const results = await Promise.allSettled(
-        TRAVEL_STYLES.map(async travelStyle => {
-          const payload = await fetchOutfitRecommendation(
-            {
-              region,
-              travelStyle,
-            },
-            {
-              signal: controller.signal,
-            },
-          );
+    setBatchState(previousState => ({
+      status: 'loading',
+      data: previousState.data,
+      error: '',
+    }));
 
-          return {
-            travelStyle,
-            recommendation: normalizeRecommendation(payload),
-          };
-        }),
-      );
+    try {
+      const batchData = await requestBatchRecommendation(region, forceRefresh);
 
-      if (controller.signal.aborted) {
+      if (requestVersion !== requestVersionRef.current) {
         return;
       }
 
-      const nextRecommendations = {};
-      const failedTravelStyles = [];
-
-      results.forEach((result, index) => {
-        const travelStyle = TRAVEL_STYLES[index];
-
-        if (result.status === 'fulfilled') {
-          nextRecommendations[result.value.travelStyle] = result.value.recommendation;
-          return;
-        }
-
-        failedTravelStyles.push(travelStyle);
+      setBatchState({
+        status: 'success',
+        data: batchData,
+        error: '',
       });
-
-      if (Object.keys(nextRecommendations).length === 0) {
-        setRecommendationsState({
-          status: 'error',
-          data: {},
-          error: 'AI 옷차림 추천을 불러오지 못했습니다.',
-        });
+    } catch (error) {
+      if (requestVersion !== requestVersionRef.current) {
         return;
       }
 
-      if (failedTravelStyles.length === 0) {
-        regionCacheRef.current.set(region, nextRecommendations);
-
-        setRecommendationsState({
-          status: 'success',
-          data: nextRecommendations,
-          error: '',
-        });
-        return;
-      }
-
-      setRecommendationsState({
-        status: 'partial',
-        data: nextRecommendations,
-        error: `${failedTravelStyles.join(', ')} 추천을 불러오지 못했습니다.`,
-      });
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    fetchWeatherRegions({
-      signal: controller.signal,
-    })
-      .then(regions => {
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setRegionsState({
-          status: 'success',
-          data: regions,
-          error: '',
-        });
-      })
-      .catch(error => {
-        if (controller.signal.aborted || error.name === 'AbortError') {
-          return;
-        }
-
-        setRegionsState({
-          status: 'error',
-          data: [],
-          error: error.message || '충북 지역 목록을 불러오지 못했습니다.',
-        });
-      });
-
-    return () => controller.abort();
-  }, [regionsRequestVersion]);
-
-  useEffect(() => {
-    return () => {
-      recommendationsAbortControllerRef.current?.abort();
-    };
+      setBatchState(previousState => ({
+        status: 'error',
+        data: previousState.data,
+        error: error.message || 'AI 옷차림 추천을 불러오지 못했습니다.',
+      }));
+    }
   }, []);
+
+  useEffect(() => {
+    void loadRegionRecommendation(selectedRegion);
+  }, [loadRegionRecommendation, selectedRegion]);
 
   const selectRegion = useCallback(
     region => {
-      if (!region || region === selectedRegion) {
+      if (!CHUNGBUK_REGIONS.includes(region)) {
+        return;
+      }
+
+      if (region === selectedRegion) {
         return;
       }
 
       setSelectedRegion(region);
-      void preloadRegionRecommendations(region);
+      setSelectedTravelStyle(TRAVEL_STYLES[0]);
     },
-    [preloadRegionRecommendations, selectedRegion],
+    [selectedRegion],
   );
 
   const selectTravelStyle = useCallback(travelStyle => {
-    if (!travelStyle) {
+    if (!TRAVEL_STYLES.includes(travelStyle)) {
       return;
     }
 
     setSelectedTravelStyle(travelStyle);
   }, []);
 
-  const retryRegions = useCallback(() => {
-    setRegionsState({
-      status: 'loading',
-      data: [],
-      error: '',
-    });
-
-    setRegionsRequestVersion(previousVersion => previousVersion + 1);
-  }, []);
-
   const retryRecommendations = useCallback(() => {
-    if (!selectedRegion) {
-      return;
-    }
-
-    void preloadRegionRecommendations(selectedRegion, {
+    void loadRegionRecommendation(selectedRegion, {
       forceRefresh: true,
     });
-  }, [preloadRegionRecommendations, selectedRegion]);
+  }, [loadRegionRecommendation, selectedRegion]);
 
-  const activeRecommendation = recommendationsState.data[selectedTravelStyle] || null;
+  const batchData = batchState.data?.region === selectedRegion ? batchState.data : null;
 
-  const weatherRecommendation =
-    activeRecommendation ||
-    recommendationsState.data[TRAVEL_STYLES[0]] ||
-    Object.values(recommendationsState.data)[0] ||
-    null;
+  const activeRecommendation = batchData?.recommendations[selectedTravelStyle] || null;
 
   return useMemo(
     () => ({
-      regions: regionsState.data,
+      regions: CHUNGBUK_REGIONS,
       selectedRegion,
       selectedTravelStyle,
 
+      batchData,
       activeRecommendation,
-      weatherRecommendation,
-      recommendationsByStyle: recommendationsState.data,
+      recommendationsByStyle: batchData?.recommendations || {},
 
-      isRegionsLoading: regionsState.status === 'loading',
-      isRecommendationsLoading: recommendationsState.status === 'loading',
+      isRecommendationsLoading: batchState.status === 'loading',
+      isRefreshing: batchState.status === 'loading' && Boolean(batchData),
 
-      regionsError: regionsState.error,
-      recommendationsError: recommendationsState.error,
+      recommendationsError: batchState.error,
 
       selectRegion,
       selectTravelStyle,
-      retryRegions,
       retryRecommendations,
     }),
     [
-      regionsState,
-      recommendationsState,
+      activeRecommendation,
+      batchData,
+      batchState.error,
+      batchState.status,
       selectedRegion,
       selectedTravelStyle,
-      activeRecommendation,
-      weatherRecommendation,
       selectRegion,
       selectTravelStyle,
-      retryRegions,
       retryRecommendations,
     ],
   );
