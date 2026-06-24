@@ -7,7 +7,7 @@
 
 .hero {
   overflow: hidden;
-  min-height: 300px;
+  min-height: 322px;
   border-bottom: 1px solid #eef0f8;
   background:
     radial-gradient(circle at 26% 14%, rgba(255, 255, 255, 0.96) 0 9%, transparent 10%),
@@ -17,18 +17,27 @@
 .heroInner {
   position: relative;
   width: min(1180px, calc(100% - 40px));
-  min-height: 300px;
+  min-height: 322px;
   margin: 0 auto;
 }
 
 .heroCopy {
   position: relative;
   z-index: 2;
-  padding: 70px 0 52px;
+  padding: 62px 0 54px;
+}
+
+.heroEyebrow,
+.sectionEyebrow {
+  margin: 0;
+  color: #7554d7;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
 }
 
 .heroCopy h1 {
-  margin: 0;
+  margin: 8px 0 0;
   color: #17243c;
   font-size: clamp(40px, 4vw, 60px);
   font-weight: 900;
@@ -36,8 +45,8 @@
   line-height: 1.12;
 }
 
-.heroCopy p {
-  margin: 24px 0 0;
+.heroCopy > p:last-child {
+  margin: 22px 0 0;
   color: #43516a;
   font-size: 18px;
   font-weight: 500;
@@ -61,82 +70,473 @@
   padding-bottom: 72px;
 }
 
-.regionFilterCard,
-.weatherCard,
+.locationSelectionCard,
+.timeSlotSection,
+.weatherSection,
 .recommendationSection,
+.preparationSection,
 .errorBox,
-.weatherSkeleton {
+.weatherSkeleton,
+.skeletonOutfit {
   border: 1px solid #e6e9f2;
   border-radius: 22px;
   background: #ffffff;
   box-shadow: 0 8px 28px rgba(53, 67, 108, 0.06);
 }
 
-.regionFilterCard {
-  padding: 24px 28px 26px;
+.locationSelectionCard {
+  position: relative;
+  z-index: 10;
+  padding: 25px 28px 27px;
   border-color: rgba(225, 229, 242, 0.96);
+  background: linear-gradient(125deg, #ffffff 0%, #fbfaff 52%, #f5f8ff 100%);
   box-shadow: 0 14px 38px rgba(72, 81, 127, 0.1);
 }
 
-.regionFilterHeader,
-.weatherCardHeader {
+.locationSelectionHeader,
+.sectionHeader,
+.selectedTimeHeader,
+.recommendationHeader,
+.preparationHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
 }
 
-.regionEyebrow {
-  margin: 0 0 5px;
-  color: #7554d7;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.regionFilterHeader h2,
-.weatherCard h2 {
-  margin: 0;
+.locationSelectionHeader h2,
+.sectionHeader h2,
+.selectedTimeHeader h2,
+.recommendationHeader h2,
+.preparationHeader h2 {
+  margin: 5px 0 0;
   color: #1b2942;
   font-size: 21px;
   font-weight: 850;
   letter-spacing: -0.04em;
 }
 
-.selectedRegionBadge,
-.basisBadge,
-.refreshBadge {
+.comparisonActiveBadge,
+.refreshBadge,
+.aiBadge,
+.fallbackBadge,
+.basisBadge {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
 }
 
-.selectedRegionBadge {
+.comparisonActiveBadge {
   padding: 8px 12px;
-  background: #f2efff;
-  color: #7251d8;
-  font-size: 13px;
+  background: #eaf7ef;
+  color: #23814f;
 }
 
-.regionChipGroup,
-.travelStyleGroup {
-  display: flex;
-  flex-wrap: wrap;
+.locationSelectionGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.selectionField,
+.residenceSelectionField {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e3e7f1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.selectionField > span,
+.selectionFieldLabel {
+  color: #43516a;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.selectionField select,
+.countryField select,
+.citySearchField input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid #dce2ee;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #26344d;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.selectionField select:focus,
+.countryField select:focus,
+.citySearchField input:focus {
+  border-color: #805ee5;
+  box-shadow: 0 0 0 3px rgba(128, 94, 229, 0.13);
+}
+
+.selectionField small,
+.residenceSelectionField > small {
+  color: #7a879a;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.residenceInlineControls {
+  display: grid;
+  grid-template-columns: minmax(132px, 0.52fr) minmax(0, 1fr);
   gap: 9px;
 }
 
-.regionChipGroup {
+.countryField,
+.citySearchField {
+  display: block;
+}
+
+.cityFieldWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.citySearchNotice,
+.citySearchError,
+.emptyCityResult {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.citySearchNotice {
+  color: #6e7890;
+}
+
+.citySearchError {
+  color: #be4561;
+}
+
+.cityResultPanel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  max-height: 228px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #dde3ee;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 14px 28px rgba(40, 51, 78, 0.15);
+}
+
+.cityResultButton {
+  display: grid;
+  width: 100%;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #53617a;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.cityResultButton:hover {
+  background: #f3f0ff;
+  color: #5d3dc1;
+}
+
+.cityResultButton strong {
+  color: #2b3953;
+  font-size: 14px;
+}
+
+.cityResultButton span,
+.emptyCityResult {
+  color: #79859a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.emptyCityResult {
+  padding: 8px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skeletonStack {
+  display: grid;
+  gap: 18px;
   margin-top: 20px;
 }
 
-.regionChip,
-.travelStyleButton {
-  border: 1px solid #e0e4ed;
+.weatherSkeleton,
+.skeletonOutfit {
+  padding: 28px 26px;
+}
+
+.skeletonOutfit {
+  min-height: 150px;
+}
+
+.skeletonMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 28px;
+}
+
+.skeletonMetric {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  min-height: 126px;
+  padding: 14px;
+  border-right: 1px solid #e8ebf3;
+}
+
+.skeletonBlock {
   border-radius: 999px;
+  background: linear-gradient(90deg, #edf0f6 20%, #f8f9fc 50%, #edf0f6 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite linear;
+}
+
+.skeletonTitle {
+  width: 180px;
+  height: 28px;
+}
+
+.skeletonTime {
+  width: 110px;
+  height: 14px;
+  margin-top: 12px;
+}
+
+.skeletonIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.skeletonLabel {
+  width: 55px;
+  height: 13px;
+}
+
+.skeletonValue {
+  width: 72px;
+  height: 30px;
+}
+
+.skeletonFeelsTitle {
+  width: 180px;
+  height: 22px;
+}
+
+.skeletonLine {
+  width: min(600px, 88%);
+  height: 14px;
+  margin-top: 18px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.comparisonSummaryCard,
+.comparisonHintCard {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  border-radius: 18px;
+}
+
+.comparisonSummaryCard {
+  padding: 21px 24px;
+  border: 1px solid #d9e8ff;
+  background: linear-gradient(115deg, #f7fbff 0%, #f9f7ff 100%);
+}
+
+.comparisonIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #edf4ff;
+  color: #3d79d9;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.comparisonMain {
+  min-width: 0;
+}
+
+.comparisonMain p {
+  margin: 0;
+  color: #557ab5;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.comparisonMain h2 {
+  margin: 5px 0 0;
+  color: #2d568f;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.comparisonMain span {
+  display: block;
+  margin-top: 7px;
+  color: #6a7890;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.comparisonWeatherBadge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  padding-left: 20px;
+  border-left: 1px solid #dfe9f7;
+}
+
+.comparisonWeatherBadge > span {
+  color: #4b7ed5;
+  font-size: 28px;
+}
+
+.comparisonWeatherBadge div {
+  display: grid;
+  gap: 3px;
+}
+
+.comparisonWeatherBadge strong {
+  color: #334a6d;
+  font-size: 14px;
+}
+
+.comparisonWeatherBadge small {
+  color: #71809a;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.comparisonHintCard {
+  padding: 16px 20px;
+  border: 1px dashed #d7ddea;
+  background: #fcfcff;
+  color: #68758c;
+}
+
+.comparisonHintCard > span {
+  color: #7d5add;
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.comparisonHintCard p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.timeSlotSection,
+.weatherSection,
+.recommendationSection,
+.preparationSection {
+  margin-top: 20px;
+  padding: 27px 26px 28px;
+}
+
+.sectionEyebrow {
+  margin-bottom: 5px;
+  color: #7554d7;
+}
+
+.sectionHeaderBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refreshBadge,
+.aiBadge,
+.fallbackBadge,
+.basisBadge {
+  padding: 7px 10px;
+}
+
+.refreshBadge {
+  background: #fff8dc;
+  color: #b98000;
+}
+
+.aiBadge {
+  background: #eaf7ef;
+  color: #237c4c;
+}
+
+.fallbackBadge {
+  background: #f2efff;
+  color: #7251d8;
+}
+
+.timeSlotTabGroup {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 21px;
+}
+
+.timeSlotTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 66px;
+  padding: 10px;
+  border: 1px solid #e0e4ed;
+  border-radius: 14px;
   background: #ffffff;
   color: #53617a;
-  font-weight: 800;
+  text-align: left;
   cursor: pointer;
   transition:
     transform 160ms ease,
@@ -146,30 +546,49 @@
     box-shadow 160ms ease;
 }
 
-.regionChip {
-  min-width: 68px;
-  padding: 10px 14px;
-  font-size: 14px;
-}
-
-.regionChip:hover,
-.travelStyleButton:hover:not(:disabled) {
+.timeSlotTab:hover {
   border-color: #a58eec;
   color: #6f4ed7;
   transform: translateY(-1px);
 }
 
-.regionChipActive,
-.travelStyleButtonActive {
-  border-color: #6745d1;
-  background: linear-gradient(135deg, #6945d4, #805ee5);
-  box-shadow: 0 8px 16px rgba(105, 70, 212, 0.22);
+.timeSlotTab > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.timeSlotTab strong {
+  color: inherit;
+  font-size: 14px;
+}
+
+.timeSlotTab small {
+  color: #8792a6;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.timeSlotIcon {
+  color: #7050d7;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.timeSlotTabActive {
+  border-color: #6d4ad5;
+  background: linear-gradient(135deg, #6d49d4, #8665e7);
+  box-shadow: 0 9px 18px rgba(105, 70, 212, 0.2);
   color: #ffffff;
 }
 
-.weatherCard {
-  margin-top: 20px;
-  padding: 28px 26px 30px;
+.timeSlotTabActive .timeSlotIcon,
+.timeSlotTabActive small {
+  color: #ffffff;
+}
+
+.weatherSection {
+  padding-bottom: 12px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
 }
 
 .locationInfo {
@@ -191,54 +610,74 @@
   font-weight: 900;
 }
 
+.timeSlotLabel {
+  margin: 0 0 5px;
+  color: #7756d9;
+  font-size: 12px;
+  font-weight: 850;
+}
+
 .locationTitleRow {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 9px;
 }
 
 .locationTitleRow h2 {
+  margin: 0;
+  color: #1b2942;
   font-size: 24px;
   font-weight: 900;
   letter-spacing: -0.055em;
 }
 
 .basisBadge {
-  padding: 6px 10px;
   background: #f2efff;
   color: #704ed7;
-  font-size: 12px;
 }
 
-.locationInfo p {
+.locationInfo p:last-child {
   margin: 7px 0 0;
   color: #8490a5;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
-.refreshBadge {
-  padding: 8px 12px;
-  background: #fff8dc;
-  color: #b98000;
-  font-size: 12px;
+.weatherSummaryBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid #e2e7f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #42516a;
+}
+
+.weatherSummaryBadge span {
+  color: #7050d7;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.weatherSummaryBadge strong {
+  font-size: 14px;
 }
 
 .weatherMetricGrid {
   display: grid;
-  grid-template-columns: 1.25fr repeat(5, minmax(0, 1fr));
-  margin-top: 28px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 20px;
 }
 
-.weatherSummary,
 .weatherMetric {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 156px;
-  padding: 10px 18px;
+  min-height: 135px;
+  padding: 10px 14px 16px;
   border-right: 1px solid #e6e9f2;
   text-align: center;
 }
@@ -247,45 +686,32 @@
   border-right: 0;
 }
 
-.weatherSymbol {
-  color: #939fb6;
-  font-size: 64px;
-  line-height: 1;
-}
-
-.weatherSummary strong {
-  margin-top: 10px;
-  color: #24314a;
-  font-size: 22px;
-  font-weight: 850;
-}
-
 .metricSymbol {
   color: #7854df;
-  font-size: 29px;
+  font-size: 28px;
   line-height: 1;
 }
 
 .weatherMetric p {
-  margin: 12px 0 0;
+  margin: 11px 0 0;
   color: #4e5d76;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 750;
 }
 
 .weatherMetric strong {
-  margin-top: 12px;
+  margin-top: 10px;
   color: #1e2c46;
-  font-size: clamp(23px, 2.3vw, 33px);
+  font-size: clamp(22px, 2.3vw, 30px);
   font-weight: 900;
   letter-spacing: -0.065em;
   white-space: nowrap;
 }
 
 .weatherMetric small {
-  margin-top: 6px;
+  margin-top: 5px;
   color: #7a63d3;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -293,93 +719,42 @@
   color: #6844d4 !important;
 }
 
-.feelsLikeCard {
+.feelsLikeNarrative {
   display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  margin-top: 18px;
-  padding: 25px 28px;
+  gap: 10px;
+  margin: 2px 4px 15px;
+  padding: 15px 16px;
   border: 1px solid #dce9ff;
-  border-radius: 18px;
-  background: linear-gradient(115deg, #f9fcff 0%, #f5f8ff 100%);
+  border-radius: 14px;
+  background: #f8fbff;
 }
 
-.feelsLikeIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
+.feelsLikeNarrative > span {
   color: #3787ef;
-  font-size: 33px;
-}
-
-.feelsLikeContent h2 {
-  margin: 0;
-  color: #287edd;
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-}
-
-.feelsLikeContent p {
-  margin: 10px 0 0;
-  color: #4e5d74;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.7;
-}
-
-.recommendationSection {
-  margin-top: 20px;
-  padding: 27px 26px 28px;
-}
-
-.recommendationSection h2 {
-  margin: 0;
-  color: #1f2c45;
   font-size: 21px;
   font-weight: 900;
-  letter-spacing: -0.05em;
 }
 
-.travelStyleGroup {
-  margin-top: 22px;
-  gap: 10px;
+.feelsLikeNarrative p {
+  margin: 0;
+  color: #4e5d74;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.6;
 }
 
-.travelStyleButton {
+.recommendationHeader > span,
+.preparationHeader > span {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 17px;
-  font-size: 14px;
-}
-
-.travelStyleButton span {
-  font-size: 18px;
-}
-
-.travelStyleButton:disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-
-.travelStyleGuide {
-  margin: 20px 0 0;
-  color: #8994a7;
-  font-size: 14px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.sectionDivider {
-  height: 1px;
-  margin: 20px 0;
-  background: #e8ebf2;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f3f4f8;
+  color: #67748b;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .outfitGrid {
@@ -390,7 +765,7 @@
 }
 
 .outfitCard {
-  min-height: 330px;
+  min-height: 325px;
   padding: 18px 16px 20px;
   border-radius: 16px;
   background: linear-gradient(150deg, #fcfcff 0%, #f4f7ff 100%);
@@ -416,7 +791,7 @@
 .outfitLabel {
   margin: 0;
   color: #1f2c45;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 850;
 }
 
@@ -424,12 +799,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 155px;
+  height: 150px;
 }
 
 .outfitArtworkWrap svg {
-  width: 145px;
-  height: 145px;
+  width: 142px;
+  height: 142px;
   filter: drop-shadow(0 10px 12px rgba(52, 63, 91, 0.12));
 }
 
@@ -451,52 +826,43 @@
 }
 
 .preparationSection {
-  margin-top: 20px;
-  padding: 22px 18px;
-  border: 1px solid #e8e1ff;
-  border-radius: 17px;
+  border-color: #e8e1ff;
   background: linear-gradient(120deg, #fcfaff 0%, #f8f8ff 100%);
 }
 
-.preparationSection h2 {
-  color: #6543d0;
-  font-size: 18px;
+.preparationHeader h2 {
+  color: #4f3b9f;
 }
 
 .preparationGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 19px;
 }
 
 .preparationItem {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  min-height: 76px;
-  padding: 4px 14px;
-  border-right: 1px solid #e6e0f7;
-}
-
-.preparationItem:first-child {
-  padding-left: 0;
-}
-
-.preparationItem:last-child {
-  border-right: 0;
+  min-height: 86px;
+  padding: 14px;
+  border: 1px solid #ebe6f8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .preparationIcon {
   flex: 0 0 auto;
   color: #6c49d4;
-  font-size: 30px;
+  font-size: 29px;
   line-height: 1;
 }
 
 .preparationItem h3 {
   margin: 0;
   color: #27334a;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 850;
 }
 
@@ -571,7 +937,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-top: 14px;
+  margin-top: 20px;
   padding: 12px 14px;
   border: 1px solid #ffe0aa;
   border-radius: 12px;
@@ -591,103 +957,15 @@
   font-size: 12px;
 }
 
-.skeletonStack {
-  display: grid;
-  gap: 18px;
-  margin-top: 20px;
-}
-
-.weatherSkeleton {
-  padding: 28px 26px;
-}
-
-.skeletonFeelsLike {
-  padding: 24px 28px;
-  border: 1px solid #dce9ff;
-  border-radius: 18px;
-  background: #f8fbff;
-}
-
-.skeletonMetricGrid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  margin-top: 28px;
-}
-
-.skeletonMetric {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  min-height: 126px;
-  padding: 14px;
-  border-right: 1px solid #e8ebf3;
-}
-
-.skeletonBlock {
-  border-radius: 999px;
-  background: linear-gradient(90deg, #edf0f6 20%, #f8f9fc 50%, #edf0f6 80%);
-  background-size: 200% 100%;
-  animation: shimmer 1.3s infinite linear;
-}
-
-.skeletonTitle {
-  width: 150px;
-  height: 28px;
-}
-
-.skeletonTime {
-  width: 100px;
-  height: 14px;
-  margin-top: 12px;
-}
-
-.skeletonIcon {
-  width: 44px;
-  height: 44px;
-}
-
-.skeletonLabel {
-  width: 55px;
-  height: 13px;
-}
-
-.skeletonValue {
-  width: 72px;
-  height: 30px;
-}
-
-.skeletonFeelsTitle {
-  width: 100px;
-  height: 20px;
-}
-
-.skeletonLine {
-  width: min(600px, 88%);
-  height: 14px;
-  margin-top: 16px;
-}
-
-.skeletonLineShort {
-  width: min(410px, 68%);
-  height: 14px;
-  margin-top: 10px;
-}
-
-@keyframes shimmer {
-  from {
-    background-position: 200% 0;
-  }
-
-  to {
-    background-position: -200% 0;
-  }
-}
-
 @media (max-width: 1080px) {
   .heroArtwork {
     right: -100px;
     width: 690px;
     opacity: 0.82;
+  }
+
+  .locationSelectionGrid {
+    grid-template-columns: 1fr;
   }
 
   .weatherMetricGrid,
@@ -696,11 +974,15 @@
     gap: 14px;
   }
 
-  .weatherSummary,
-  .weatherMetric {
-    min-height: 132px;
+  .weatherMetric,
+  .skeletonMetric {
+    min-height: 122px;
     border: 1px solid #edf0f5;
     border-radius: 14px;
+  }
+
+  .weatherMetric:last-child {
+    border-right: 1px solid #edf0f5;
   }
 
   .outfitGrid {
@@ -709,15 +991,6 @@
 
   .preparationGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 0;
-  }
-
-  .preparationItem:nth-child(2) {
-    border-right: 0;
-  }
-
-  .preparationItem:nth-child(3) {
-    padding-left: 0;
   }
 }
 
@@ -754,18 +1027,42 @@
     margin-top: -22px;
   }
 
-  .regionFilterCard,
-  .weatherCard,
+  .locationSelectionCard,
+  .timeSlotSection,
+  .weatherSection,
   .recommendationSection,
-  .weatherSkeleton {
+  .preparationSection,
+  .weatherSkeleton,
+  .skeletonOutfit {
     padding: 22px 18px;
     border-radius: 18px;
   }
 
-  .regionFilterHeader,
-  .weatherCardHeader {
+  .locationSelectionHeader,
+  .sectionHeader,
+  .selectedTimeHeader,
+  .recommendationHeader,
+  .preparationHeader,
+  .comparisonSummaryCard {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .residenceInlineControls {
+    grid-template-columns: 1fr;
+  }
+
+  .comparisonWeatherBadge {
+    width: 100%;
+    margin-left: 0;
+    padding-top: 14px;
+    padding-left: 0;
+    border-top: 1px solid #dfe9f7;
+    border-left: 0;
+  }
+
+  .timeSlotTabGroup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .weatherMetricGrid,
@@ -773,24 +1070,9 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .weatherMetricGrid .weatherMetric:last-child,
-  .skeletonMetricGrid .skeletonMetric:last-child {
+  .weatherMetric:last-child,
+  .skeletonMetric:last-child {
     grid-column: span 2;
-  }
-
-  .feelsLikeCard {
-    gap: 12px;
-    padding: 20px;
-  }
-
-  .feelsLikeContent p {
-    font-size: 14px;
-  }
-
-  .travelStyleButton {
-    flex: 1 1 calc(50% - 8px);
-    padding: 11px 10px;
-    font-size: 13px;
   }
 
   .outfitGrid,
@@ -798,15 +1080,7 @@
     grid-template-columns: 1fr;
   }
 
-  .preparationItem,
-  .preparationItem:nth-child(2),
-  .preparationItem:nth-child(3) {
-    padding: 8px 0;
-    border-right: 0;
-    border-bottom: 1px solid #e6e0f7;
-  }
-
-  .preparationItem:last-child {
-    border-bottom: 0;
+  .outfitCard {
+    min-height: auto;
   }
 }
