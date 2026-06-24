@@ -51,14 +51,41 @@ async function requestJson(url) {
   return payload;
 }
 
-export async function fetchBatchOutfitRecommendations({ region }) {
+export async function fetchTimeSlotOutfitRecommendations({
+  region,
+  residenceCity,
+  residenceCountryCode,
+}) {
   if (!region?.trim()) {
-    throw new WeatherApiError('지역을 선택해 주세요.', 400, 'INVALID_REQUEST');
+    throw new WeatherApiError('여행 지역을 선택해 주세요.', 400, 'INVALID_REQUEST');
+  }
+
+  if (residenceCity?.trim() && !residenceCountryCode?.trim()) {
+    throw new WeatherApiError('현재 거주 도시의 국가를 선택해 주세요.', 400, 'INVALID_REQUEST');
   }
 
   return requestJson(
-    createUrl('/api/weather/outfit-recommendations', {
+    createUrl('/api/weather/outfit-recommendations/time-slots', {
       region: region.trim(),
+      residenceCity: residenceCity?.trim(),
+      residenceCountryCode: residenceCountryCode?.trim(),
+    }),
+  );
+}
+
+export async function fetchResidenceCities({ countryCode, query }) {
+  if (!countryCode?.trim()) {
+    throw new WeatherApiError('국가를 선택해 주세요.', 400, 'INVALID_REQUEST');
+  }
+
+  if (!query?.trim() || query.trim().length < 2) {
+    throw new WeatherApiError('도시 이름을 두 글자 이상 입력해 주세요.', 400, 'INVALID_REQUEST');
+  }
+
+  return requestJson(
+    createUrl('/api/weather/residence-cities', {
+      countryCode: countryCode.trim(),
+      query: query.trim(),
     }),
   );
 }
