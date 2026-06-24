@@ -2,11 +2,11 @@ import { NavLink } from 'react-router-dom';
 import styles from './Header.module.css';
 
 const NAV_ITEMS = [
-  { label: '사용설명서', path: '/guide' },
+  { label: '이용 안내', path: '/guide' },
   { label: '지도', path: '/map' },
   { label: '체험·축제', path: '/festival' },
   { label: '숙박', path: '/lodging' },
-  { label: 'AI 코스 추천', path: '/course' },
+  { label: 'AI 여행 추천', path: '/course' },
   { label: 'AI 옷차림 추천', path: '/clothing' },
 ];
 
