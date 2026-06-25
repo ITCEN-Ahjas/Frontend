@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchResidenceCities,
   fetchTimeSlotOutfitRecommendations,
+  normalizeCitySearchQuery,
   WeatherApiError,
 } from '../api/weatherApi';
 
@@ -232,7 +233,8 @@ function requestTimeSlotRecommendation(region, residenceCity, forceRefresh) {
 }
 
 function requestResidenceCities(countryCode, query) {
-  const cacheKey = `${countryCode}|${query.trim().toLocaleLowerCase()}`;
+  const normalizedQuery = normalizeCitySearchQuery(query);
+  const cacheKey = `${countryCode}|${normalizedQuery.replace(/\s/g, '').toLocaleLowerCase()}`;
 
   if (residenceCitySearchCache.has(cacheKey)) {
     return Promise.resolve(residenceCitySearchCache.get(cacheKey));
@@ -242,7 +244,7 @@ function requestResidenceCities(countryCode, query) {
     return pendingCitySearchRequests.get(cacheKey);
   }
 
-  const requestPromise = fetchResidenceCities({ countryCode, query })
+  const requestPromise = fetchResidenceCities({ countryCode, query: normalizedQuery })
     .then(normalizeResidenceCities)
     .then(cities => {
       residenceCitySearchCache.set(cacheKey, cities);

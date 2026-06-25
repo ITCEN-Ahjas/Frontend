@@ -224,7 +224,6 @@ export default function ClothingPage() {
     activeRecommendation,
     dailyPreparationItems,
     isRecommendationsLoading,
-    isRefreshing,
     recommendationsError,
     selectRegion,
     selectTimeSlot,
@@ -268,7 +267,6 @@ export default function ClothingPage() {
               <p className={styles.sectionEyebrow}>TRAVEL &amp; RESIDENCE</p>
               <h2>여행 지역과 현재 거주 도시를 선택해 주세요</h2>
             </div>
-            {selectedResidenceCity && <span className={styles.comparisonActiveBadge}>비교 중</span>}
           </div>
 
           <div className={styles.locationSelectionGrid}>
@@ -308,7 +306,7 @@ export default function ClothingPage() {
                     <input
                       type="search"
                       value={residenceCityQuery}
-                      placeholder="도시 검색: Tokyo"
+                      placeholder="도시 검색: ne / New York"
                       onChange={event => changeResidenceCityQuery(event.target.value)}
                     />
                   </label>
@@ -347,7 +345,7 @@ export default function ClothingPage() {
                   ? `${selectedResidenceCity.city}, ${[selectedResidenceCity.admin1, selectedResidenceCity.country]
                       .filter(Boolean)
                       .join(', ')}`
-                  : '국가를 고른 뒤 도시 이름을 입력해 선택해 주세요.'}
+                  : '국가를 고른 뒤 두 글자 이상 입력해 도시를 선택해 주세요.'}
               </small>
             </div>
           </div>
@@ -367,44 +365,56 @@ export default function ClothingPage() {
 
         {hasData && (
           <>
-            {residenceWeather && residenceComparison ? (
-              <section className={styles.comparisonSummaryCard}>
-                <div className={styles.comparisonIcon}>↔</div>
-                <div className={styles.comparisonMain}>
-                  <p>현재 거주 도시와 충북 여행지 비교</p>
-                  <h2>{residenceComparison.message}</h2>
-                  <span>
-                    {residenceWeather.city} 체감 {formatTemperature(residenceWeather.feelsLikeTemperature)}°C · 충북{' '}
-                    {activeRecommendation.timeSlotName} 체감{' '}
-                    {formatTemperature(feelsLikeWeather.feelsLikeTemperature)}°C
-                  </span>
+            <section className={styles.weatherInsightSection}>
+              <div className={styles.weatherInsightHeader}>
+                <div>
+                  <p className={styles.weatherInsightEyebrow}>여행지 체감 날씨 안내</p>
+                  <h2>
+                    충북 {batchData.region} {activeRecommendation.timeSlotName} 체감날씨
+                  </h2>
                 </div>
-                <div className={styles.comparisonWeatherBadge}>
-                  <span>{getWeatherSymbol(residenceWeather.weatherCondition)}</span>
-                  <div>
-                    <strong>{residenceWeather.city}</strong>
-                    <small>현재 {formatTemperature(residenceWeather.temperature)}°C</small>
-                  </div>
+                <p className={styles.weatherInsightTime}>
+                  {formatTimeRange(activeRecommendation.startTime, activeRecommendation.endTime)}
+                </p>
+              </div>
+
+              <div className={styles.weatherInsight}>
+                <span className={styles.weatherInsightIcon}>☼</span>
+                <div>
+                  {residenceWeather && residenceComparison ? (
+                    <>
+                      <strong>{residenceComparison.message}</strong>
+                      <p className={styles.weatherInsightDetail}>
+                        {residenceWeather.city} 체감 {formatTemperature(residenceWeather.feelsLikeTemperature)}°C · 충북{' '}
+                        {activeRecommendation.timeSlotName} 체감{' '}
+                        {formatTemperature(feelsLikeWeather.feelsLikeTemperature)}°C
+                      </p>
+                    </>
+                  ) : (
+                    <strong>
+                      충북 {batchData.region}의 {activeRecommendation.timeSlotName} 체감온도는{' '}
+                      {formatTemperature(feelsLikeWeather.feelsLikeTemperature)}°C예요.
+                    </strong>
+                  )}
+                  {(feelsLikeWeather.summary || feelsLikeWeather.detail) && (
+                    <p className={styles.weatherInsightDetail}>
+                      {feelsLikeWeather.summary || feelsLikeWeather.detail}
+                      {feelsLikeWeather.summary && feelsLikeWeather.detail ? ` ${feelsLikeWeather.detail}` : ''}
+                    </p>
+                  )}
+                  {!residenceWeather && (
+                    <p className={styles.weatherInsightHint}>
+                      현재 거주 도시를 선택하면 평소 날씨와의 체감온도 차이도 함께 알려드려요.
+                    </p>
+                  )}
                 </div>
-              </section>
-            ) : (
-              <section className={styles.comparisonHintCard}>
-                <span>↔</span>
-                <p>현재 거주 도시를 선택하면 충북 여행지와 체감온도 차이를 알려드려요.</p>
-              </section>
-            )}
+              </div>
+            </section>
 
             <section className={styles.timeSlotSection}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <p className={styles.sectionEyebrow}>{batchData.forecastDate || '오늘'} 기준</p>
                   <h2>여행 시간대를 선택해 주세요</h2>
-                </div>
-                <div className={styles.sectionHeaderBadges}>
-                  {isRefreshing && <span className={styles.refreshBadge}>추천 정보 갱신 중</span>}
-                  <span className={batchData.source === 'ai' ? styles.aiBadge : styles.fallbackBadge}>
-                    {batchData.source === 'ai' ? 'AI 보완 추천' : '날씨 기반 추천'}
-                  </span>
                 </div>
               </div>
 
@@ -447,7 +457,6 @@ export default function ClothingPage() {
                     </p>
                     <div className={styles.locationTitleRow}>
                       <h2>충북 {batchData.region} 날씨</h2>
-                      <span className={styles.basisBadge}>여행 지역 기준</span>
                     </div>
                     <p>{formatUpdatedAt(batchData.updatedAt)}</p>
                   </div>
@@ -490,15 +499,6 @@ export default function ClothingPage() {
                 </article>
               </div>
 
-              {(feelsLikeWeather.summary || feelsLikeWeather.detail) && (
-                <div className={styles.feelsLikeNarrative}>
-                  <span>☼</span>
-                  <p>
-                    {feelsLikeWeather.summary || feelsLikeWeather.detail}
-                    {feelsLikeWeather.summary && feelsLikeWeather.detail ? ` ${feelsLikeWeather.detail}` : ''}
-                  </p>
-                </div>
-              )}
             </section>
 
             {recommendationsError && (
@@ -513,10 +513,8 @@ export default function ClothingPage() {
             <section className={styles.recommendationSection}>
               <div className={styles.recommendationHeader}>
                 <div>
-                  <p className={styles.sectionEyebrow}>SELECTED TIME SLOT</p>
                   <h2>{activeRecommendation.timeSlotName}에 추천하는 옷차림</h2>
                 </div>
-                <span>{formatTimeRange(activeRecommendation.startTime, activeRecommendation.endTime)}</span>
               </div>
 
               <div className={styles.outfitGrid}>
@@ -545,13 +543,18 @@ export default function ClothingPage() {
             <section className={styles.preparationSection}>
               <div className={styles.preparationHeader}>
                 <div>
-                  <p className={styles.sectionEyebrow}>ALL TIME SLOTS</p>
                   <h2>하루 동안 챙기면 좋은 준비물</h2>
                 </div>
-                <span>{batchData.recommendations.length}개 시간대 종합</span>
               </div>
 
-              <div className={styles.preparationGrid}>
+              <div
+                className={[
+                  styles.preparationGrid,
+                  styles[`preparationGridCount${Math.min(dailyPreparationItems.length, 6)}`],
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
                 {dailyPreparationItems.map(item => (
                   <article key={item.code} className={styles.preparationItem}>
                     <span className={styles.preparationIcon}>{getPreparationSymbol(item.code)}</span>
