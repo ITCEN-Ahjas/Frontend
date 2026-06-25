@@ -71,6 +71,7 @@
 }
 
 .locationSelectionCard,
+.weatherInsightSection,
 .timeSlotSection,
 .weatherSection,
 .recommendationSection,
@@ -116,10 +117,6 @@
   letter-spacing: -0.04em;
 }
 
-.comparisonActiveBadge,
-.refreshBadge,
-.aiBadge,
-.fallbackBadge,
 .basisBadge {
   display: inline-flex;
   align-items: center;
@@ -127,12 +124,6 @@
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
-}
-
-.comparisonActiveBadge {
-  padding: 8px 12px;
-  background: #eaf7ef;
-  color: #23814f;
 }
 
 .locationSelectionGrid {
@@ -174,7 +165,9 @@
   font: inherit;
   font-size: 14px;
   font-weight: 700;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .selectionField select:focus,
@@ -250,7 +243,9 @@
   color: #53617a;
   text-align: left;
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .cityResultButton:hover {
@@ -370,113 +365,7 @@
   }
 }
 
-.comparisonSummaryCard,
-.comparisonHintCard {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: 20px;
-  border-radius: 18px;
-}
-
-.comparisonSummaryCard {
-  padding: 21px 24px;
-  border: 1px solid #d9e8ff;
-  background: linear-gradient(115deg, #f7fbff 0%, #f9f7ff 100%);
-}
-
-.comparisonIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #edf4ff;
-  color: #3d79d9;
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.comparisonMain {
-  min-width: 0;
-}
-
-.comparisonMain p {
-  margin: 0;
-  color: #557ab5;
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.comparisonMain h2 {
-  margin: 5px 0 0;
-  color: #2d568f;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: -0.045em;
-}
-
-.comparisonMain span {
-  display: block;
-  margin-top: 7px;
-  color: #6a7890;
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.comparisonWeatherBadge {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-left: auto;
-  padding-left: 20px;
-  border-left: 1px solid #dfe9f7;
-}
-
-.comparisonWeatherBadge > span {
-  color: #4b7ed5;
-  font-size: 28px;
-}
-
-.comparisonWeatherBadge div {
-  display: grid;
-  gap: 3px;
-}
-
-.comparisonWeatherBadge strong {
-  color: #334a6d;
-  font-size: 14px;
-}
-
-.comparisonWeatherBadge small {
-  color: #71809a;
-  font-size: 12px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-
-.comparisonHintCard {
-  padding: 16px 20px;
-  border: 1px dashed #d7ddea;
-  background: #fcfcff;
-  color: #68758c;
-}
-
-.comparisonHintCard > span {
-  color: #7d5add;
-  font-size: 23px;
-  font-weight: 900;
-}
-
-.comparisonHintCard p {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1.5;
-}
-
+.weatherInsightSection,
 .timeSlotSection,
 .weatherSection,
 .recommendationSection,
@@ -488,34 +377,6 @@
 .sectionEyebrow {
   margin-bottom: 5px;
   color: #7554d7;
-}
-
-.sectionHeaderBadges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.refreshBadge,
-.aiBadge,
-.fallbackBadge,
-.basisBadge {
-  padding: 7px 10px;
-}
-
-.refreshBadge {
-  background: #fff8dc;
-  color: #b98000;
-}
-
-.aiBadge {
-  background: #eaf7ef;
-  color: #237c4c;
-}
-
-.fallbackBadge {
-  background: #f2efff;
-  color: #7251d8;
 }
 
 .timeSlotTabGroup {
@@ -719,42 +580,77 @@
   color: #6844d4 !important;
 }
 
-.feelsLikeNarrative {
+.weatherInsightHeader {
   display: flex;
-  gap: 10px;
-  margin: 2px 4px 15px;
-  padding: 15px 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.weatherInsightHeader h2 {
+  margin: 5px 0 0;
+  color: #1b2942;
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+}
+
+.weatherInsightTime {
+  margin: 3px 0 0;
+  color: #6e57c4;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.weatherInsight {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 17px 18px;
   border: 1px solid #dce9ff;
   border-radius: 14px;
-  background: #f8fbff;
+  background: linear-gradient(115deg, #f7fbff 0%, #f9f7ff 100%);
 }
 
-.feelsLikeNarrative > span {
+.weatherInsightIcon {
+  flex: 0 0 auto;
   color: #3787ef;
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 900;
+  line-height: 1;
 }
 
-.feelsLikeNarrative p {
+.weatherInsightEyebrow {
   margin: 0;
-  color: #4e5d74;
+  color: #557ab5;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.weatherInsight strong {
+  display: block;
+  margin-top: 5px;
+  color: #2d568f;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.45;
+}
+
+.weatherInsightDetail,
+.weatherInsightHint {
+  margin: 7px 0 0;
+  color: #5d6f88;
   font-size: 13px;
   font-weight: 650;
   line-height: 1.6;
 }
 
-.recommendationHeader > span,
-.preparationHeader > span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: #f3f4f8;
-  color: #67748b;
-  font-size: 12px;
-  font-weight: 800;
-  white-space: nowrap;
+.weatherInsightHint {
+  color: #7b699d;
 }
 
 .outfitGrid {
@@ -811,7 +707,7 @@
 .outfitCard h3 {
   margin: 0;
   color: #24314a;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   letter-spacing: -0.045em;
   line-height: 1.38;
@@ -820,7 +716,7 @@
 .outfitDescription {
   margin: 11px 0 0;
   color: #607089;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.55;
 }
@@ -835,8 +731,9 @@
 }
 
 .preparationGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   margin-top: 19px;
 }
@@ -845,11 +742,27 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  min-width: 0;
   min-height: 86px;
   padding: 14px;
   border: 1px solid #ebe6f8;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.72);
+}
+
+.preparationGridCount1 .preparationItem {
+  flex: 0 1 min(100%, 390px);
+}
+
+.preparationGridCount2 .preparationItem,
+.preparationGridCount4 .preparationItem {
+  flex: 0 1 min(calc((100% - 12px) / 2), 440px);
+}
+
+.preparationGridCount3 .preparationItem,
+.preparationGridCount5 .preparationItem,
+.preparationGridCount6 .preparationItem {
+  flex: 0 1 calc((100% - 24px) / 3);
 }
 
 .preparationIcon {
@@ -957,6 +870,21 @@
   font-size: 12px;
 }
 
+@media (min-width: 1081px) {
+  .outfitCard {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .outfitDescription {
+    overflow: hidden;
+    font-size: 10.5px;
+    letter-spacing: -0.1em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 1080px) {
   .heroArtwork {
     right: -100px;
@@ -986,10 +914,6 @@
   }
 
   .outfitGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .preparationGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1028,6 +952,7 @@
   }
 
   .locationSelectionCard,
+  .weatherInsightSection,
   .timeSlotSection,
   .weatherSection,
   .recommendationSection,
@@ -1039,26 +964,17 @@
   }
 
   .locationSelectionHeader,
+  .weatherInsightHeader,
   .sectionHeader,
   .selectedTimeHeader,
   .recommendationHeader,
-  .preparationHeader,
-  .comparisonSummaryCard {
+  .preparationHeader {
     align-items: flex-start;
     flex-direction: column;
   }
 
   .residenceInlineControls {
     grid-template-columns: 1fr;
-  }
-
-  .comparisonWeatherBadge {
-    width: 100%;
-    margin-left: 0;
-    padding-top: 14px;
-    padding-left: 0;
-    border-top: 1px solid #dfe9f7;
-    border-left: 0;
   }
 
   .timeSlotTabGroup {
@@ -1075,9 +991,17 @@
     grid-column: span 2;
   }
 
-  .outfitGrid,
-  .preparationGrid {
+  .outfitGrid {
     grid-template-columns: 1fr;
+  }
+
+  .preparationGridCount1 .preparationItem,
+  .preparationGridCount2 .preparationItem,
+  .preparationGridCount3 .preparationItem,
+  .preparationGridCount4 .preparationItem,
+  .preparationGridCount5 .preparationItem,
+  .preparationGridCount6 .preparationItem {
+    flex-basis: 100%;
   }
 
   .outfitCard {

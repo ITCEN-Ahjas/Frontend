@@ -24,6 +24,13 @@ function createUrl(path, query = {}) {
   return url.toString();
 }
 
+export function normalizeCitySearchQuery(query) {
+  return String(query || '')
+    .trim()
+    .replace(/[\s\-_]+/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
 async function requestJson(url) {
   let response;
 
@@ -78,14 +85,16 @@ export async function fetchResidenceCities({ countryCode, query }) {
     throw new WeatherApiError('국가를 선택해 주세요.', 400, 'INVALID_REQUEST');
   }
 
-  if (!query?.trim() || query.trim().length < 2) {
+  const normalizedQuery = normalizeCitySearchQuery(query);
+
+  if (normalizedQuery.length < 2) {
     throw new WeatherApiError('도시 이름을 두 글자 이상 입력해 주세요.', 400, 'INVALID_REQUEST');
   }
 
   return requestJson(
     createUrl('/api/weather/residence-cities', {
       countryCode: countryCode.trim(),
-      query: query.trim(),
+      query: normalizedQuery,
     }),
   );
 }
