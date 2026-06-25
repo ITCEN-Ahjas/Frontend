@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ensureFestivalInitialized, fetchExperienceList } from '../../api/festivalApi';
 import { fetchAccommodationList } from '../../api/lodgingApi';
 import LodgingFilterPanel from './components/LodgingFilterPanel';
 import LodgingGrid from './components/LodgingGrid';
@@ -8,7 +9,8 @@ import LodgingPagination from './components/LodgingPagination';
 import LodgingSectionHeader from './components/LodgingSectionHeader';
 import styles from './LodgingPage.module.css';
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 8;
+const FETCH_SIZE = 200;
 
 const CHUNGBUK_REGIONS = [
   '청주',
@@ -24,6 +26,8 @@ const CHUNGBUK_REGIONS = [
   '단양',
 ];
 
+const TYPE_OPTIONS = ['전체', '숙소', '캠핑장'];
+
 function pickArray(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.items)) return payload.items;
@@ -32,63 +36,52 @@ function pickArray(payload) {
   return [];
 }
 
-function pickTotalCount(payload, fallbackCount) {
-  return payload?.totalCount ?? payload?.total ?? fallbackCount;
-}
-
 function normalizeAccommodation(item) {
-  const region = String(item.region ?? '').trim() || '충북';
-
   return {
-    id: String(item.id ?? item.contentId ?? item.contentid ?? item.title),
+    id: `acc-${item.id ?? item.contentId ?? item.contentid ?? item.title}`,
     contentId: String(item.id ?? item.contentId ?? item.contentid ?? ''),
+    itemType: '숙소',
     title: item.title ?? '이름 없는 숙소',
-    region,
-    category: item.category ?? item.cat3 ?? item.cat2 ?? '숙박',
+    region: String(item.sigunguNm ?? item.region ?? '').trim() || '충북',
+    category: item.category ?? '숙박',
     description: item.address ?? '',
     descriptionLabel: '주소',
     subInfo: item.tel ?? '',
     subInfoLabel: '문의',
     imageUrl: item.imageUrl ?? '',
     tel: item.tel ?? '',
-    mapX: item.mapX ?? '',
-    mapY: item.mapY ?? '',
     address: item.address ?? '',
   };
 }
 
-const initialRequestState = {
-  lodgings: [],
-  totalCount: 0,
-  loading: true,
-  errorMessage: '',
-};
+function normalizeCamping(item) {
+  return {
+    id: `camp-${item.id ?? item.title}`,
+    contentId: String(item.id ?? ''),
+    itemType: '캠핑장',
+    title: item.title ?? '이름 없는 캠핑장',
+    region: String(item.region ?? '').trim() || '충북',
+    category: item.themeCategory || '캠핑',
+    description: item.address ?? '',
+    descriptionLabel: '주소',
+    subInfo: item.timeValue || item.tel || '',
+    subInfoLabel: item.timeValue ? (item.timeLabel || '운영시간') : '문의',
+    imageUrl: item.imageUrl ?? '',
+    tel: item.tel ?? '',
+    address: item.address ?? '',
+  };
+}
 
-function lodgingRequestReducer(state, action) {
+const initialState = { allItems: [], loading: true, errorMessage: '' };
+
+function reducer(state, action) {
   switch (action.type) {
     case 'start':
-      return {
-        ...state,
-        loading: true,
-        errorMessage: '',
-      };
-
+      return { ...state, loading: true, errorMessage: '' };
     case 'success':
-      return {
-        lodgings: action.payload.items,
-        totalCount: action.payload.totalCount,
-        loading: false,
-        errorMessage: '',
-      };
-
+      return { allItems: action.payload, loading: false, errorMessage: '' };
     case 'error':
-      return {
-        lodgings: [],
-        totalCount: 0,
-        loading: false,
-        errorMessage: action.payload,
-      };
-
+      return { allItems: [], loading: false, errorMessage: action.payload };
     default:
       return state;
   }
@@ -99,68 +92,90 @@ export default function LodgingPage() {
 
   const [keyword, setKeyword] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [selectedType, setSelectedType] = useState('전체');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [{ lodgings, totalCount, loading, errorMessage }, dispatch] = useReducer(
-    lodgingRequestReducer,
-    initialRequestState,
-  );
+  const [{ allItems, loading, errorMessage }, dispatch] = useReducer(reducer, initialState);
 
   const regionOptions = useMemo(() => ['전체', ...CHUNGBUK_REGIONS], []);
-
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   useEffect(() => {
     const controller = new AbortController();
 
     dispatch({ type: 'start' });
+    ensureFestivalInitialized().catch(() => {});
 
-    fetchAccommodationList({
-      page: currentPage,
-      size: PAGE_SIZE,
-      region: selectedRegion,
-      keyword,
-      signal: controller.signal,
-    })
-      .then(payload => {
+    Promise.all([
+      fetchAccommodationList({ page: 1, size: FETCH_SIZE, signal: controller.signal })
+        .then(payload => pickArray(payload).map(normalizeAccommodation))
+        .catch(() => []),
+      fetchExperienceList({
+        contentTypeId: '28',
+        size: 200,
+        signal: controller.signal,
+      })
+        .then(payload =>
+          pickArray(payload)
+            .filter(item => item.themeCategory === '캠핑')
+            .map(normalizeCamping),
+        )
+        .catch(() => []),
+    ])
+      .then(([accommodations, campings]) => {
         if (controller.signal.aborted) return;
-
-        const items = pickArray(payload).map(normalizeAccommodation);
-
-        dispatch({
-          type: 'success',
-          payload: {
-            items,
-            totalCount: pickTotalCount(payload, items.length),
-          },
-        });
+        dispatch({ type: 'success', payload: [...accommodations, ...campings] });
       })
       .catch(error => {
         if (error.name === 'AbortError') return;
-
-        dispatch({
-          type: 'error',
-          payload: error.message || '숙박 목록 조회에 실패했습니다.',
-        });
+        dispatch({ type: 'error', payload: error.message || '목록 조회에 실패했습니다.' });
       });
 
     return () => {
       controller.abort();
     };
-  }, [currentPage, selectedRegion, keyword]);
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    const normalizedKeyword = keyword.trim().toLowerCase();
+
+    return allItems.filter(item => {
+      const typeMatch = selectedType === '전체' || item.itemType === selectedType;
+      const regionMatch =
+        selectedRegion === '전체' || String(item.region).includes(selectedRegion);
+      const keywordMatch =
+        normalizedKeyword === '' ||
+        [item.title, item.region, item.category, item.description, item.subInfo, item.address]
+          .filter(Boolean)
+          .some(v => v.toLowerCase().includes(normalizedKeyword));
+
+      return typeMatch && regionMatch && keywordMatch;
+    });
+  }, [allItems, keyword, selectedRegion, selectedType]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pagedItems = filteredItems.slice(
+    (safeCurrentPage - 1) * PAGE_SIZE,
+    safeCurrentPage * PAGE_SIZE,
+  );
 
   const resetFilters = () => {
     setKeyword('');
     setSelectedRegion('전체');
+    setSelectedType('전체');
     setCurrentPage(1);
   };
 
   const handleClickDetail = item => {
-    const contentId = item.contentId || item.id;
-
-    navigate(`/lodging/${encodeURIComponent(contentId)}`, {
-      state: { lodging: item },
-    });
+    if (item.itemType === '캠핑장') {
+      navigate(`/festival/${encodeURIComponent(item.contentId)}`, {
+        state: { festival: item },
+      });
+    } else {
+      navigate(`/lodging/${encodeURIComponent(item.contentId)}`, {
+        state: { lodging: item },
+      });
+    }
   };
 
   return (
@@ -171,7 +186,9 @@ export default function LodgingPage() {
         <LodgingFilterPanel
           keyword={keyword}
           regionOptions={regionOptions}
+          typeOptions={TYPE_OPTIONS}
           selectedRegion={selectedRegion}
+          selectedType={selectedType}
           onKeywordChange={value => {
             setKeyword(value);
             setCurrentPage(1);
@@ -180,20 +197,24 @@ export default function LodgingPage() {
             setSelectedRegion(value);
             setCurrentPage(1);
           }}
+          onTypeChange={value => {
+            setSelectedType(value);
+            setCurrentPage(1);
+          }}
           onReset={resetFilters}
         />
 
-        <LodgingSectionHeader count={totalCount} />
+        <LodgingSectionHeader count={filteredItems.length} />
 
         <LodgingGrid
-          lodgings={lodgings}
+          lodgings={pagedItems}
           loading={loading}
           errorMessage={errorMessage}
           onClickDetail={handleClickDetail}
         />
 
         <LodgingPagination
-          currentPage={currentPage}
+          currentPage={safeCurrentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
         />

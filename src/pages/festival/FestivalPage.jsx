@@ -531,7 +531,9 @@ async function fetchAllFestivalItems({ signal }) {
     ),
   ]);
 
-  return dedupeFestivals(results.flat()).sort(compareFestivalDate);
+  return dedupeFestivals(results.flat())
+    .filter(item => item.themeCategory !== '캠핑')
+    .sort(compareFestivalDate);
 }
 
 function dedupeFestivals(items) {
