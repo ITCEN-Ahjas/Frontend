@@ -1,7 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-let festivalInitializationRequest = null;
-
 async function requestJson(url, errorMessage, options) {
   const response = await fetch(url, options);
 
@@ -82,48 +80,6 @@ function createExperienceQuery({
   }
 
   return params.toString() ? `?${params.toString()}` : '';
-}
-
-export function ensureFestivalInitialized() {
-  if (festivalInitializationRequest) {
-    return festivalInitializationRequest;
-  }
-
-  const request = requestJson(
-    `${API_BASE_URL}/api/festivals/sync/ensure-initialized`,
-    '축제·체험 초기 적재 상태 확인에 실패했습니다.',
-    {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-      },
-    },
-  );
-
-  festivalInitializationRequest = request;
-
-  request.then(
-    () => {
-      if (festivalInitializationRequest === request) {
-        festivalInitializationRequest = null;
-      }
-    },
-    () => {
-      if (festivalInitializationRequest === request) {
-        festivalInitializationRequest = null;
-      }
-    },
-  );
-
-  return request;
-}
-
-export async function fetchFestivalSyncStatus({ signal } = {}) {
-  return requestJson(
-    `${API_BASE_URL}/api/festivals/sync/status`,
-    '축제·체험 동기화 상태 조회에 실패했습니다.',
-    { signal },
-  );
 }
 
 export async function fetchFestivalList({
