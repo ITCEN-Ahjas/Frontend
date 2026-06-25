@@ -28,13 +28,16 @@ function FilterRow({ label, options, selected, onChange }) {
 export default function LodgingFilterPanel({
   keyword,
   regionOptions,
+  typeOptions,
   selectedRegion,
+  selectedType,
   onKeywordChange,
   onRegionChange,
+  onTypeChange,
   onReset,
 }) {
   return (
-    <section className={styles.panel} aria-label="숙박 검색 필터">
+    <section className={styles.panel} aria-label="숙박·캠핑 검색 필터">
       <div className={styles.searchRow}>
         <form
           onSubmit={event => {
@@ -49,7 +52,7 @@ export default function LodgingFilterPanel({
               type="text"
               value={keyword}
               onChange={event => onKeywordChange(event.target.value)}
-              placeholder="숙소명, 지역 또는 키워드를 검색하세요"
+              placeholder="숙소명, 캠핑장명, 지역 또는 키워드를 검색하세요"
               className={styles.searchInput}
             />
           </div>
@@ -68,6 +71,12 @@ export default function LodgingFilterPanel({
           options={regionOptions}
           selected={selectedRegion}
           onChange={onRegionChange}
+        />
+        <FilterRow
+          label="유형"
+          options={typeOptions}
+          selected={selectedType}
+          onChange={onTypeChange}
         />
       </div>
     </section>

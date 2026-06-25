@@ -57,6 +57,7 @@ function createExperienceQuery({
   size = 10,
   region = '전체',
   contentTypeId = '전체',
+  category = '전체',
 } = {}) {
   const params = new URLSearchParams();
 
@@ -79,7 +80,21 @@ function createExperienceQuery({
     params.append('contentTypeId', String(contentTypeId).trim());
   }
 
+  if (category && category !== '전체') {
+    const trimmedCategory = String(category).trim();
+    if (trimmedCategory) {
+      params.append('category', trimmedCategory);
+    }
+  }
+
   return params.toString() ? `?${params.toString()}` : '';
+}
+
+let _ensureInitializedCalled = false;
+export async function ensureFestivalInitialized() {
+  if (_ensureInitializedCalled) return;
+  _ensureInitializedCalled = true;
+  await fetch(`${API_BASE_URL}/api/festivals/sync/ensure-initialized`, { method: 'POST' });
 }
 
 export async function fetchFestivalList({
@@ -120,6 +135,7 @@ export async function fetchExperienceList({
   size = 10,
   region = '전체',
   contentTypeId = '전체',
+  category = '전체',
   signal,
 } = {}) {
   const query = createExperienceQuery({
@@ -127,6 +143,7 @@ export async function fetchExperienceList({
     size,
     region,
     contentTypeId,
+    category,
   });
 
   const url = `${API_BASE_URL}/api/festivals/experiences${query}`;

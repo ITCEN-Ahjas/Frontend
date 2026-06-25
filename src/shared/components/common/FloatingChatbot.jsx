@@ -130,10 +130,15 @@ export default function FloatingChatbot() {
         .cb-suggest:hover { background: var(--color-success-hover) !important; transform: translateX(2px); }
         .cb-send:hover:not(:disabled) { background: var(--color-success-dark) !important; transform: scale(1.06); }
         .cb-close:hover { background: var(--color-chat-inverse-bg-hover) !important; }
-        .cb-fab:hover { box-shadow: 0 10px 32px var(--color-shadow-black-hover) !important; transform: scale(1.07) !important; }
+        @keyframes fabPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45), 0 8px 28px rgba(16,185,129,0.35); }
+          55% { box-shadow: 0 0 0 10px rgba(16,185,129,0), 0 8px 28px rgba(16,185,129,0.35); }
+        }
+        .cb-fab { animation: fabPulse 2.6s ease-in-out infinite; }
+        .cb-fab:hover { filter: brightness(1.08) !important; transform: scale(1.04) !important; animation: none !important; }
         .cb-fab svg {
-          width: 30px;
-          height: 30px;
+          width: 22px;
+          height: 22px;
           color: var(--color-white);
           stroke-width: 2.2;
         }
@@ -447,21 +452,47 @@ export default function FloatingChatbot() {
           onMouseDown={onMouseDown}
           onClick={handleToggle}
           style={{
-            width: 64, height: 64, borderRadius: '50%',
-            background: 'var(--color-slate-900)',
-            color: 'var(--color-white)',
-            display: 'grid', placeItems: 'center',
+            height: 52,
+            borderRadius: 999,
+            padding: open ? '0 20px' : '0 18px',
+            background: open
+              ? 'rgba(15,23,42,0.9)'
+              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
             cursor: 'grab',
-            boxShadow: '0 6px 24px var(--color-shadow-black-strong)',
             userSelect: 'none',
-            transition: 'all 0.2s ease',
-            border: '2px solid var(--color-chat-fab-border)',
+            transition: 'background 0.2s ease, filter 0.2s ease, transform 0.2s ease',
+            backdropFilter: open ? 'blur(8px)' : 'none',
+            border: open ? '1.5px solid rgba(255,255,255,0.12)' : 'none',
+            whiteSpace: 'nowrap',
           }}
         >
-          {open
-            ? <FiX aria-hidden="true" />
-            : <FiMessageCircle aria-hidden="true" />
-          }
+          {open ? (
+            <>
+              <FiX aria-hidden="true" style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.75)', flexShrink: 0 }} />
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>닫기</span>
+            </>
+          ) : (
+            <>
+              <div style={{
+                width: 30, height: 30, borderRadius: 10, flexShrink: 0,
+                background: 'rgba(255,255,255,0.2)',
+                display: 'grid', placeItems: 'center',
+              }}>
+                <FiMessageCircle aria-hidden="true" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <span style={{ fontSize: 12, fontWeight: 800, color: '#fff', letterSpacing: '-0.2px', lineHeight: 1 }}>
+                  AI 여행 도우미
+                </span>
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>
+                  충북 여행 질문하기
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
