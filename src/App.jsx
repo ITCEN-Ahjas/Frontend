@@ -2,7 +2,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ClothingPage from './pages/clothing/ClothingPage';
 import CoursePage from './pages/course/CoursePage';
 import FestivalDetailPage from './pages/festival/FestivalDetailPage';
-import FestivalInitializationPage from './pages/festival/FestivalInitializationPage';
 import FestivalPage from './pages/festival/FestivalPage';
 import GuidePage from './pages/guide/GuidePage';
 import LodgingDetailPage from './pages/lodging/LodgingDetailPage';
@@ -22,7 +21,6 @@ export default function App() {
           <Route path="/guide" element={<GuidePage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/map/places/:placeId" element={<PlaceDetailPage />} />
-          <Route path="/festival/init" element={<FestivalInitializationPage />} />
           <Route path="/festival" element={<FestivalPage />} />
           <Route path="/festival/:contentId" element={<FestivalDetailPage />} />
           <Route path="/lodging" element={<LodgingPage />} />
