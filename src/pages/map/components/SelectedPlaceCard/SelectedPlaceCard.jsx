@@ -1,3 +1,4 @@
+import { FiNavigation, FiX } from 'react-icons/fi';
 import styles from './SelectedPlaceCard.module.css';
 
 export default function SelectedPlaceCard({ place, onOpenDirections, onClear }) {
@@ -15,9 +16,11 @@ export default function SelectedPlaceCard({ place, onOpenDirections, onClear }) 
 
       <div className={styles.actions}>
         <button type="button" className={styles.secondaryButton} onClick={onClear}>
+          <FiX aria-hidden="true" />
           선택 취소
         </button>
         <button type="button" className={styles.primaryButton} onClick={onOpenDirections}>
+          <FiNavigation aria-hidden="true" />
           길찾기
         </button>
       </div>

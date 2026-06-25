@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FiCalendar, FiChevronRight, FiMapPin, FiPhone } from 'react-icons/fi';
 import styles from './ExperienceCard.module.css';
 
 function getBadgeClass(variant) {
@@ -87,7 +88,7 @@ export default function ExperienceCard({
       <div className={styles.body}>
         {region && (
           <p className={styles.region}>
-            <span aria-hidden="true">📍</span>
+            <FiMapPin aria-hidden="true" />
             {region}
           </p>
         )}
@@ -108,14 +109,14 @@ export default function ExperienceCard({
           <div className={styles.metaList}>
             {period && (
               <div className={styles.metaItem}>
-                <span aria-hidden="true">🗓️</span>
+                <FiCalendar aria-hidden="true" />
                 <span>{period}</span>
               </div>
             )}
 
             {tel && (
               <div className={styles.metaItem}>
-                <span aria-hidden="true">☎️</span>
+                <FiPhone aria-hidden="true" />
                 <span>{tel}</span>
               </div>
             )}
@@ -124,7 +125,7 @@ export default function ExperienceCard({
 
         <button type="button" onClick={onClick} className={styles.actionButton}>
           상세보기
-          <span aria-hidden="true">›</span>
+          <FiChevronRight aria-hidden="true" />
         </button>
       </div>
     </article>

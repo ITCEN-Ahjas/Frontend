@@ -1,10 +1,10 @@
 .panel {
   margin-top: 3.2rem;
   padding: 2.4rem 2.8rem;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid var(--color-border-alpha);
   border-radius: 2.8rem;
   background: var(--color-white);
-  box-shadow: 0 1.6rem 4rem rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1.6rem 4rem var(--color-shadow-card);
 }
 
 .searchRow {
@@ -35,12 +35,12 @@
   border: 1px solid var(--color-slate-200);
   border-radius: 1.6rem;
   background: var(--color-white);
-  box-shadow: 0 0.4rem 1.6rem rgba(15, 23, 42, 0.04);
+  box-shadow: 0 0.4rem 1.6rem var(--color-shadow-subtle);
 }
 
 .searchBox:focus-within {
   border-color: var(--color-chungbuk-purple);
-  box-shadow: 0 0 0 0.3rem rgba(114, 69, 152, 0.12);
+  box-shadow: 0 0 0 0.3rem var(--color-detail-radial-purple);
 }
 
 .searchIcon {
@@ -71,7 +71,7 @@
   color: var(--color-slate-500);
   font-size: 1.4rem;
   font-weight: 900;
-  box-shadow: 0 0.4rem 1.6rem rgba(15, 23, 42, 0.04);
+  box-shadow: 0 0.4rem 1.6rem var(--color-shadow-subtle);
   transition:
     color 0.2s ease,
     border-color 0.2s ease;
@@ -122,7 +122,7 @@
   color: var(--color-slate-500);
   font-size: 1.4rem;
   font-weight: 900;
-  box-shadow: 0 0.4rem 1.2rem rgba(15, 23, 42, 0.04);
+  box-shadow: 0 0.4rem 1.2rem var(--color-shadow-subtle);
   transition:
     color 0.2s ease,
     border-color 0.2s ease,
@@ -135,6 +135,12 @@
 }
 
 .filterButtonActivePurple {
+  border-color: var(--color-chungbuk-purple);
+  background: var(--color-chungbuk-purple);
+  color: var(--color-white);
+}
+
+.filterButtonActivePurple:hover {
   border-color: var(--color-chungbuk-purple);
   background: var(--color-chungbuk-purple);
   color: var(--color-white);

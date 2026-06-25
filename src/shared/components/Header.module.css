@@ -3,10 +3,10 @@
   top: 0;
   z-index: 50;
   width: 100%;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
-  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--color-border-alpha-strong);
+  background: var(--color-card-bg-translucent);
   backdrop-filter: blur(14px);
-  box-shadow: 0 0.8rem 2.4rem rgba(15, 23, 42, 0.04);
+  box-shadow: 0 0.8rem 2.4rem var(--color-shadow-subtle);
 }
 
 .inner {
@@ -70,21 +70,21 @@
 
 .navLink:hover {
   color: var(--color-chungbuk-purple);
-  background: rgba(124, 58, 237, 0.07);
-  border-color: rgba(124, 58, 237, 0.14);
+  background: var(--color-hover-bg);
+  border-color: var(--color-hover-border);
   transform: translateY(-0.1rem);
 }
 
 .navLinkActive {
   color: var(--color-chungbuk-purple);
-  background: rgba(124, 58, 237, 0.08);
-  border-color: rgba(124, 58, 237, 0.18);
+  background: var(--color-active-bg);
+  border-color: var(--color-active-border);
 }
 
 .navLinkActive:hover {
   color: var(--color-chungbuk-purple);
-  background: rgba(124, 58, 237, 0.1);
-  border-color: rgba(124, 58, 237, 0.22);
+  background: var(--color-hover-bg-strong);
+  border-color: var(--color-hover-border-strong);
 }
 
 @media (max-width: 1080px) {

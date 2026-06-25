@@ -28,14 +28,19 @@ const SEARCH_CATEGORY_VALUES = PLACE_CATEGORIES
   .filter(category => category.value !== 'ALL')
   .map(category => category.value);
 
+function getCssColor(variableName) {
+  return window.getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+}
+
 function createMarkerIcon(isSelected = false) {
-  const color = isSelected ? '#00aebb' : '#724598';
+  const color = getCssColor(isSelected ? '--color-chungbuk-cyan' : '--color-chungbuk-purple');
+  const strokeColor = getCssColor('--color-white');
 
   return {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52">
-        <path fill="${color}" stroke="#ffffff" stroke-width="4" d="M20 2C10.06 2 2 10.06 2 20c0 13.5 18 29 18 29s18-15.5 18-29C38 10.06 29.94 2 20 2Z"/>
-        <circle cx="20" cy="20" r="6.5" fill="#ffffff"/>
+        <path fill="${color}" stroke="${strokeColor}" stroke-width="4" d="M20 2C10.06 2 2 10.06 2 20c0 13.5 18 29 18 29s18-15.5 18-29C38 10.06 29.94 2 20 2Z"/>
+        <circle cx="20" cy="20" r="6.5" fill="${strokeColor}"/>
       </svg>
     `)}`,
     scaledSize: new window.google.maps.Size(isSelected ? 44 : 38, isSelected ? 57 : 49),
@@ -224,10 +229,10 @@ export default function MapPage() {
 
         boundaryPolygonRef.current = new window.google.maps.Polygon({
           paths: CHUNGBUK_BOUNDARY_PATH,
-          strokeColor: '#724598',
+          strokeColor: getCssColor('--color-chungbuk-purple'),
           strokeOpacity: 0.95,
           strokeWeight: 4,
-          fillColor: '#724598',
+          fillColor: getCssColor('--color-chungbuk-purple'),
           fillOpacity: 0.08,
           clickable: false,
           map: mapInstanceRef.current,
@@ -380,7 +385,13 @@ export default function MapPage() {
   }, []);
 
   useEffect(() => {
-    requestPlaces({ search: DEFAULT_SEARCH });
+    const timeoutId = window.setTimeout(() => {
+      requestPlaces({ search: DEFAULT_SEARCH });
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [requestPlaces]);
 
   useEffect(

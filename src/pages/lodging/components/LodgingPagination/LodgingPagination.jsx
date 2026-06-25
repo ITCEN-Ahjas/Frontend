@@ -1,3 +1,4 @@
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import styles from './LodgingPagination.module.css';
 
 const PAGE_WINDOW_SIZE = 10;
@@ -19,7 +20,7 @@ export default function LodgingPagination({ currentPage, totalPages, onPageChang
         disabled={windowStart === 1}
         aria-label="이전 페이지 묶음"
       >
-        ‹
+        <FiChevronLeft aria-hidden="true" />
       </button>
 
       {pages.map(page => (
@@ -41,7 +42,7 @@ export default function LodgingPagination({ currentPage, totalPages, onPageChang
         disabled={windowEnd === totalPages}
         aria-label="다음 페이지 묶음"
       >
-        ›
+        <FiChevronRight aria-hidden="true" />
       </button>
     </nav>
   );

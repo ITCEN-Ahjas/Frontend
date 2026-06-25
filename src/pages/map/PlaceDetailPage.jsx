@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
+import { FiArrowLeft, FiChevronRight, FiExternalLink, FiStar } from 'react-icons/fi';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { createPlacePhotoUrl, fetchPlaceDetail } from '../../api/placeApi';
 import styles from './PlaceDetailPage.module.css';
@@ -222,26 +223,28 @@ export default function PlaceDetailPage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setVisibleReviewCount(REVIEW_PREVIEW_COUNT);
+      dispatch({ type: 'start' });
 
-    setVisibleReviewCount(REVIEW_PREVIEW_COUNT);
-    dispatch({ type: 'start' });
+      fetchPlaceDetail(placeId, { signal: controller.signal })
+        .then(detail => {
+          if (controller.signal.aborted) return;
 
-    fetchPlaceDetail(placeId, { signal: controller.signal })
-      .then(detail => {
-        if (controller.signal.aborted) return;
+          dispatch({ type: 'success', payload: normalizeDetail(detail) });
+        })
+        .catch(error => {
+          if (error.name === 'AbortError') return;
 
-        dispatch({ type: 'success', payload: normalizeDetail(detail) });
-      })
-      .catch(error => {
-        if (error.name === 'AbortError') return;
-
-        dispatch({
-          type: 'error',
-          payload: error.message || '장소 상세 정보를 불러오지 못했습니다.',
+          dispatch({
+            type: 'error',
+            payload: error.message || '장소 상세 정보를 불러오지 못했습니다.',
+          });
         });
-      });
+    }, 0);
 
     return () => {
+      window.clearTimeout(timeoutId);
       controller.abort();
     };
   }, [placeId]);
@@ -283,9 +286,9 @@ export default function PlaceDetailPage() {
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
         <Link to="/">홈</Link>
-        <span>›</span>
+        <FiChevronRight aria-hidden="true" />
         <Link to="/map">지도</Link>
-        <span>›</span>
+        <FiChevronRight aria-hidden="true" />
         <span>상세</span>
       </div>
 
@@ -318,7 +321,8 @@ export default function PlaceDetailPage() {
             ))}
             {Number.isFinite(detail.rating) && (
               <span className={styles.ratingBadge}>
-                ★ {detail.rating.toFixed(1)}
+                <FiStar aria-hidden="true" />
+                {detail.rating.toFixed(1)}
                 {ratingCount && <small>({ratingCount})</small>}
               </span>
             )}
@@ -333,7 +337,7 @@ export default function PlaceDetailPage() {
               className={styles.titleDirectionsButton}
             >
               길찾기
-              <span aria-hidden="true">↗</span>
+              <FiExternalLink aria-hidden="true" />
             </a>
           </div>
 
@@ -392,7 +396,10 @@ export default function PlaceDetailPage() {
                     </div>
 
                     {Number.isFinite(review.rating) && (
-                      <span className={styles.reviewRating}>★ {review.rating.toFixed(1)}</span>
+                      <span className={styles.reviewRating}>
+                        <FiStar aria-hidden="true" />
+                        {review.rating.toFixed(1)}
+                      </span>
                     )}
                   </div>
 
@@ -423,7 +430,8 @@ export default function PlaceDetailPage() {
 
       <div className={styles.bottomActions}>
         <button type="button" onClick={() => navigate('/map')} className={styles.backButton}>
-          ‹ 지도 검색으로 돌아가기
+          <FiArrowLeft aria-hidden="true" />
+          지도 검색으로 돌아가기
         </button>
 
         {detail.websiteUri && (
@@ -434,7 +442,7 @@ export default function PlaceDetailPage() {
             className={styles.primaryButton}
           >
             웹사이트 바로가기
-            <span aria-hidden="true">↗</span>
+            <FiExternalLink aria-hidden="true" />
           </a>
         )}
 
@@ -446,7 +454,7 @@ export default function PlaceDetailPage() {
             className={styles.secondaryButton}
           >
             Google Maps에서 보기
-            <span aria-hidden="true">↗</span>
+            <FiExternalLink aria-hidden="true" />
           </a>
         )}
       </div>
