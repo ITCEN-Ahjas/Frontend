@@ -7,6 +7,9 @@
 }
 
 .pageButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 4.2rem;
   height: 4.2rem;
   border: 1px solid var(--color-slate-200);
@@ -15,11 +18,18 @@
   color: var(--color-slate-600);
   font-size: 1.4rem;
   font-weight: 900;
-  box-shadow: 0 0.4rem 1.2rem rgba(15, 23, 42, 0.04);
+  box-shadow: 0 0.4rem 1.2rem var(--color-shadow-subtle);
   transition:
     color 0.2s ease,
     border-color 0.2s ease,
     background 0.2s ease;
+}
+
+.pageButton svg {
+  width: 1.8rem;
+  height: 1.8rem;
+  flex: 0 0 auto;
+  stroke-width: 2.4;
 }
 
 .pageButton:hover:not(:disabled) {

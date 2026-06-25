@@ -1,4 +1,14 @@
 import { useEffect, useMemo, useReducer } from 'react';
+import {
+  FiArrowLeft,
+  FiCalendar,
+  FiChevronRight,
+  FiClock,
+  FiExternalLink,
+  FiInfo,
+  FiMapPin,
+  FiPhone,
+} from 'react-icons/fi';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchFestivalDetail } from '../../api/festivalApi';
 import styles from './FestivalDetailPage.module.css';
@@ -282,14 +292,15 @@ function buildGoogleMapsDirectionsUrl(item) {
 
   const mapX = normalizeMapCoord(item.mapX ?? item.mapx);
   const mapY = normalizeMapCoord(item.mapY ?? item.mapy);
+  const destination = pickText(item.title, item.place, item.eventPlace, item.address);
+  const fallbackDestination = mapY && mapX ? `${mapY},${mapX}` : '';
+  const resolvedDestination = destination || fallbackDestination;
 
-  if (!mapX || !mapY) {
+  if (!resolvedDestination) {
     return '';
   }
 
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-    `${mapY},${mapX}`,
-  )}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(resolvedDestination)}`;
 }
 
 function makeInfoItem(icon, label, value) {
@@ -300,7 +311,7 @@ function makeInfoItem(icon, label, value) {
   }
 
   return {
-    icon,
+    Icon: icon,
     label,
     value: cleanedValue,
   };
@@ -313,7 +324,7 @@ function buildKeyInfo(detail) {
 
   if (detail.mainInfo?.length > 0) {
     return detail.mainInfo.map((item, index) => ({
-      icon: ['▣', '◷', '⌖', '◇', '◎', '☎'][index % 6],
+      Icon: [FiCalendar, FiClock, FiMapPin, FiInfo, FiInfo, FiPhone][index % 6],
       label: item.label,
       value: item.value,
     }));
@@ -324,46 +335,46 @@ function buildKeyInfo(detail) {
 
   const itemsByType = {
     15: [
-      makeInfoItem('▣', '기간', detail.period),
-      makeInfoItem('◷', '운영시간', getField(item, 'playTime', 'playtime') || detail.playTime),
-      makeInfoItem('⌖', '행사장소', getField(item, 'eventPlace', 'eventplace') || detail.place),
-      makeInfoItem('◇', '주최/주관', getField(item, 'sponsor') || detail.sponsor),
-      makeInfoItem('☎', '문의', detail.tel),
+      makeInfoItem(FiCalendar, '기간', detail.period),
+      makeInfoItem(FiClock, '운영시간', getField(item, 'playTime', 'playtime') || detail.playTime),
+      makeInfoItem(FiMapPin, '행사장소', getField(item, 'eventPlace', 'eventplace') || detail.place),
+      makeInfoItem(FiInfo, '주최/주관', getField(item, 'sponsor') || detail.sponsor),
+      makeInfoItem(FiPhone, '문의', detail.tel),
     ],
     12: [
-      makeInfoItem('◷', '이용시간', getField(item, 'useTime', 'usetime') || detail.playTime),
-      makeInfoItem('▣', '휴무일', getField(item, 'restDate', 'restdate')),
-      makeInfoItem('◇', '체험안내', getField(item, 'expGuide', 'expguide')),
-      makeInfoItem('▤', '주차', getField(item, 'parking')),
-      makeInfoItem('☎', '문의', getField(item, 'infoCenter', 'infocenter') || detail.tel),
+      makeInfoItem(FiClock, '이용시간', getField(item, 'useTime', 'usetime') || detail.playTime),
+      makeInfoItem(FiCalendar, '휴무일', getField(item, 'restDate', 'restdate')),
+      makeInfoItem(FiInfo, '체험안내', getField(item, 'expGuide', 'expguide')),
+      makeInfoItem(FiInfo, '주차', getField(item, 'parking')),
+      makeInfoItem(FiPhone, '문의', getField(item, 'infoCenter', 'infocenter') || detail.tel),
     ],
     14: [
       makeInfoItem(
-        '◷',
+        FiClock,
         '관람시간',
         getField(item, 'useTimeCulture', 'usetimeculture') || detail.playTime,
       ),
-      makeInfoItem('▣', '휴무일', getField(item, 'restDateCulture', 'restdateculture')),
-      makeInfoItem('◎', '이용요금', getField(item, 'useFee', 'usefee')),
-      makeInfoItem('▤', '주차', getField(item, 'parkingCulture', 'parkingculture')),
+      makeInfoItem(FiCalendar, '휴무일', getField(item, 'restDateCulture', 'restdateculture')),
+      makeInfoItem(FiInfo, '이용요금', getField(item, 'useFee', 'usefee')),
+      makeInfoItem(FiInfo, '주차', getField(item, 'parkingCulture', 'parkingculture')),
       makeInfoItem(
-        '☎',
+        FiPhone,
         '문의',
         getField(item, 'infoCenterCulture', 'infocenterculture') || detail.tel,
       ),
     ],
     28: [
-      makeInfoItem('▣', '운영기간', getField(item, 'openPeriod', 'openperiod') || detail.period),
+      makeInfoItem(FiCalendar, '운영기간', getField(item, 'openPeriod', 'openperiod') || detail.period),
       makeInfoItem(
-        '◷',
+        FiClock,
         '이용시간',
         getField(item, 'useTimeLeports', 'usetimeleports') || detail.playTime,
       ),
-      makeInfoItem('◎', '이용요금', getField(item, 'useFeeLeports', 'usefeeleports')),
-      makeInfoItem('◇', '예약', getField(item, 'reservation')),
-      makeInfoItem('▤', '주차', getField(item, 'parkingLeports', 'parkingleports')),
+      makeInfoItem(FiInfo, '이용요금', getField(item, 'useFeeLeports', 'usefeeleports')),
+      makeInfoItem(FiInfo, '예약', getField(item, 'reservation')),
+      makeInfoItem(FiInfo, '주차', getField(item, 'parkingLeports', 'parkingleports')),
       makeInfoItem(
-        '☎',
+        FiPhone,
         '문의',
         getField(item, 'infoCenterLeports', 'infocenterleports') || detail.tel,
       ),
@@ -485,11 +496,11 @@ export default function FestivalDetailPage() {
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
         <Link to="/">홈</Link>
-        <span>›</span>
+        <FiChevronRight aria-hidden="true" />
         <Link to="/festival" state={festivalListState ? { festivalListState } : undefined}>
           체험·축제
         </Link>
-        <span>›</span>
+        <FiChevronRight aria-hidden="true" />
         <span>상세</span>
       </div>
 
@@ -522,15 +533,17 @@ export default function FestivalDetailPage() {
 
         {keyInfo.length > 0 ? (
           <div className={styles.infoGrid}>
-            {keyInfo.map(item => (
-              <div key={`${item.label}-${item.value}`} className={styles.infoItem}>
-                <span aria-hidden="true" className={styles.infoIcon}>
-                  {item.icon}
-                </span>
-                <strong>{item.label}</strong>
-                <p>{item.value}</p>
-              </div>
-            ))}
+            {keyInfo.map(item => {
+              const InfoIcon = item.Icon;
+
+              return (
+                <div key={`${item.label}-${item.value}`} className={styles.infoItem}>
+                  <InfoIcon aria-hidden="true" className={styles.infoIcon} />
+                  <strong>{item.label}</strong>
+                  <p>{item.value}</p>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className={styles.emptyInfoText}>
@@ -544,9 +557,7 @@ export default function FestivalDetailPage() {
 
         <div className={styles.locationBox}>
           <div className={styles.mapPreview}>
-            <span className={styles.mapPin} aria-hidden="true">
-              ◆
-            </span>
+            <FiMapPin className={styles.mapPin} aria-hidden="true" />
           </div>
 
           <div className={styles.locationContent}>
@@ -566,7 +577,7 @@ export default function FestivalDetailPage() {
                 className={styles.outlineButton}
               >
                 Google Maps에서 길찾기
-                <span aria-hidden="true">↗</span>
+                <FiExternalLink aria-hidden="true" />
               </a>
             )}
           </div>
@@ -583,7 +594,8 @@ export default function FestivalDetailPage() {
           }
           className={styles.backButton}
         >
-          ‹ 목록으로 돌아가기
+          <FiArrowLeft aria-hidden="true" />
+          목록으로 돌아가기
         </button>
 
         {homepageUrl && (
@@ -594,7 +606,7 @@ export default function FestivalDetailPage() {
             className={styles.primaryButton}
           >
             공식 홈페이지 바로가기
-            <span aria-hidden="true">↗</span>
+            <FiExternalLink aria-hidden="true" />
           </a>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { FiSearch } from 'react-icons/fi';
 import { PLACE_CATEGORIES } from '../../../../api/placeApi';
 import { CHUNGBUK_REGIONS } from '../../../../data/chungbukRegions';
 import styles from './PlaceSearchPanel.module.css';
@@ -27,9 +28,7 @@ export default function PlaceSearchPanel({
       <form className={styles.searchForm} onSubmit={onSubmit}>
         <label className={styles.searchLabel}>
           <span className={styles.visuallyHidden}>장소 검색어</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />
-          </svg>
+          <FiSearch aria-hidden="true" />
           <input
             type="search"
             value={keyword}

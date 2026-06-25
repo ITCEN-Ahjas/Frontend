@@ -1,3 +1,4 @@
+import { FiMapPin, FiStar } from 'react-icons/fi';
 import { createPlacePhotoUrl } from '../../../../api/placeApi';
 import styles from './PlaceResultList.module.css';
 
@@ -73,9 +74,7 @@ export default function PlaceResultList({
 
       {!isLoading && !errorMessage && places.length === 0 && (
         <div className={styles.state}>
-          <span className={styles.emptyIcon} aria-hidden="true">
-            ⌖
-          </span>
+          <FiMapPin className={styles.emptyIcon} aria-hidden="true" />
           <strong>{hasSearched ? '검색 결과가 없습니다.' : '장소를 검색해보세요.'}</strong>
           <p>
             {hasSearched
@@ -125,7 +124,7 @@ export default function PlaceResultList({
                           <span className={styles.category}>{place.category || '장소'}</span>
                           {Number.isFinite(place.rating) && (
                             <span className={styles.rating}>
-                              <span aria-hidden="true">★</span>
+                              <FiStar aria-hidden="true" />
                               {place.rating.toFixed(1)}
                               {ratingCount && <small>({ratingCount})</small>}
                             </span>

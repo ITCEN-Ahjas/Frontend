@@ -1,4 +1,14 @@
 import { useEffect, useMemo, useReducer } from 'react';
+import {
+  FiArrowLeft,
+  FiCalendar,
+  FiChevronRight,
+  FiClock,
+  FiExternalLink,
+  FiInfo,
+  FiMapPin,
+  FiPhone,
+} from 'react-icons/fi';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchAccommodationDetail } from '../../api/lodgingApi';
 import styles from './LodgingDetailPage.module.css';
@@ -89,12 +99,12 @@ function buildKeyInfo(detail) {
   if (!detail) return [];
 
   return [
-    makeInfoItem('◷', '체크인', detail.checkInTime),
-    makeInfoItem('◷', '체크아웃', detail.checkOutTime),
-    makeInfoItem('▤', '주차', detail.parking),
-    makeInfoItem('◎', '취사 가능 여부', detail.cookingAvailable),
-    makeInfoItem('▣', '객실 수', detail.roomCount),
-    makeInfoItem('☎', '문의', detail.infoCenter || detail.tel),
+    makeInfoItem(FiClock, '체크인', detail.checkInTime),
+    makeInfoItem(FiClock, '체크아웃', detail.checkOutTime),
+    makeInfoItem(FiInfo, '주차', detail.parking),
+    makeInfoItem(FiInfo, '취사 가능 여부', detail.cookingAvailable),
+    makeInfoItem(FiCalendar, '객실 수', detail.roomCount),
+    makeInfoItem(FiPhone, '문의', detail.infoCenter || detail.tel),
   ].filter(Boolean);
 }
 
@@ -189,9 +199,9 @@ export default function LodgingDetailPage() {
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
         <Link to="/">홈</Link>
-        <span>›</span>
+        <FiChevronRight aria-hidden="true" />
         <Link to="/lodging">숙박</Link>
-        <span>›</span>
+        <FiChevronRight aria-hidden="true" />
         <span>상세</span>
       </div>
 
@@ -220,15 +230,17 @@ export default function LodgingDetailPage() {
 
         {keyInfo.length > 0 ? (
           <div className={styles.infoGrid}>
-            {keyInfo.map(item => (
-              <div key={`${item.label}-${item.value}`} className={styles.infoItem}>
-                <span aria-hidden="true" className={styles.infoIcon}>
-                  {item.icon}
-                </span>
-                <strong>{item.label}</strong>
-                <p>{item.value}</p>
-              </div>
-            ))}
+            {keyInfo.map(item => {
+              const InfoIcon = item.icon;
+
+              return (
+                <div key={`${item.label}-${item.value}`} className={styles.infoItem}>
+                  <InfoIcon aria-hidden="true" className={styles.infoIcon} />
+                  <strong>{item.label}</strong>
+                  <p>{item.value}</p>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className={styles.emptyInfoText}>제공된 상세 정보가 없습니다.</p>
@@ -274,9 +286,7 @@ export default function LodgingDetailPage() {
 
         <div className={styles.locationBox}>
           <div className={styles.mapPreview}>
-            <span className={styles.mapPin} aria-hidden="true">
-              ◆
-            </span>
+            <FiMapPin className={styles.mapPin} aria-hidden="true" />
           </div>
 
           <div className={styles.locationContent}>
@@ -294,7 +304,7 @@ export default function LodgingDetailPage() {
                 className={styles.outlineButton}
               >
                 Google Maps에서 길찾기
-                <span aria-hidden="true">↗</span>
+                <FiExternalLink aria-hidden="true" />
               </a>
             )}
           </div>
@@ -303,7 +313,8 @@ export default function LodgingDetailPage() {
 
       <div className={styles.bottomActions}>
         <button type="button" onClick={() => navigate('/lodging')} className={styles.backButton}>
-          ‹ 목록으로 돌아가기
+          <FiArrowLeft aria-hidden="true" />
+          목록으로 돌아가기
         </button>
 
         {detail.homepage && (
@@ -314,7 +325,7 @@ export default function LodgingDetailPage() {
             className={styles.primaryButton}
           >
             공식 홈페이지 바로가기
-            <span aria-hidden="true">↗</span>
+            <FiExternalLink aria-hidden="true" />
           </a>
         )}
       </div>

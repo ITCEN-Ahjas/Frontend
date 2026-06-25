@@ -1,15 +1,15 @@
 .page {
   min-height: calc(100vh - 7.6rem);
   background:
-    linear-gradient(135deg, rgba(0, 174, 187, 0.08), transparent 36rem),
-    linear-gradient(315deg, rgba(114, 69, 152, 0.08), transparent 42rem),
+    linear-gradient(135deg, var(--color-brand-secondary-bg-soft), transparent 36rem),
+    linear-gradient(315deg, var(--color-brand-primary-bg-soft), transparent 42rem),
     var(--color-page-bg);
 }
 
 .hero {
   width: 100%;
-  border-bottom: 1px solid rgba(203, 213, 225, 0.8);
-  background: #ffffff;
+  border-bottom: 1px solid var(--color-border-muted-alpha);
+  background: var(--color-white);
 }
 
 .heroInner {
@@ -56,7 +56,7 @@
 .metric {
   min-height: 10rem;
   padding: 1.8rem;
-  border: 1px solid rgba(203, 213, 225, 0.85);
+  border: 1px solid var(--color-border-muted-alpha-strong);
   border-radius: 0.8rem;
   background: var(--color-slate-50);
 }
@@ -88,10 +88,10 @@
 .formPanel,
 .resultPanel,
 .sectionCard {
-  border: 1px solid rgba(203, 213, 225, 0.9);
+  border: 1px solid var(--color-border-muted-alpha-xstrong);
   border-radius: 0.8rem;
-  background: #ffffff;
-  box-shadow: 0 1.6rem 4rem rgba(15, 23, 42, 0.06);
+  background: var(--color-white);
+  box-shadow: 0 1.6rem 4rem var(--color-shadow-soft);
 }
 
 .formPanel {
@@ -149,7 +149,7 @@
   padding: 0 1.3rem;
   border: 1px solid var(--color-slate-300);
   border-radius: 0.8rem;
-  background: #ffffff;
+  background: var(--color-white);
   font-size: 1.45rem;
   font-weight: 700;
   color: var(--color-slate-800);
@@ -158,7 +158,7 @@
 .field input:focus,
 .field select:focus,
 .fullField input:focus {
-  outline: 0.3rem solid rgba(0, 174, 187, 0.18);
+  outline: 0.3rem solid var(--color-focus-ring-cyan);
   border-color: var(--color-chungbuk-cyan);
 }
 
@@ -197,7 +197,7 @@
   background: var(--color-chungbuk-purple);
   font-size: 1.6rem;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .submitButton:disabled {
@@ -217,15 +217,15 @@
 
 .statusBox,
 .emptyBox {
-  border: 1px solid rgba(0, 174, 187, 0.18);
-  background: rgba(0, 174, 187, 0.08);
+  border: 1px solid var(--color-focus-ring-cyan);
+  background: var(--color-brand-secondary-bg-soft);
   color: var(--color-slate-700);
 }
 
 .errorBox {
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  background: rgba(220, 38, 38, 0.08);
-  color: #b91c1c;
+  border: 1px solid var(--color-error-border-alpha);
+  background: var(--color-error-bg-soft);
+  color: var(--color-error-dark);
 }
 
 .resultPanel {
@@ -284,7 +284,7 @@
   padding: 1.6rem;
   border: 1px solid var(--color-slate-200);
   border-radius: 0.8rem;
-  background: #ffffff;
+  background: var(--color-white);
 }
 
 .time {
@@ -317,7 +317,7 @@
   min-height: 2.8rem;
   padding: 0 1rem;
   border-radius: 999rem;
-  background: rgba(114, 69, 152, 0.08);
+  background: var(--color-brand-primary-bg-soft);
   font-size: 1.25rem;
   font-weight: 900;
   color: var(--color-chungbuk-purple);
@@ -340,10 +340,10 @@
   margin: 1rem 0 0;
   padding: 1.4rem;
   border-radius: 0.8rem;
-  background: #0f172a;
+  background: var(--color-slate-900);
   font-size: 1.2rem;
   line-height: 1.55;
-  color: #e2e8f0;
+  color: var(--color-slate-200);
 }
 
 @media (max-width: 980px) {

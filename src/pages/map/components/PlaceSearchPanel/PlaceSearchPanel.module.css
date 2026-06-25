@@ -1,9 +1,9 @@
 .panel {
   padding: 2.8rem;
-  border: 1px solid rgba(203, 213, 225, 0.8);
+  border: 1px solid var(--color-border-muted-alpha);
   border-radius: 2.4rem;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 1.8rem 4rem rgba(30, 41, 59, 0.08);
+  background: var(--color-card-bg-translucent);
+  box-shadow: 0 1.8rem 4rem var(--color-shadow-map-soft);
 }
 
 .heading {
@@ -57,8 +57,8 @@
 }
 
 .searchLabel:focus-within {
-  border-color: rgba(114, 69, 152, 0.65);
-  box-shadow: 0 0 0 0.35rem rgba(114, 69, 152, 0.1);
+  border-color: var(--color-brand-primary-border-focus);
+  box-shadow: 0 0 0 0.35rem var(--color-brand-primary-bg);
 }
 
 .searchLabel svg {
@@ -101,7 +101,7 @@
 }
 
 .searchButton:hover:not(:disabled) {
-  background: #603482;
+  background: var(--color-brand-primary-deep);
   transform: translateY(-0.1rem);
 }
 
@@ -145,7 +145,7 @@
 
 .categoryButton:hover:not(:disabled) {
   color: var(--color-chungbuk-purple);
-  border-color: rgba(114, 69, 152, 0.2);
+  border-color: var(--color-brand-primary-border);
 }
 
 .categoryButtonActive {
@@ -155,6 +155,12 @@
 }
 
 .categoryButtonActive:hover:not(:disabled) {
+  color: var(--color-white);
+  border-color: var(--color-chungbuk-purple);
+  background: var(--color-chungbuk-purple);
+}
+
+.categoryButtonActive:focus-visible {
   color: var(--color-white);
 }
 

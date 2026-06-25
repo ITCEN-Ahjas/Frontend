@@ -2,7 +2,7 @@
   width: 100%;
   min-height: calc(100vh - 7.6rem);
   background:
-    radial-gradient(circle at 12% 6%, rgba(114, 69, 152, 0.08), transparent 34rem),
+    radial-gradient(circle at 12% 6%, var(--color-brand-primary-bg-soft), transparent 34rem),
     var(--color-page-bg);
 }
 
@@ -33,10 +33,10 @@
   width: 100%;
   min-height: 112rem;
   overflow: hidden;
-  border: 1px solid rgba(203, 213, 225, 0.85);
+  border: 1px solid var(--color-border-muted-alpha-strong);
   border-radius: 2.8rem;
   background: var(--color-white);
-  box-shadow: 0 2.4rem 6rem rgba(30, 41, 59, 0.12);
+  box-shadow: 0 2.4rem 6rem var(--color-shadow-map);
 }
 
 .map {
@@ -55,13 +55,13 @@
   padding: 3.2rem;
   text-align: center;
   background:
-    linear-gradient(rgba(248, 250, 252, 0.94), rgba(248, 250, 252, 0.94)),
+    linear-gradient(var(--color-map-overlay), var(--color-map-overlay)),
     repeating-linear-gradient(
       45deg,
       transparent,
       transparent 1.2rem,
-      rgba(114, 69, 152, 0.05) 1.2rem,
-      rgba(114, 69, 152, 0.05) 2.4rem
+      var(--color-map-grid-line) 1.2rem,
+      var(--color-map-grid-line) 2.4rem
     );
   color: var(--color-slate-700);
 }
@@ -83,7 +83,7 @@
 .spinner {
   width: 4.2rem;
   height: 4.2rem;
-  border: 0.4rem solid rgba(114, 69, 152, 0.18);
+  border: 0.4rem solid var(--color-brand-primary-border-soft);
   border-top-color: var(--color-chungbuk-purple);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -96,10 +96,10 @@
   width: 4.8rem;
   height: 4.8rem;
   border-radius: 50%;
-  background: rgba(220, 38, 38, 0.1);
+  background: var(--color-error-bg-alpha);
   font-size: 2.4rem;
   font-weight: 900;
-  color: #dc2626;
+  color: var(--color-error);
 }
 
 .errorGuide {

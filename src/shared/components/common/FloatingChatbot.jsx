@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { FiMessageCircle, FiSend, FiX, FiMaximize2, FiHelpCircle } from 'react-icons/fi';
 import { sendChatMessage, fetchSuggestedQuestions } from '../../../api/chatApi';
 
 const SAMPLES = [
@@ -7,27 +8,10 @@ const SAMPLES = [
   '청주에서 아이랑 가기 좋은 곳은?',
 ];
 
-const ChatIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M11 1.5C5.753 1.5 1.5 5.477 1.5 10.375c0 2.674 1.22 5.07 3.148 6.69L3.5 20.5l4.23-1.406A10.1 10.1 0 0011 19.25c5.247 0 9.5-3.977 9.5-8.875S16.247 1.5 11 1.5z"
-      fill="white"
-      stroke="white"
-      strokeWidth="0.5"
-    />
-  </svg>
-);
-
-const SendIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 9L2 2l3 7-3 7 14-7z" fill="white" />
-  </svg>
-);
-
 export default function FloatingChatbot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'ai', text: '안녕하세요! 충북 여행 AI입니다.\n궁금한 여행 정보를 편하게 물어보세요 😊' },
+    { role: 'ai', text: '안녕하세요! 충북 여행 AI입니다.\n궁금한 여행 정보를 편하게 물어보세요.' },
   ]);
   const [suggested, setSuggested] = useState([]);
   const [input, setInput] = useState('');
@@ -142,15 +126,51 @@ export default function FloatingChatbot() {
           from { opacity: 0; transform: translateY(6px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .cb-sample:hover  { background: #f1f5f9 !important; transform: translateX(2px); }
-        .cb-suggest:hover { background: #d1fae5 !important; transform: translateX(2px); }
-        .cb-send:hover:not(:disabled) { background: #059669 !important; transform: scale(1.06); }
-        .cb-close:hover { background: rgba(255,255,255,0.15) !important; }
-        .cb-fab:hover { box-shadow: 0 10px 32px rgba(0,0,0,0.4) !important; transform: scale(1.07) !important; }
+        .cb-sample:hover  { background: var(--color-slate-100) !important; transform: translateX(2px); }
+        .cb-suggest:hover { background: var(--color-success-hover) !important; transform: translateX(2px); }
+        .cb-send:hover:not(:disabled) { background: var(--color-success-dark) !important; transform: scale(1.06); }
+        .cb-close:hover { background: var(--color-chat-inverse-bg-hover) !important; }
+        .cb-fab:hover { box-shadow: 0 10px 32px var(--color-shadow-black-hover) !important; transform: scale(1.07) !important; }
+        .cb-fab svg {
+          width: 30px;
+          height: 30px;
+          color: var(--color-white);
+          stroke-width: 2.2;
+        }
+        .cb-close svg {
+          width: 18px;
+          height: 18px;
+          color: var(--color-chat-inverse-muted);
+          stroke-width: 2.4;
+        }
+        .cb-send svg {
+          width: 19px;
+          height: 19px;
+          color: var(--color-white);
+          stroke-width: 2.4;
+        }
+        .cb-bot-icon svg {
+          width: 22px;
+          height: 22px;
+          color: var(--color-white);
+          stroke-width: 2.2;
+        }
+        .cb-message-icon svg {
+          width: 17px;
+          height: 17px;
+          color: var(--color-white);
+          stroke-width: 2.2;
+        }
+        .cb-resize-icon svg {
+          width: 12px;
+          height: 12px;
+          color: var(--color-slate-300);
+          stroke-width: 2;
+        }
         .cb-msg { animation: msgIn 0.2s ease; }
         .cb-scroll::-webkit-scrollbar { width: 4px; }
         .cb-scroll::-webkit-scrollbar-track { background: transparent; }
-        .cb-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+        .cb-scroll::-webkit-scrollbar-thumb { background: var(--color-slate-200); border-radius: 4px; }
       `}</style>
 
       <div style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 9999, transform: 'translate(-50%,-50%)' }}>
@@ -163,9 +183,9 @@ export default function FloatingChatbot() {
             right: 0,
             width: `min(${panelSize.width}px, 90vw)`,
             borderRadius: 24,
-            background: '#fff',
-            boxShadow: '0 32px 80px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06)',
-            border: '1px solid #e8ecf1',
+            background: 'var(--color-white)',
+            boxShadow: '0 32px 80px var(--color-shadow-black-medium), 0 2px 8px var(--color-shadow-black-faint)',
+            border: '1px solid var(--color-border-muted)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -173,6 +193,7 @@ export default function FloatingChatbot() {
           }}>
             {/* 리사이즈 핸들 */}
             <div
+              className="cb-resize-icon"
               onMouseDown={onResizeMouseDown}
               title="드래그해서 크기 조절"
               style={{
@@ -188,52 +209,57 @@ export default function FloatingChatbot() {
                 justifyContent: 'center',
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M1 9L9 1M1 5L5 1M5 9L9 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <FiMaximize2 aria-hidden="true" />
             </div>
 
             {/* 헤더 */}
             <div style={{
               padding: '16px 18px',
-              background: '#0f172a',
+              background: 'var(--color-slate-900)',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
             }}>
-              <div style={{
+              <div className="cb-bot-icon" style={{
                 width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                background: 'linear-gradient(135deg,#10b981,#059669)',
+                background: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))',
                 display: 'grid', placeItems: 'center',
-                boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
+                boxShadow: '0 4px 14px var(--color-shadow-success-strong)',
               }}>
-                <ChatIcon />
+                <FiMessageCircle aria-hidden="true" />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: '-0.2px' }}>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--color-white)', letterSpacing: '-0.2px' }}>
                   충북 여행 AI
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 5px #10b981' }} />
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>지금 바로 답변 가능</span>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', boxShadow: '0 0 5px var(--color-success)' }} />
+                  <span style={{ fontSize: 11, color: 'var(--color-chat-inverse-faint)' }}>지금 바로 답변 가능</span>
                 </div>
               </div>
-              <button className="cb-close" onClick={() => setOpen(false)} style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
+              <button
+                className="cb-close"
+                type="button"
+                aria-label="챗봇 닫기"
+                onClick={() => setOpen(false)}
+                style={{
+                background: 'var(--color-chat-inverse-bg)',
+                border: '1px solid var(--color-chat-inverse-border)',
                 borderRadius: 10, width: 32, height: 32,
                 display: 'grid', placeItems: 'center',
-                cursor: 'pointer', color: 'rgba(255,255,255,0.55)',
+                cursor: 'pointer', color: 'var(--color-chat-inverse-weak)',
                 fontSize: 13, flexShrink: 0,
                 transition: 'background 0.15s',
-              }}>✕</button>
+              }}>
+                <FiX aria-hidden="true" />
+              </button>
             </div>
 
             {/* 메시지 */}
             <div className="cb-scroll" style={{
               height: panelSize.height,
               overflowY: 'auto',
-              background: '#f8fafc',
+              background: 'var(--color-slate-50)',
               padding: '18px 14px',
               display: 'flex',
               flexDirection: 'column',
@@ -247,29 +273,29 @@ export default function FloatingChatbot() {
                   gap: 8,
                 }}>
                   {msg.role === 'ai' && (
-                    <div style={{
+                    <div className="cb-message-icon" style={{
                       width: 30, height: 30, borderRadius: 10, flexShrink: 0,
-                      background: 'linear-gradient(135deg,#10b981,#059669)',
+                      background: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))',
                       display: 'grid', placeItems: 'center',
-                      boxShadow: '0 2px 8px rgba(16,185,129,0.25)',
+                      boxShadow: '0 2px 8px var(--color-shadow-success-light)',
                     }}>
-                      <ChatIcon />
+                      <FiMessageCircle aria-hidden="true" />
                     </div>
                   )}
                   <div style={{
                     maxWidth: '72%',
                     padding: '11px 14px',
                     borderRadius: msg.role === 'user' ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
-                    background: msg.role === 'user' ? '#0f172a' : '#fff',
-                    color: msg.role === 'user' ? '#f8fafc' : '#1e293b',
+                    background: msg.role === 'user' ? 'var(--color-slate-900)' : 'var(--color-white)',
+                    color: msg.role === 'user' ? 'var(--color-slate-50)' : 'var(--color-slate-800)',
                     fontSize: 13.5,
                     lineHeight: 1.7,
                     fontWeight: 400,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                     boxShadow: msg.role === 'ai'
-                      ? '0 2px 10px rgba(0,0,0,0.07)'
-                      : '0 2px 10px rgba(15,23,42,0.2)',
+                      ? '0 2px 10px var(--color-shadow-black-soft)'
+                      : '0 2px 10px var(--color-shadow-slate-strong)',
                   }}>
                     {msg.text}
                   </div>
@@ -279,21 +305,21 @@ export default function FloatingChatbot() {
               {/* 로딩 */}
               {loading && (
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                  <div style={{
+                  <div className="cb-message-icon" style={{
                     width: 30, height: 30, borderRadius: 10, flexShrink: 0,
-                    background: 'linear-gradient(135deg,#10b981,#059669)',
+                    background: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))',
                     display: 'grid', placeItems: 'center',
                   }}>
-                    <ChatIcon />
+                    <FiMessageCircle aria-hidden="true" />
                   </div>
                   <div style={{
-                    background: '#fff', borderRadius: '4px 18px 18px 18px',
+                    background: 'var(--color-white)', borderRadius: '4px 18px 18px 18px',
                     padding: '14px 18px', display: 'flex', gap: 5, alignItems: 'center',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.07)',
+                    boxShadow: '0 2px 10px var(--color-shadow-black-soft)',
                   }}>
                     {[0, 1, 2].map(i => (
                       <div key={i} style={{
-                        width: 7, height: 7, borderRadius: '50%', background: '#10b981',
+                        width: 7, height: 7, borderRadius: '50%', background: 'var(--color-success)',
                         animation: `dotBounce 1.1s ease-in-out ${i * 0.16}s infinite`,
                       }} />
                     ))}
@@ -304,22 +330,22 @@ export default function FloatingChatbot() {
               {/* 샘플 질문 */}
               {messages.length <= 1 && !loading && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', paddingLeft: 2, letterSpacing: '0.2px' }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-slate-400)', paddingLeft: 2, letterSpacing: '0.2px' }}>
                     이런 질문은 어떠세요?
                   </span>
                   {SAMPLES.map(q => (
                     <button key={q} className="cb-sample" onClick={() => handleSend(q)} style={{
-                      background: '#fff',
-                      border: '1.5px solid #e2e8f0',
+                      background: 'var(--color-white)',
+                      border: '1.5px solid var(--color-slate-200)',
                       borderRadius: 13,
                       padding: '11px 15px',
                       fontSize: 13,
                       fontWeight: 500,
                       textAlign: 'left',
                       cursor: 'pointer',
-                      color: '#334155',
+                      color: 'var(--color-slate-700)',
                       transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                      boxShadow: '0 1px 4px var(--color-shadow-black-subtle)',
                     }}>
                       {q}
                     </button>
@@ -330,22 +356,23 @@ export default function FloatingChatbot() {
               {/* 추천 질문 */}
               {suggested.length > 0 && !loading && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#10b981', paddingLeft: 2, letterSpacing: '0.2px' }}>
-                    💡 이런 것도 궁금하지 않으세요?
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', paddingLeft: 2, letterSpacing: '0.2px' }}>
+                    <FiHelpCircle aria-hidden="true" />
+                    이런 것도 궁금하지 않으세요?
                   </span>
                   {suggested.map(q => (
                     <button key={q} className="cb-suggest" onClick={() => handleSend(q)} style={{
-                      background: '#f0fdf9',
-                      border: '1.5px solid #a7f3d0',
+                      background: 'var(--color-success-soft)',
+                      border: '1.5px solid var(--color-success-border)',
                       borderRadius: 13,
                       padding: '11px 15px',
                       fontSize: 13,
                       fontWeight: 500,
                       textAlign: 'left',
                       cursor: 'pointer',
-                      color: '#065f46',
+                      color: 'var(--color-success-deep)',
                       transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 4px rgba(16,185,129,0.08)',
+                      boxShadow: '0 1px 4px var(--color-shadow-success-soft)',
                     }}>
                       {q}
                     </button>
@@ -359,8 +386,8 @@ export default function FloatingChatbot() {
             {/* 입력 영역 */}
             <div style={{
               padding: '12px 14px',
-              background: '#fff',
-              borderTop: '1px solid #f1f5f9',
+              background: 'var(--color-white)',
+              borderTop: '1px solid var(--color-slate-100)',
               display: 'flex',
               gap: 8,
               alignItems: 'flex-end',
@@ -374,24 +401,24 @@ export default function FloatingChatbot() {
                 placeholder="궁금한 점을 입력하세요..."
                 style={{
                   flex: 1,
-                  background: '#f1f5f9',
+                  background: 'var(--color-slate-100)',
                   border: '1.5px solid transparent',
                   borderRadius: 14,
                   padding: '11px 16px',
                   fontSize: 13.5,
-                  color: '#1e293b',
+                  color: 'var(--color-slate-800)',
                   outline: 'none',
                   resize: 'none',
                   lineHeight: 1.5,
                   transition: 'border 0.2s, background 0.2s',
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = '#10b981';
-                  e.target.style.background = '#fff';
+                  e.target.style.borderColor = 'var(--color-success)';
+                  e.target.style.background = 'var(--color-white)';
                 }}
                 onBlur={e => {
                   e.target.style.borderColor = 'transparent';
-                  e.target.style.background = '#f1f5f9';
+                  e.target.style.background = 'var(--color-slate-100)';
                 }}
               />
               <button
@@ -400,15 +427,15 @@ export default function FloatingChatbot() {
                 disabled={loading || !input.trim()}
                 style={{
                   width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                  background: loading || !input.trim() ? '#e2e8f0' : '#10b981',
+                  background: loading || !input.trim() ? 'var(--color-slate-200)' : 'var(--color-success)',
                   border: 'none',
                   display: 'grid', placeItems: 'center',
                   cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
-                  boxShadow: !loading && input.trim() ? '0 4px 14px rgba(16,185,129,0.3)' : 'none',
+                  boxShadow: !loading && input.trim() ? '0 4px 14px var(--color-shadow-success)' : 'none',
                 }}
               >
-                <SendIcon />
+                <FiSend aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -421,18 +448,19 @@ export default function FloatingChatbot() {
           onClick={handleToggle}
           style={{
             width: 64, height: 64, borderRadius: '50%',
-            background: '#0f172a',
+            background: 'var(--color-slate-900)',
+            color: 'var(--color-white)',
             display: 'grid', placeItems: 'center',
             cursor: 'grab',
-            boxShadow: '0 6px 24px rgba(0,0,0,0.28)',
+            boxShadow: '0 6px 24px var(--color-shadow-black-strong)',
             userSelect: 'none',
             transition: 'all 0.2s ease',
-            border: '2px solid rgba(255,255,255,0.07)',
+            border: '2px solid var(--color-chat-fab-border)',
           }}
         >
           {open
-            ? <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>✕</span>
-            : <ChatIcon />
+            ? <FiX aria-hidden="true" />
+            : <FiMessageCircle aria-hidden="true" />
           }
         </div>
       </div>

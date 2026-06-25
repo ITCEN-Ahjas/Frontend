@@ -1,3 +1,22 @@
+import {
+  createElement,
+} from 'react';
+import {
+  FiBattery,
+  FiCircle,
+  FiCloud,
+  FiCloudRain,
+  FiDroplet,
+  FiInfo,
+  FiMapPin,
+  FiMoon,
+  FiPackage,
+  FiShield,
+  FiSun,
+  FiThermometer,
+  FiUmbrella,
+  FiWind,
+} from 'react-icons/fi';
 import { useOutfitRecommendation } from '../../hooks/useOutfitRecommendation';
 import styles from './ClothingPage.module.css';
 
@@ -9,10 +28,10 @@ const OUTFIT_CARD_LABELS = [
 ];
 
 const TIME_SLOT_META = {
-  morning: { icon: '☀', label: '아침' },
-  daytime: { icon: '☼', label: '낮' },
-  afternoon: { icon: '◐', label: '오후' },
-  evening: { icon: '☾', label: '저녁' },
+  morning: { Icon: FiSun, label: '아침' },
+  daytime: { Icon: FiSun, label: '낮' },
+  afternoon: { Icon: FiCloud, label: '오후' },
+  evening: { Icon: FiMoon, label: '저녁' },
 };
 
 function formatTemperature(value) {
@@ -50,42 +69,42 @@ function formatUpdatedAt(updatedAt) {
   return `${time.slice(0, 5)} 업데이트`;
 }
 
-function getWeatherSymbol(weatherCondition) {
+function getWeatherIcon(weatherCondition) {
   const condition = String(weatherCondition || '');
 
   if (condition.includes('눈')) {
-    return '❄';
+    return FiCloud;
   }
 
   if (condition.includes('비') || condition.includes('소나기')) {
-    return '☂';
+    return FiCloudRain;
   }
 
   if (condition.includes('맑음')) {
-    return '☀';
+    return FiSun;
   }
 
-  return '☁';
+  return FiCloud;
 }
 
-function getPreparationSymbol(code) {
-  const symbolMap = {
-    umbrella: '☂',
-    waterproof_pouch: '▣',
-    extra_socks: '⌁',
-    light_outerwear: '♧',
-    warm_accessory: '✳',
-    hot_pack: '◉',
-    water_bottle: '▯',
-    thermal_bottle: '▯',
-    battery: '▰',
-    sunscreen: '☀',
-    hat: '⌒',
-    insect_repellent: '✦',
-    portable_fan: '◌',
+function getPreparationIcon(code) {
+  const iconMap = {
+    umbrella: FiUmbrella,
+    waterproof_pouch: FiPackage,
+    extra_socks: FiShield,
+    light_outerwear: FiShield,
+    warm_accessory: FiShield,
+    hot_pack: FiCircle,
+    water_bottle: FiDroplet,
+    thermal_bottle: FiDroplet,
+    battery: FiBattery,
+    sunscreen: FiSun,
+    hat: FiShield,
+    insect_repellent: FiShield,
+    portable_fan: FiWind,
   };
 
-  return symbolMap[code] || '✦';
+  return iconMap[code] || FiPackage;
 }
 
 function OutfitIllustration({ type }) {
@@ -99,7 +118,7 @@ function OutfitIllustration({ type }) {
         <path
           d="M90 31v112M64 67l26 25 26-25"
           fill="none"
-          stroke="#ffffff"
+          stroke="currentColor"
           strokeLinecap="round"
           strokeWidth="4"
         />
@@ -117,7 +136,7 @@ function OutfitIllustration({ type }) {
         <path
           d="M80 25c0 13 20 13 20 0"
           fill="none"
-          stroke="#ffffff"
+          stroke="currentColor"
           strokeLinecap="round"
           strokeWidth="4"
         />
@@ -132,7 +151,7 @@ function OutfitIllustration({ type }) {
         <path
           d="M61 44h58M90 44v32"
           fill="none"
-          stroke="#ffffff"
+          stroke="currentColor"
           strokeLinecap="round"
           strokeWidth="4"
         />
@@ -149,7 +168,7 @@ function OutfitIllustration({ type }) {
       <path
         d="M47 108h97M61 117h16m8 0h16m8 0h16"
         fill="none"
-        stroke="#ffffff"
+        stroke="currentColor"
         strokeLinecap="round"
         strokeWidth="4"
       />
@@ -160,26 +179,26 @@ function OutfitIllustration({ type }) {
 function HeroArtwork() {
   return (
     <svg className={styles.heroArtwork} viewBox="0 0 760 330" aria-hidden="true">
-      <path d="M0 255 105 178l90 58 118-96 119 84 101-70 127 101H0Z" fill="#dcebdc" />
-      <path d="M0 274 101 221l91 42 115-56 116 44 104-45 133 68H0Z" fill="#c4dfc8" />
-      <path d="M318 165h185v102H318z" fill="#e7eceb" />
-      <path d="M304 166 410 109l106 57-15 14H319l-15-14Z" fill="#2f3e55" />
-      <path d="M320 159h180l-90-48-90 48Z" fill="#52647e" />
-      <path d="M410 178c-24 0-43 21-43 47v42h86v-42c0-26-19-47-43-47Z" fill="#3b475a" />
-      <path d="M410 191c-16 0-29 14-29 31v45h58v-45c0-17-13-31-29-31Z" fill="#f4f5f2" />
-      <path d="M313 177h195" stroke="#e67144" strokeWidth="6" />
-      <path d="M610 50h10v143h-10z" fill="#8b95ac" />
-      <path d="m594 51 21-38 21 38H594Z" fill="#8b95ac" />
+      <path d="M0 255 105 178l90 58 118-96 119 84 101-70 127 101H0Z" fill="var(--color-illustration-mountain)" />
+      <path d="M0 274 101 221l91 42 115-56 116 44 104-45 133 68H0Z" fill="var(--color-illustration-mountain-deep)" />
+      <path d="M318 165h185v102H318z" fill="var(--color-illustration-building)" />
+      <path d="M304 166 410 109l106 57-15 14H319l-15-14Z" fill="var(--color-illustration-roof)" />
+      <path d="M320 159h180l-90-48-90 48Z" fill="var(--color-illustration-roof-light)" />
+      <path d="M410 178c-24 0-43 21-43 47v42h86v-42c0-26-19-47-43-47Z" fill="var(--color-illustration-door)" />
+      <path d="M410 191c-16 0-29 14-29 31v45h58v-45c0-17-13-31-29-31Z" fill="var(--color-illustration-door-light)" />
+      <path d="M313 177h195" stroke="var(--color-illustration-accent)" strokeWidth="6" />
+      <path d="M610 50h10v143h-10z" fill="var(--color-illustration-pole)" />
+      <path d="m594 51 21-38 21 38H594Z" fill="var(--color-illustration-pole)" />
       <path
         d="M171 166v90M153 190v66M560 175v83M578 198v60"
-        stroke="#9fbd87"
+        stroke="var(--color-illustration-tree)"
         strokeLinecap="round"
         strokeWidth="11"
       />
-      <circle cx="171" cy="145" r="29" fill="#a4c983" />
-      <circle cx="153" cy="175" r="22" fill="#b8d89a" />
-      <circle cx="560" cy="153" r="30" fill="#a9cb89" />
-      <circle cx="578" cy="178" r="22" fill="#c0dca1" />
+      <circle cx="171" cy="145" r="29" fill="var(--color-illustration-tree-light)" />
+      <circle cx="153" cy="175" r="22" fill="var(--color-illustration-tree-soft)" />
+      <circle cx="560" cy="153" r="30" fill="var(--color-illustration-tree-alt)" />
+      <circle cx="578" cy="178" r="22" fill="var(--color-illustration-tree-alt-soft)" />
     </svg>
   );
 }
@@ -239,7 +258,7 @@ export default function ClothingPage() {
   const residenceWeather = batchData?.residenceWeather;
   const residenceComparison = activeRecommendation?.residenceComparison;
   const timeSlotMeta = TIME_SLOT_META[activeRecommendation?.timeSlot] || {
-    icon: '◐',
+    Icon: FiCloud,
     label: activeRecommendation?.timeSlotName || '시간대',
   };
 
@@ -379,7 +398,7 @@ export default function ClothingPage() {
               </div>
 
               <div className={styles.weatherInsight}>
-                <span className={styles.weatherInsightIcon}>☼</span>
+                <FiSun className={styles.weatherInsightIcon} aria-hidden="true" />
                 <div>
                   {residenceWeather && residenceComparison ? (
                     <>
@@ -421,10 +440,11 @@ export default function ClothingPage() {
               <div className={styles.timeSlotTabGroup}>
                 {batchData.recommendations.map(recommendation => {
                   const meta = TIME_SLOT_META[recommendation.timeSlot] || {
-                    icon: '◐',
+                    Icon: FiCloud,
                     label: recommendation.timeSlotName,
                   };
                   const isSelected = selectedTimeSlot === recommendation.timeSlot;
+                  const SlotIcon = meta.Icon;
 
                   return (
                     <button
@@ -435,7 +455,10 @@ export default function ClothingPage() {
                         .join(' ')}
                       onClick={() => selectTimeSlot(recommendation.timeSlot)}
                     >
-                      <span className={styles.timeSlotIcon}>{meta.icon}</span>
+                      {createElement(SlotIcon, {
+                        className: styles.timeSlotIcon,
+                        'aria-hidden': 'true',
+                      })}
                       <span>
                         <strong>{meta.label}</strong>
                         <small>{formatTimeRange(recommendation.startTime, recommendation.endTime)}</small>
@@ -449,10 +472,14 @@ export default function ClothingPage() {
             <section className={styles.weatherSection}>
               <div className={styles.selectedTimeHeader}>
                 <div className={styles.locationInfo}>
-                  <span className={styles.locationPin}>⌖</span>
+                  <FiMapPin className={styles.locationPin} aria-hidden="true" />
                   <div>
                     <p className={styles.timeSlotLabel}>
-                      {timeSlotMeta.icon} {timeSlotMeta.label} ·{' '}
+                      {createElement(timeSlotMeta.Icon, {
+                        className: styles.inlineIcon,
+                        'aria-hidden': 'true',
+                      })}
+                      {timeSlotMeta.label} ·{' '}
                       {formatTimeRange(activeRecommendation.startTime, activeRecommendation.endTime)}
                     </p>
                     <div className={styles.locationTitleRow}>
@@ -463,37 +490,39 @@ export default function ClothingPage() {
                 </div>
 
                 <div className={styles.weatherSummaryBadge}>
-                  <span>{getWeatherSymbol(currentWeather.weatherCondition)}</span>
+                  {createElement(getWeatherIcon(currentWeather.weatherCondition), {
+                    'aria-hidden': 'true',
+                  })}
                   <strong>{currentWeather.weatherCondition}</strong>
                 </div>
               </div>
 
               <div className={styles.weatherMetricGrid}>
                 <article className={styles.weatherMetric}>
-                  <span className={styles.metricSymbol}>♨</span>
+                  <FiThermometer className={styles.metricSymbol} aria-hidden="true" />
                   <p>예상 기온</p>
                   <strong>{formatTemperature(currentWeather.temperature)}°C</strong>
                 </article>
                 <article className={styles.weatherMetric}>
-                  <span className={styles.metricSymbol}>♨</span>
+                  <FiThermometer className={styles.metricSymbol} aria-hidden="true" />
                   <p>체감온도</p>
                   <strong className={styles.accentValue}>
                     {formatTemperature(feelsLikeWeather.feelsLikeTemperature)}°C
                   </strong>
                 </article>
                 <article className={styles.weatherMetric}>
-                  <span className={styles.metricSymbol}>◈</span>
+                  <FiDroplet className={styles.metricSymbol} aria-hidden="true" />
                   <p>습도</p>
                   <strong>{currentWeather.humidity}%</strong>
                 </article>
                 <article className={styles.weatherMetric}>
-                  <span className={styles.metricSymbol}>≋</span>
+                  <FiWind className={styles.metricSymbol} aria-hidden="true" />
                   <p>바람</p>
                   <strong>{currentWeather.windStatus}</strong>
                   <small>{currentWeather.windSpeed}m/s</small>
                 </article>
                 <article className={styles.weatherMetric}>
-                  <span className={styles.metricSymbol}>☂</span>
+                  <FiCloudRain className={styles.metricSymbol} aria-hidden="true" />
                   <p>강수 확률</p>
                   <strong>{currentWeather.precipitationProbability}%</strong>
                 </article>
@@ -555,20 +584,24 @@ export default function ClothingPage() {
                   .filter(Boolean)
                   .join(' ')}
               >
-                {dailyPreparationItems.map(item => (
-                  <article key={item.code} className={styles.preparationItem}>
-                    <span className={styles.preparationIcon}>{getPreparationSymbol(item.code)}</span>
+                {dailyPreparationItems.map(item => {
+                  const PreparationIcon = getPreparationIcon(item.code);
+
+                  return (
+                    <article key={item.code} className={styles.preparationItem}>
+                      <PreparationIcon className={styles.preparationIcon} aria-hidden="true" />
                     <div>
                       <h3>{item.name}</h3>
                       <p>{item.description}</p>
                     </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             </section>
 
             <div className={styles.weatherNotice}>
-              <span>i</span>
+              <FiInfo aria-hidden="true" />
               날씨 정보는 변동될 수 있으니, 출발 전 최신 예보를 한 번 더 확인해 주세요.
             </div>
           </>

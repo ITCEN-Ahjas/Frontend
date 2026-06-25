@@ -1,17 +1,17 @@
 .page {
   min-height: 100vh;
   padding-top: 72px;
-  background: linear-gradient(180deg, #fafbff 0%, #f7f8ff 42%, #ffffff 100%);
-  color: #15223a;
+  background: linear-gradient(180deg, var(--color-page-bg-pale) 0%, var(--color-page-bg-soft) 42%, var(--color-white) 100%);
+  color: var(--color-text-primary);
 }
 
 .hero {
   overflow: hidden;
   min-height: 322px;
-  border-bottom: 1px solid #eef0f8;
+  border-bottom: 1px solid var(--color-border-subtle);
   background:
-    radial-gradient(circle at 26% 14%, rgba(255, 255, 255, 0.96) 0 9%, transparent 10%),
-    linear-gradient(110deg, #f8f9ff 0%, #f5f5ff 51%, #edf3ff 100%);
+    radial-gradient(circle at 26% 14%, var(--color-card-bg-translucent) 0 9%, transparent 10%),
+    linear-gradient(110deg, var(--color-gradient-clothing-hero-start) 0%, var(--color-gradient-clothing-hero-mid) 51%, var(--color-page-bg-blue) 100%);
 }
 
 .heroInner {
@@ -30,7 +30,7 @@
 .heroEyebrow,
 .sectionEyebrow {
   margin: 0;
-  color: #7554d7;
+  color: var(--color-brand-purple-light);
   font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -38,7 +38,7 @@
 
 .heroCopy h1 {
   margin: 8px 0 0;
-  color: #17243c;
+  color: var(--color-text-heading);
   font-size: clamp(40px, 4vw, 60px);
   font-weight: 900;
   letter-spacing: -0.065em;
@@ -47,7 +47,7 @@
 
 .heroCopy > p:last-child {
   margin: 22px 0 0;
-  color: #43516a;
+  color: var(--color-text-secondary);
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -79,19 +79,19 @@
 .errorBox,
 .weatherSkeleton,
 .skeletonOutfit {
-  border: 1px solid #e6e9f2;
+  border: 1px solid var(--color-border-subtle-2);
   border-radius: 22px;
-  background: #ffffff;
-  box-shadow: 0 8px 28px rgba(53, 67, 108, 0.06);
+  background: var(--color-white);
+  box-shadow: 0 8px 28px var(--color-shadow-clothing-soft);
 }
 
 .locationSelectionCard {
   position: relative;
   z-index: 10;
   padding: 25px 28px 27px;
-  border-color: rgba(225, 229, 242, 0.96);
-  background: linear-gradient(125deg, #ffffff 0%, #fbfaff 52%, #f5f8ff 100%);
-  box-shadow: 0 14px 38px rgba(72, 81, 127, 0.1);
+  border-color: var(--color-border-clothing-alpha);
+  background: linear-gradient(125deg, var(--color-white) 0%, var(--color-gradient-card-mid) 52%, var(--color-gradient-card-end) 100%);
+  box-shadow: 0 14px 38px var(--color-shadow-clothing-card);
 }
 
 .locationSelectionHeader,
@@ -111,7 +111,7 @@
 .recommendationHeader h2,
 .preparationHeader h2 {
   margin: 5px 0 0;
-  color: #1b2942;
+  color: var(--color-text-body);
   font-size: 21px;
   font-weight: 850;
   letter-spacing: -0.04em;
@@ -139,14 +139,14 @@
   gap: 9px;
   min-width: 0;
   padding: 16px;
-  border: 1px solid #e3e7f1;
+  border: 1px solid var(--color-border-subtle-3);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.74);
+  background: var(--color-card-bg-glass);
 }
 
 .selectionField > span,
 .selectionFieldLabel {
-  color: #43516a;
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 850;
 }
@@ -157,11 +157,11 @@
   width: 100%;
   min-height: 48px;
   padding: 0 13px;
-  border: 1px solid #dce2ee;
+  border: 1px solid var(--color-border-cool);
   border-radius: 12px;
   outline: none;
-  background: #ffffff;
-  color: #26344d;
+  background: var(--color-white);
+  color: var(--color-text-card);
   font: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -173,13 +173,13 @@
 .selectionField select:focus,
 .countryField select:focus,
 .citySearchField input:focus {
-  border-color: #805ee5;
-  box-shadow: 0 0 0 3px rgba(128, 94, 229, 0.13);
+  border-color: var(--color-brand-purple-accent);
+  box-shadow: 0 0 0 3px var(--color-focus-ring-purple);
 }
 
 .selectionField small,
 .residenceSelectionField > small {
-  color: #7a879a;
+  color: var(--color-text-weak-5);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
@@ -210,11 +210,11 @@
 }
 
 .citySearchNotice {
-  color: #6e7890;
+  color: var(--color-text-muted);
 }
 
 .citySearchError {
-  color: #be4561;
+  color: var(--color-error-muted-2);
 }
 
 .cityResultPanel {
@@ -226,10 +226,10 @@
   max-height: 228px;
   overflow-y: auto;
   padding: 6px;
-  border: 1px solid #dde3ee;
+  border: 1px solid var(--color-border-cool-2);
   border-radius: 13px;
-  background: #ffffff;
-  box-shadow: 0 14px 28px rgba(40, 51, 78, 0.15);
+  background: var(--color-white);
+  box-shadow: 0 14px 28px var(--color-shadow-clothing-panel);
 }
 
 .cityResultButton {
@@ -239,8 +239,8 @@
   padding: 10px 11px;
   border: 0;
   border-radius: 9px;
-  background: #ffffff;
-  color: #53617a;
+  background: var(--color-white);
+  color: var(--color-text-muted-2);
   text-align: left;
   cursor: pointer;
   transition:
@@ -249,18 +249,18 @@
 }
 
 .cityResultButton:hover {
-  background: #f3f0ff;
-  color: #5d3dc1;
+  background: var(--color-purple-bg-soft);
+  color: var(--color-brand-purple-deeper);
 }
 
 .cityResultButton strong {
-  color: #2b3953;
+  color: var(--color-text-card-2);
   font-size: 14px;
 }
 
 .cityResultButton span,
 .emptyCityResult {
-  color: #79859a;
+  color: var(--color-text-weak-2);
   font-size: 12px;
   line-height: 1.45;
 }
@@ -308,12 +308,12 @@
   gap: 12px;
   min-height: 126px;
   padding: 14px;
-  border-right: 1px solid #e8ebf3;
+  border-right: 1px solid var(--color-border-muted-2);
 }
 
 .skeletonBlock {
   border-radius: 999px;
-  background: linear-gradient(90deg, #edf0f6 20%, #f8f9fc 50%, #edf0f6 80%);
+  background: linear-gradient(90deg, var(--color-skeleton-start) 20%, var(--color-skeleton-mid) 50%, var(--color-skeleton-start) 80%);
   background-size: 200% 100%;
   animation: shimmer 1.3s infinite linear;
 }
@@ -376,7 +376,7 @@
 
 .sectionEyebrow {
   margin-bottom: 5px;
-  color: #7554d7;
+  color: var(--color-brand-purple-light);
 }
 
 .timeSlotTabGroup {
@@ -393,10 +393,10 @@
   gap: 10px;
   min-height: 66px;
   padding: 10px;
-  border: 1px solid #e0e4ed;
+  border: 1px solid var(--color-border-muted-3);
   border-radius: 14px;
-  background: #ffffff;
-  color: #53617a;
+  background: var(--color-white);
+  color: var(--color-text-muted-2);
   text-align: left;
   cursor: pointer;
   transition:
@@ -408,8 +408,8 @@
 }
 
 .timeSlotTab:hover {
-  border-color: #a58eec;
-  color: #6f4ed7;
+  border-color: var(--color-brand-purple-muted);
+  color: var(--color-brand-purple-text);
   transform: translateY(-1px);
 }
 
@@ -424,32 +424,32 @@
 }
 
 .timeSlotTab small {
-  color: #8792a6;
+  color: var(--color-text-weak);
   font-size: 11px;
   font-weight: 700;
 }
 
 .timeSlotIcon {
-  color: #7050d7;
+  color: var(--color-brand-purple-mid-2);
   font-size: 23px;
   line-height: 1;
 }
 
 .timeSlotTabActive {
-  border-color: #6d4ad5;
-  background: linear-gradient(135deg, #6d49d4, #8665e7);
-  box-shadow: 0 9px 18px rgba(105, 70, 212, 0.2);
-  color: #ffffff;
+  border-color: var(--color-brand-purple-border);
+  background: linear-gradient(135deg, var(--color-gradient-purple-start), var(--color-gradient-purple-end));
+  box-shadow: 0 9px 18px var(--color-shadow-clothing-purple);
+  color: var(--color-white);
 }
 
 .timeSlotTabActive .timeSlotIcon,
 .timeSlotTabActive small {
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .weatherSection {
   padding-bottom: 12px;
-  background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
+  background: linear-gradient(145deg, var(--color-white) 0%, var(--color-gradient-purple-pale-end) 100%);
 }
 
 .locationInfo {
@@ -465,17 +465,25 @@
   width: 33px;
   height: 33px;
   border-radius: 50%;
-  background: #f0edff;
-  color: #6845d2;
+  background: var(--color-purple-bg-muted);
+  color: var(--color-brand-purple-strong-2);
   font-size: 25px;
   font-weight: 900;
 }
 
 .timeSlotLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   margin: 0 0 5px;
-  color: #7756d9;
+  color: var(--color-brand-purple-bright-2);
   font-size: 12px;
   font-weight: 850;
+}
+
+.inlineIcon {
+  flex: 0 0 auto;
+  font-size: 14px;
 }
 
 .locationTitleRow {
@@ -487,20 +495,20 @@
 
 .locationTitleRow h2 {
   margin: 0;
-  color: #1b2942;
+  color: var(--color-text-body);
   font-size: 24px;
   font-weight: 900;
   letter-spacing: -0.055em;
 }
 
 .basisBadge {
-  background: #f2efff;
-  color: #704ed7;
+  background: var(--color-purple-bg-subtle);
+  color: var(--color-brand-purple-mid);
 }
 
 .locationInfo p:last-child {
   margin: 7px 0 0;
-  color: #8490a5;
+  color: var(--color-text-weak-3);
   font-size: 13px;
   font-weight: 600;
 }
@@ -510,14 +518,14 @@
   align-items: center;
   gap: 8px;
   padding: 9px 12px;
-  border: 1px solid #e2e7f0;
+  border: 1px solid var(--color-border-clothing-info);
   border-radius: 999px;
-  background: #ffffff;
-  color: #42516a;
+  background: var(--color-white);
+  color: var(--color-text-info);
 }
 
-.weatherSummaryBadge span {
-  color: #7050d7;
+.weatherSummaryBadge svg {
+  color: var(--color-brand-purple-mid-2);
   font-size: 22px;
   line-height: 1;
 }
@@ -539,7 +547,7 @@
   justify-content: center;
   min-height: 135px;
   padding: 10px 14px 16px;
-  border-right: 1px solid #e6e9f2;
+  border-right: 1px solid var(--color-border-subtle-2);
   text-align: center;
 }
 
@@ -548,21 +556,21 @@
 }
 
 .metricSymbol {
-  color: #7854df;
+  color: var(--color-brand-purple-bright);
   font-size: 28px;
   line-height: 1;
 }
 
 .weatherMetric p {
   margin: 11px 0 0;
-  color: #4e5d76;
+  color: var(--color-text-secondary-2);
   font-size: 13px;
   font-weight: 750;
 }
 
 .weatherMetric strong {
   margin-top: 10px;
-  color: #1e2c46;
+  color: var(--color-text-heading-2);
   font-size: clamp(22px, 2.3vw, 30px);
   font-weight: 900;
   letter-spacing: -0.065em;
@@ -571,13 +579,13 @@
 
 .weatherMetric small {
   margin-top: 5px;
-  color: #7a63d3;
+  color: var(--color-brand-purple-subtle);
   font-size: 11px;
   font-weight: 700;
 }
 
 .accentValue {
-  color: #6844d4 !important;
+  color: var(--color-brand-purple-strong-3) !important;
 }
 
 .weatherInsightHeader {
@@ -590,7 +598,7 @@
 
 .weatherInsightHeader h2 {
   margin: 5px 0 0;
-  color: #1b2942;
+  color: var(--color-text-body);
   font-size: 21px;
   font-weight: 850;
   letter-spacing: -0.04em;
@@ -598,7 +606,7 @@
 
 .weatherInsightTime {
   margin: 3px 0 0;
-  color: #6e57c4;
+  color: var(--color-brand-purple-muted-2);
   font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
@@ -610,14 +618,14 @@
   gap: 12px;
   margin: 0;
   padding: 17px 18px;
-  border: 1px solid #dce9ff;
+  border: 1px solid var(--color-border-blue);
   border-radius: 14px;
-  background: linear-gradient(115deg, #f7fbff 0%, #f9f7ff 100%);
+  background: linear-gradient(115deg, var(--color-info-gradient-start) 0%, var(--color-info-gradient-end) 100%);
 }
 
 .weatherInsightIcon {
   flex: 0 0 auto;
-  color: #3787ef;
+  color: var(--color-brand-blue);
   font-size: 22px;
   font-weight: 900;
   line-height: 1;
@@ -625,7 +633,7 @@
 
 .weatherInsightEyebrow {
   margin: 0;
-  color: #557ab5;
+  color: var(--color-brand-blue-muted);
   font-size: 12px;
   font-weight: 850;
 }
@@ -633,7 +641,7 @@
 .weatherInsight strong {
   display: block;
   margin-top: 5px;
-  color: #2d568f;
+  color: var(--color-brand-blue-deep);
   font-size: 16px;
   font-weight: 900;
   letter-spacing: -0.03em;
@@ -643,14 +651,14 @@
 .weatherInsightDetail,
 .weatherInsightHint {
   margin: 7px 0 0;
-  color: #5d6f88;
+  color: var(--color-text-blue-muted);
   font-size: 13px;
   font-weight: 650;
   line-height: 1.6;
 }
 
 .weatherInsightHint {
-  color: #7b699d;
+  color: var(--color-clothing-lavender-text);
 }
 
 .outfitGrid {
@@ -664,29 +672,29 @@
   min-height: 325px;
   padding: 18px 16px 20px;
   border-radius: 16px;
-  background: linear-gradient(150deg, #fcfcff 0%, #f4f7ff 100%);
+  background: linear-gradient(150deg, var(--color-gradient-soft-start) 0%, var(--color-gradient-soft-end) 100%);
   text-align: center;
 }
 
 .outfitCardouterwear {
-  color: #dccbb3;
+  color: var(--color-clothing-sand);
 }
 
 .outfitCardtop {
-  color: #a6c2ed;
+  color: var(--color-brand-blue-soft);
 }
 
 .outfitCardbottom {
-  color: #314f76;
+  color: var(--color-text-blue-gray);
 }
 
 .outfitCardshoes {
-  color: #d7dee9;
+  color: var(--color-blue-gray-soft);
 }
 
 .outfitLabel {
   margin: 0;
-  color: #1f2c45;
+  color: var(--color-text-heading-3);
   font-size: 16px;
   font-weight: 850;
 }
@@ -701,12 +709,12 @@
 .outfitArtworkWrap svg {
   width: 142px;
   height: 142px;
-  filter: drop-shadow(0 10px 12px rgba(52, 63, 91, 0.12));
+  filter: drop-shadow(0 10px 12px var(--color-shadow-clothing-art));
 }
 
 .outfitCard h3 {
   margin: 0;
-  color: #24314a;
+  color: var(--color-text-heading-4);
   font-size: 20px;
   font-weight: 900;
   letter-spacing: -0.045em;
@@ -715,19 +723,19 @@
 
 .outfitDescription {
   margin: 11px 0 0;
-  color: #607089;
+  color: var(--color-text-muted-4);
   font-size: 18px;
   font-weight: 600;
   line-height: 1.55;
 }
 
 .preparationSection {
-  border-color: #e8e1ff;
-  background: linear-gradient(120deg, #fcfaff 0%, #f8f8ff 100%);
+  border-color: var(--color-border-purple);
+  background: linear-gradient(120deg, var(--color-gradient-purple-pale-start) 0%, var(--color-gradient-purple-pale-end) 100%);
 }
 
 .preparationHeader h2 {
-  color: #4f3b9f;
+  color: var(--color-brand-purple-deep);
 }
 
 .preparationGrid {
@@ -745,9 +753,9 @@
   min-width: 0;
   min-height: 86px;
   padding: 14px;
-  border: 1px solid #ebe6f8;
+  border: 1px solid var(--color-border-purple-soft);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--color-card-bg-soft-glass);
 }
 
 .preparationGridCount1 .preparationItem {
@@ -767,21 +775,21 @@
 
 .preparationIcon {
   flex: 0 0 auto;
-  color: #6c49d4;
+  color: var(--color-brand-purple-link);
   font-size: 29px;
   line-height: 1;
 }
 
 .preparationItem h3 {
   margin: 0;
-  color: #27334a;
+  color: var(--color-text-heading-5);
   font-size: 14px;
   font-weight: 850;
 }
 
 .preparationItem p {
   margin: 6px 0 0;
-  color: #68758c;
+  color: var(--color-text-muted-3);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
@@ -793,20 +801,20 @@
   gap: 10px;
   margin-top: 20px;
   padding: 0 4px;
-  color: #929cac;
+  color: var(--color-text-weak-4);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.5;
 }
 
-.weatherNotice span {
+.weatherNotice svg {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
   width: 23px;
   height: 23px;
-  border: 1px solid #c7cedb;
+  border: 1px solid var(--color-border-strong);
   border-radius: 50%;
   font-size: 14px;
   font-weight: 900;
@@ -815,27 +823,27 @@
 .errorBox {
   margin-top: 20px;
   padding: 28px;
-  border-color: #ffd9df;
-  background: #fff8f9;
+  border-color: var(--color-border-error);
+  background: var(--color-error-soft);
 }
 
 .errorBox h2 {
   margin: 0;
-  color: #bc3450;
+  color: var(--color-error-muted);
   font-size: 20px;
 }
 
 .errorBox p {
   margin: 10px 0 0;
-  color: #b5475d;
+  color: var(--color-error-text);
 }
 
 .retryButton,
 .inlineErrorBox button {
   border: 0;
   border-radius: 10px;
-  background: #6845d1;
-  color: #ffffff;
+  background: var(--color-brand-purple-strong);
+  color: var(--color-white);
   font-weight: 800;
   cursor: pointer;
 }
@@ -852,21 +860,21 @@
   gap: 14px;
   margin-top: 20px;
   padding: 12px 14px;
-  border: 1px solid #ffe0aa;
+  border: 1px solid var(--color-border-warning);
   border-radius: 12px;
-  background: #fffaf0;
+  background: var(--color-warning-soft);
 }
 
 .inlineErrorBox p {
   margin: 0;
-  color: #9a6d00;
+  color: var(--color-warning-deep);
   font-size: 13px;
   font-weight: 650;
 }
 
 .inlineErrorBox button {
   padding: 8px 11px;
-  background: #b68314;
+  background: var(--color-warning-dark);
   font-size: 12px;
 }
 
@@ -905,12 +913,12 @@
   .weatherMetric,
   .skeletonMetric {
     min-height: 122px;
-    border: 1px solid #edf0f5;
+    border: 1px solid var(--color-border-light);
     border-radius: 14px;
   }
 
   .weatherMetric:last-child {
-    border-right: 1px solid #edf0f5;
+    border-right: 1px solid var(--color-border-light);
   }
 
   .outfitGrid {

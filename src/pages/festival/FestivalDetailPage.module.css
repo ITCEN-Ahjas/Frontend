@@ -31,7 +31,7 @@
   overflow: hidden;
   border-radius: 1.8rem;
   background: var(--color-slate-100);
-  box-shadow: 0 1.6rem 4rem rgba(15, 23, 42, 0.12);
+  box-shadow: 0 1.6rem 4rem var(--color-shadow-panel);
 }
 
 .heroImage {
@@ -196,13 +196,13 @@
   min-height: 25rem;
   overflow: hidden;
   background:
-    linear-gradient(110deg, transparent 49%, rgba(148, 163, 184, 0.16) 49% 51%, transparent 51%) 0
+    linear-gradient(110deg, transparent 49%, var(--color-detail-grid-line-strong) 49% 51%, transparent 51%) 0
       0 / 9rem 9rem,
-    linear-gradient(20deg, transparent 49%, rgba(148, 163, 184, 0.14) 49% 51%, transparent 51%) 0
+    linear-gradient(20deg, transparent 49%, var(--color-detail-grid-line) 49% 51%, transparent 51%) 0
       0 / 12rem 12rem,
-    radial-gradient(circle at 24% 40%, rgba(0, 174, 187, 0.16), transparent 24rem),
-    radial-gradient(circle at 72% 46%, rgba(114, 69, 152, 0.12), transparent 18rem),
-    #f7fafc;
+    radial-gradient(circle at 24% 40%, var(--color-detail-radial-cyan), transparent 24rem),
+    radial-gradient(circle at 72% 46%, var(--color-detail-radial-purple), transparent 18rem),
+    var(--color-detail-map-bg);
 }
 
 .mapPin {
@@ -212,7 +212,7 @@
   transform: translate(-50%, -50%);
   color: var(--color-chungbuk-purple);
   font-size: 4rem;
-  filter: drop-shadow(0 1rem 1.5rem rgba(114, 69, 152, 0.3));
+  filter: drop-shadow(0 1rem 1.5rem var(--color-shadow-purple-strong));
 }
 
 .locationContent {
