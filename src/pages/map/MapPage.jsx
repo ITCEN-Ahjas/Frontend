@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { CHUNGBUK_BOUNDARY_PATH } from '../../data/chungbukBoundary';
-import { getChungbukRegionLabel } from '../../data/chungbukRegions';
+import {
+  CHUNGBUK_REGIONS,
+  getChungbukRegionLabel,
+} from '../../data/chungbukRegions';
 import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
@@ -27,6 +30,12 @@ const OLIVE_YOUNG_SEARCH_KEYWORD = '올리브영';
 const SEARCH_CATEGORY_VALUES = PLACE_CATEGORIES
   .filter(category => category.value !== 'ALL')
   .map(category => category.value);
+const CATEGORY_SEARCH_TERMS = {
+  TOURIST_ATTRACTION: ['관광지', '관광', '명소', '여행지', '볼거리', 'tourist', 'attraction'],
+  RESTAURANT: ['음식점', '식당', '맛집', '음식', '먹거리', 'restaurant', 'food'],
+  SHOPPING: ['쇼핑', '상점', '매장', '가게', 'shopping', 'store'],
+  OLIVE_YOUNG: ['올리브영', '올영', 'oliveyoung', 'olive young'],
+};
 
 function getCssColor(variableName) {
   return window.getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
@@ -83,6 +92,102 @@ function getApiCategory(category) {
 
 function getDisplayCategory(category) {
   return PLACE_CATEGORIES.find(item => item.value === category)?.label || '';
+}
+
+function normalizeSearchText(value) {
+  return String(value ?? '')
+    .trim()
+    .replace(/\s+/g, '')
+    .toLowerCase();
+}
+
+function getSearchTokens(keyword) {
+  return String(keyword ?? '')
+    .trim()
+    .split(/\s+/)
+    .map(normalizeSearchText)
+    .filter(Boolean);
+}
+
+function getCategoryValueByLabel(label) {
+  return PLACE_CATEGORIES.find(category => category.label === label)?.value || '';
+}
+
+function getPlaceCategoryValue(place) {
+  return getCategoryValueByLabel(place?.category) || place?.category || '';
+}
+
+function getRegionSearchTerms(regionValue) {
+  const label = getChungbukRegionLabel(regionValue);
+  const shortLabel = label.replace(/[시군]$/, '');
+
+  return [label, shortLabel]
+    .map(normalizeSearchText)
+    .filter(Boolean);
+}
+
+function getPlaceSearchText(place) {
+  return [
+    place?.name,
+    place?.address,
+    place?.category,
+    place?.primaryTypeName,
+    place?.primaryType,
+  ].map(normalizeSearchText).join(' ');
+}
+
+function matchesSelectedRegion(place, regionValue) {
+  if (regionValue === 'ALL') {
+    return true;
+  }
+
+  const placeText = getPlaceSearchText(place);
+
+  return getRegionSearchTerms(regionValue).some(term => placeText.includes(term));
+}
+
+function matchesSelectedCategory(place, categoryValue) {
+  if (categoryValue === 'ALL') {
+    return true;
+  }
+
+  const placeCategoryValue = getPlaceCategoryValue(place);
+
+  if (categoryValue === OLIVE_YOUNG_CATEGORY) {
+    return getPlaceSearchText(place).includes(normalizeSearchText(OLIVE_YOUNG_SEARCH_KEYWORD));
+  }
+
+  return placeCategoryValue === categoryValue || place?.category === getDisplayCategory(categoryValue);
+}
+
+function matchesKeywordToken(place, token) {
+  const placeText = getPlaceSearchText(place);
+  const categoryValue = getPlaceCategoryValue(place);
+  const matchedRegion = CHUNGBUK_REGIONS.some(region =>
+    region.value !== 'ALL' &&
+    getRegionSearchTerms(region.value).some(term =>
+      (term.includes(token) || token.includes(term)) && placeText.includes(term),
+    ),
+  );
+  const matchedCategory = Object.entries(CATEGORY_SEARCH_TERMS).some(([value, terms]) => {
+    if (categoryValue !== value && place?.category !== getDisplayCategory(value)) {
+      return false;
+    }
+
+    return terms.map(normalizeSearchText).some(term => term.includes(token) || token.includes(term));
+  });
+
+  return placeText.includes(token) || matchedRegion || matchedCategory;
+}
+
+function applyClientFilters(places, search) {
+  const tokens = getSearchTokens(search.keyword);
+
+  return places.filter(place => (
+    matchesSelectedRegion(place, search.region) &&
+    matchesSelectedCategory(place, search.category) &&
+    tokens.every(token => matchesKeywordToken(place, token))
+  ));
 }
 
 async function fetchAllPlacesForCategory({ keyword, category, displayCategory, signal }) {
@@ -366,8 +471,9 @@ export default function MapPage() {
         search,
         signal: controller.signal,
       });
+      const filteredItems = applyClientFilters(responseItems, search);
 
-      setPlaces(responseItems);
+      setPlaces(filteredItems);
       setHasSearched(true);
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
