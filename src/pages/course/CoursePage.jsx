@@ -116,7 +116,6 @@ export default function CoursePage() {
   const [resultState, setResultState] = useState({
     status: 'idle',
     data: null,
-    requestBody: null,
     error: '',
   });
 
@@ -159,12 +158,11 @@ export default function CoursePage() {
     }));
 
     try {
-      const { recommendation, requestBody } = await requestRouteRecommendation(formValues);
+      const recommendation = await requestRouteRecommendation(formValues);
 
       setResultState({
         status: 'success',
         data: recommendation,
-        requestBody,
         error: '',
       });
     } catch (error) {
@@ -414,16 +412,6 @@ export default function CoursePage() {
                 )}
               </section>
 
-              {resultState.requestBody && (
-                <section className={styles.sectionCard}>
-                  <h2>전송된 AI 요청 데이터</h2>
-                  <p>연동 테스트를 위해 weatherTimeline과 candidatePlaces 변환 결과를 확인할 수 있습니다.</p>
-                  <details className={styles.debugDetails}>
-                    <summary>요청 JSON 보기</summary>
-                    <pre>{JSON.stringify(resultState.requestBody, null, 2)}</pre>
-                  </details>
-                </section>
-              )}
             </div>
           )}
         </section>
