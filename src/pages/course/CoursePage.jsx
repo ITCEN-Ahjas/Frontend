@@ -85,6 +85,74 @@ const INITIAL_FORM = {
   endLocation: '청주 시외버스터미널',
 };
 
+const FALLBACK_PLACE_COORDINATES = [
+  {
+    keywords: ['수암골'],
+    latitude: 36.6432,
+    longitude: 127.4933,
+  },
+  {
+    keywords: ['운보의집', '운보'],
+    latitude: 36.7197,
+    longitude: 127.5821,
+  },
+  {
+    keywords: ['청주삼겹살거리', '삼겹살거리', '서문시장'],
+    latitude: 36.6358,
+    longitude: 127.4885,
+  },
+  {
+    keywords: ['미동산수목원', '미동산'],
+    latitude: 36.6175,
+    longitude: 127.6596,
+  },
+  {
+    keywords: ['상당산성'],
+    latitude: 36.6589,
+    longitude: 127.5364,
+  },
+  {
+    keywords: ['청남대'],
+    latitude: 36.4621,
+    longitude: 127.4908,
+  },
+  {
+    keywords: ['국립청주박물관', '청주박물관'],
+    latitude: 36.6538,
+    longitude: 127.5126,
+  },
+  {
+    keywords: ['문암생태공원'],
+    latitude: 36.6665,
+    longitude: 127.4476,
+  },
+  {
+    keywords: ['성안길'],
+    latitude: 36.6356,
+    longitude: 127.4895,
+  },
+  {
+    keywords: ['제천중앙시장'],
+    latitude: 37.1365,
+    longitude: 128.2091,
+  },
+  {
+    keywords: ['도담삼봉'],
+    latitude: 37.0006,
+    longitude: 128.3436,
+  },
+  {
+    keywords: ['다리안계곡'],
+    latitude: 36.9842,
+    longitude: 128.4108,
+  },
+  {
+    keywords: ['정방사'],
+    latitude: 37.0605,
+    longitude: 128.2368,
+  },
+];
+
 function asArray(value) {
   if (Array.isArray(value)) {
     return value;
@@ -110,15 +178,122 @@ function stringify(value) {
 }
 
 function toFiniteNumber(value) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+
   const number = Number(value);
 
   return Number.isFinite(number) ? number : null;
 }
 
+function findFallbackCoordinates(placeName) {
+  const normalizedName = String(placeName || '').replace(/\s+/g, '').toLowerCase();
+
+  if (!normalizedName) {
+    return null;
+  }
+
+  return FALLBACK_PLACE_COORDINATES.find(item =>
+    item.keywords.some(keyword => normalizedName.includes(keyword.replace(/\s+/g, '').toLowerCase())),
+  ) || null;
+}
+
+function createApproximateCoordinates(index, baseCoordinates = CHUNGBUK_CENTER) {
+  const offsetSteps = [
+    { lat: 0, lng: 0 },
+    { lat: 0.018, lng: 0.018 },
+    { lat: -0.018, lng: 0.018 },
+    { lat: 0.018, lng: -0.018 },
+    { lat: -0.018, lng: -0.018 },
+    { lat: 0.032, lng: 0 },
+    { lat: 0, lng: 0.032 },
+    { lat: -0.032, lng: 0 },
+  ];
+  const offset = offsetSteps[index % offsetSteps.length];
+
+  return {
+    latitude: baseCoordinates.lat + offset.lat,
+    longitude: baseCoordinates.lng + offset.lng,
+    approximate: true,
+  };
+}
+
+function createResolvedPlace(place, coordinates, index, baseCoordinates) {
+  if (place.latitude !== null && place.longitude !== null) {
+    return {
+      ...place,
+      isApproximateLocation: false,
+    };
+  }
+
+  const fallbackCoordinates =
+    coordinates || createApproximateCoordinates(index, baseCoordinates);
+
+  return {
+    ...place,
+    latitude: fallbackCoordinates.latitude ?? place.latitude,
+    longitude: fallbackCoordinates.longitude ?? place.longitude,
+    isApproximateLocation: Boolean(fallbackCoordinates.approximate),
+  };
+}
+
+function getPlaceDetails(service, placeId) {
+  return new Promise(resolve => {
+    service.getDetails(
+      {
+        placeId,
+        fields: ['geometry', 'formatted_address', 'photos'],
+      },
+      (place, status) => {
+        if (status !== window.google.maps.places.PlacesServiceStatus.OK || !place) {
+          resolve(null);
+          return;
+        }
+
+        resolve(place);
+      },
+    );
+  });
+}
+
+function geocodePlace(geocoder, place) {
+  const query = [place.title, place.address, '충북']
+    .filter(Boolean)
+    .join(' ');
+
+  return geocoder.geocode({
+    address: query,
+    region: 'KR',
+  });
+}
+
+function formatStayMinutes(value) {
+  const minutes = Number(value);
+
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    return '';
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const restMinutes = minutes % 60;
+
+  if (hours > 0 && restMinutes > 0) {
+    return `${hours}시간 ${restMinutes}분`;
+  }
+
+  if (hours > 0) {
+    return `${hours}시간`;
+  }
+
+  return `${restMinutes}분`;
+}
+
 function normalizeItineraryItem(item, index) {
   const place = item?.place || item?.placeName || item?.name || item?.title;
-  const latitude = toFiniteNumber(item?.latitude);
-  const longitude = toFiniteNumber(item?.longitude);
+  const fallbackCoordinates = findFallbackCoordinates(place);
+  const latitude = toFiniteNumber(item?.latitude) ?? fallbackCoordinates?.latitude ?? null;
+  const longitude = toFiniteNumber(item?.longitude) ?? fallbackCoordinates?.longitude ?? null;
 
   return {
     placeId: stringify(item?.placeId || item?.id) || `course-place-${index + 1}`,
@@ -139,17 +314,49 @@ function normalizeItineraryItem(item, index) {
   };
 }
 
+function normalizePlanBOption(option, index) {
+  if (typeof option === 'string') {
+    return {
+      id: `plan-b-${index + 1}`,
+      triggerCondition: '대체 코스',
+      replaceFrom: '',
+      replaceTo: '',
+      reason: option,
+    };
+  }
+
+  return {
+    id: `plan-b-${index + 1}`,
+    triggerCondition: stringify(option?.triggerCondition) || '대체 코스',
+    replaceFrom: stringify(option?.replaceFrom),
+    replaceTo: stringify(option?.replaceTo),
+    reason: stringify(option?.reason || option?.description || option?.summary),
+  };
+}
+
 function normalizeRecommendation(response) {
   const itinerary = asArray(response?.itinerary || response?.days?.flatMap(day => day?.places || []))
     .map(normalizeItineraryItem);
+  const routeOverview = response?.routeOverview || {};
+  const planBOptions = asArray(response?.planBOptions || response?.planB || response?.alternatives)
+    .map(normalizePlanBOption);
+  const weatherNoteDetails = asArray(response?.weatherNoteDetails || response?.weatherNotes);
 
   return {
     summary: stringify(response?.summary) || '추천 요약이 아직 제공되지 않았습니다.',
-    totalDistance: stringify(response?.totalDistance || response?.distance) || '계산 예정',
-    totalDuration: stringify(response?.totalDuration || response?.duration) || '계산 예정',
+    overviewTitle: stringify(routeOverview?.title),
+    totalDistance: stringify(response?.totalDistance || response?.distance) || '지도 동선 기준 확인',
+    totalDuration:
+      stringify(response?.totalDuration || response?.duration) ||
+      formatStayMinutes(routeOverview?.totalStayMinutes) ||
+      '계산 예정',
+    totalPlaces: Number(routeOverview?.totalPlaces) || itinerary.length,
+    weatherSummary: stringify(routeOverview?.weatherSummary),
+    styleTags: asArray(routeOverview?.styleTags).map(stringify).filter(Boolean),
     itinerary,
     planB: asArray(response?.planB || response?.alternatives),
-    weatherNotes: asArray(response?.weatherNotes || response?.weatherWarnings),
+    planBOptions,
+    weatherNotes: weatherNoteDetails,
   };
 }
 
@@ -239,8 +446,15 @@ function SummaryTab({ result }) {
   return (
     <div className={styles.tabContent}>
       <section className={styles.summaryBox}>
-        <h3>추천 요약</h3>
+        <h3>{result.overviewTitle || '추천 요약'}</h3>
         <p>{result.summary}</p>
+        {result.styleTags.length > 0 && (
+          <div className={styles.styleTagList}>
+            {result.styleTags.map(tag => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+        )}
       </section>
 
       <div className={styles.summaryStats}>
@@ -252,6 +466,14 @@ function SummaryTab({ result }) {
           <span>예상 소요시간</span>
           <strong>{result.totalDuration}</strong>
         </div>
+        <div>
+          <span>추천 장소</span>
+          <strong>{result.totalPlaces}곳</strong>
+        </div>
+        <div>
+          <span>날씨 반영</span>
+          <strong>{result.weatherSummary || '일정별 안내 확인'}</strong>
+        </div>
       </div>
 
       <section className={styles.weatherBox}>
@@ -259,7 +481,16 @@ function SummaryTab({ result }) {
         {result.weatherNotes.length > 0 ? (
           <ul>
             {result.weatherNotes.map((note, index) => (
-              <li key={`${stringify(note)}-${index}`}>{stringify(note)}</li>
+              <li key={`${stringify(note)}-${index}`}>
+                {typeof note === 'object' && note !== null ? (
+                  <>
+                    <strong>{stringify(note.timeRange) || '여행 시간대'}</strong>
+                    <span>{stringify(note.summary) || stringify(note)}</span>
+                  </>
+                ) : (
+                  stringify(note)
+                )}
+              </li>
             ))}
           </ul>
         ) : (
@@ -268,6 +499,21 @@ function SummaryTab({ result }) {
       </section>
     </div>
   );
+}
+
+function getPlacePlanBOptions(result, place) {
+  return result.planBOptions.filter(option => {
+    if (!option.replaceFrom) {
+      return false;
+    }
+
+    return (
+      option.replaceFrom === place.title ||
+      option.replaceFrom === place.placeId ||
+      place.title.includes(option.replaceFrom) ||
+      option.replaceFrom.includes(place.title)
+    );
+  });
 }
 
 function ItineraryTab({ result, selectedPlaceId, onSelectPlace }) {
@@ -291,6 +537,7 @@ function ItineraryTab({ result, selectedPlaceId, onSelectPlace }) {
           <div className={styles.placeList}>
             {items.map((item, index) => {
               const isSelected = selectedPlaceId === item.placeId;
+              const placePlanBOptions = getPlacePlanBOptions(result, item);
 
               return (
                 <button
@@ -301,17 +548,37 @@ function ItineraryTab({ result, selectedPlaceId, onSelectPlace }) {
                 >
                   <span className={styles.placeOrder}>{item.order}</span>
                   <span className={styles.placeBody}>
+                    {item.imageUrl && (
+                      <span className={styles.placeImageBox}>
+                        <img src={item.imageUrl} alt="" loading="lazy" />
+                      </span>
+                    )}
                     <span className={styles.placeMeta}>
-                      <span>{item.time}</span>
+                      <span>{item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : item.time}</span>
                       <span>{item.category}</span>
                     </span>
                     <strong>{item.title}</strong>
                     {item.address && <span className={styles.address}>{item.address}</span>}
-                    {item.description && <span className={styles.placeDescription}>{item.description}</span>}
-                    <span className={styles.reasonList}>
-                      {item.weatherReason && <span>날씨 반영: {item.weatherReason}</span>}
-                      {item.moveTip && <span>이동 팁: {item.moveTip}</span>}
+                    <span className={styles.reasonPanel}>
+                      <span>
+                        <b>추천 이유</b>
+                        {item.description || '추천 이유가 응답에 포함되지 않았습니다.'}
+                      </span>
+                      <span>
+                        <b>날씨 반영</b>
+                        {item.weatherReason || '날씨 반영 이유가 응답에 포함되지 않았습니다.'}
+                      </span>
                     </span>
+                    {(item.moveTip || placePlanBOptions.length > 0) && (
+                      <span className={styles.reasonList}>
+                        {item.moveTip && <span>이동 팁: {item.moveTip}</span>}
+                        {placePlanBOptions.map(option => (
+                          <span key={option.id}>
+                            대체 코스: {option.replaceTo || option.reason}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </span>
                 </button>
               );
@@ -341,21 +608,32 @@ function ArticlesTab({ result }) {
 }
 
 function TalkTab({ result }) {
+  const planBItems = result.planBOptions.length > 0
+    ? result.planBOptions
+    : result.planB.map(normalizePlanBOption);
+
   return (
     <div className={styles.infoStack}>
       <section className={styles.infoNotice}>
         <h3>여행톡</h3>
         <p>여행자가 코스 선택 전에 확인할 수 있는 짧은 안내와 대체 코스를 모아 보여줍니다.</p>
       </section>
-      {result.planB.length > 0 ? (
-        result.planB.map((item, index) => (
-          <article key={`${stringify(item)}-${index}`} className={styles.infoItem}>
-            <span>대체 코스 {index + 1}</span>
-            <strong>{stringify(item)}</strong>
+      {planBItems.length > 0 ? (
+        planBItems.map((item, index) => (
+          <article key={item.id || `${stringify(item)}-${index}`} className={styles.planBCard}>
+            <span>{item.triggerCondition || `대체 코스 ${index + 1}`}</span>
+            {item.replaceFrom || item.replaceTo ? (
+              <strong>
+                {item.replaceFrom || '기존 장소'} → {item.replaceTo || '대체 장소'}
+              </strong>
+            ) : (
+              <strong>대체 코스 {index + 1}</strong>
+            )}
+            {item.reason && <p>{item.reason}</p>}
           </article>
         ))
       ) : (
-        <article className={styles.infoItem}>
+        <article className={styles.planBCard}>
           <span>대체 코스</span>
           <strong>응답에 대체 코스가 포함되면 이 영역에 표시됩니다.</strong>
         </article>
@@ -415,10 +693,56 @@ function PlannerMap({ result, selectedPlaceId, onSelectPlace }) {
   const mapInstanceRef = useRef(null);
   const markerInstancesRef = useRef(new Map());
   const routeLineRef = useRef(null);
+  const coordinateResolveAttemptRef = useRef(new Set());
   const [mapStatus, setMapStatus] = useState('loading');
   const [mapErrorMessage, setMapErrorMessage] = useState('');
+  const [resolvedCoordinates, setResolvedCoordinates] = useState({});
   const places = result?.itinerary || [];
-  const mappablePlaces = useMemo(() => getMappablePlaces(places), [places]);
+  const placeSignature = useMemo(
+    () => places.map(place => place.placeId).join('|'),
+    [places],
+  );
+  const routeBaseCoordinates = useMemo(() => {
+    const knownPlace = places.find(
+      place => place.latitude !== null && place.longitude !== null,
+    );
+
+    if (knownPlace) {
+      return {
+        lat: knownPlace.latitude,
+        lng: knownPlace.longitude,
+      };
+    }
+
+    const resolvedCoordinate = Object.values(resolvedCoordinates).find(Boolean);
+
+    if (resolvedCoordinate) {
+      return {
+        lat: resolvedCoordinate.latitude,
+        lng: resolvedCoordinate.longitude,
+      };
+    }
+
+    return CHUNGBUK_CENTER;
+  }, [places, resolvedCoordinates]);
+  const resolvedPlaces = useMemo(
+    () =>
+      places.map((place, index) =>
+        createResolvedPlace(
+          place,
+          resolvedCoordinates[place.placeId],
+          index,
+          routeBaseCoordinates,
+        ),
+      ),
+    [places, resolvedCoordinates, routeBaseCoordinates],
+  );
+  const mappablePlaces = useMemo(() => getMappablePlaces(resolvedPlaces), [resolvedPlaces]);
+
+  useEffect(() => {
+    coordinateResolveAttemptRef.current.clear();
+    setResolvedCoordinates({});
+  }, [placeSignature]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -467,6 +791,83 @@ function PlannerMap({ result, selectedPlaceId, onSelectPlace }) {
       routeLineRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      mapStatus !== 'ready' ||
+      !window.google?.maps ||
+      !mapInstanceRef.current ||
+      places.length === 0
+    ) {
+      return undefined;
+    }
+
+    let isCancelled = false;
+    const unresolvedPlaces = places.filter(
+      place =>
+        place.latitude === null &&
+        place.longitude === null &&
+        !resolvedCoordinates[place.placeId] &&
+        !coordinateResolveAttemptRef.current.has(place.placeId),
+    );
+
+    if (unresolvedPlaces.length === 0) {
+      return undefined;
+    }
+
+    async function resolveMissingCoordinates() {
+      const { PlacesService } = await importGoogleMapsLibrary('places');
+      const placesService = new PlacesService(mapInstanceRef.current);
+      const geocoder = new window.google.maps.Geocoder();
+      const nextCoordinates = {};
+
+      for (const place of unresolvedPlaces) {
+        coordinateResolveAttemptRef.current.add(place.placeId);
+
+        try {
+          const placeDetails = place.placeId
+            ? await getPlaceDetails(placesService, place.placeId)
+            : null;
+          const detailLocation = placeDetails?.geometry?.location;
+
+          if (detailLocation) {
+            nextCoordinates[place.placeId] = {
+              latitude: detailLocation.lat(),
+              longitude: detailLocation.lng(),
+            };
+            continue;
+          }
+
+          const response = await geocodePlace(geocoder, place);
+          const geocodeLocation = response.results?.[0]?.geometry?.location;
+
+          if (!geocodeLocation) {
+            continue;
+          }
+
+          nextCoordinates[place.placeId] = {
+            latitude: geocodeLocation.lat(),
+            longitude: geocodeLocation.lng(),
+          };
+        } catch {
+          // 좌표 보강 실패 시 해당 장소는 일정에만 표시한다.
+        }
+      }
+
+      if (!isCancelled && Object.keys(nextCoordinates).length > 0) {
+        setResolvedCoordinates(previous => ({
+          ...previous,
+          ...nextCoordinates,
+        }));
+      }
+    }
+
+    resolveMissingCoordinates();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [mapStatus, places, resolvedCoordinates]);
 
   useEffect(() => {
     if (mapStatus !== 'ready' || !mapInstanceRef.current) {
@@ -563,8 +964,8 @@ function PlannerMap({ result, selectedPlaceId, onSelectPlace }) {
         <div>
           <span>Route Map</span>
           <strong>
-            {mappablePlaces.length > 0
-              ? `${mappablePlaces.length}개 지도 표시 지점`
+            {places.length > 0
+              ? `${mappablePlaces.length}/${places.length}개 지도 표시 지점`
               : '지도 표시 지점 대기 중'}
           </strong>
         </div>
@@ -597,8 +998,8 @@ function PlannerMap({ result, selectedPlaceId, onSelectPlace }) {
         {mapStatus === 'ready' && places.length > 0 && mappablePlaces.length === 0 && (
           <div className={styles.mapNotice}>
             <FiMapPin aria-hidden="true" />
-            <strong>좌표가 있는 추천 장소가 없습니다.</strong>
-            <p>일정 목록은 표시되며, 좌표가 포함된 응답이 오면 지도에 마커가 표시됩니다.</p>
+            <strong>추천 장소 좌표를 찾고 있습니다.</strong>
+            <p>백엔드 응답에 좌표가 없어서 장소명으로 지도 위치를 보강하는 중입니다.</p>
           </div>
         )}
 
@@ -826,6 +1227,17 @@ export default function CoursePage() {
             </button>
           </form>
 
+        </aside>
+
+        <div className={styles.mapColumn}>
+          <PlannerMap
+            result={normalizedResult}
+            selectedPlaceId={selectedPlaceId}
+            onSelectPlace={handleSelectPlace}
+          />
+        </div>
+
+        <aside className={styles.resultColumn}>
           {normalizedResult ? (
             <PlannerTabs
               result={normalizedResult}
@@ -836,14 +1248,6 @@ export default function CoursePage() {
             <StatusPanel status={resultState.status} error={resultState.error} />
           )}
         </aside>
-
-        <div className={styles.mapColumn}>
-          <PlannerMap
-            result={normalizedResult}
-            selectedPlaceId={selectedPlaceId}
-            onSelectPlace={handleSelectPlace}
-          />
-        </div>
       </div>
     </section>
   );
