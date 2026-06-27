@@ -36,6 +36,13 @@ const CATEGORY_SEARCH_TERMS = {
   SHOPPING: ['쇼핑', '상점', '매장', '가게', 'shopping', 'store'],
   OLIVE_YOUNG: ['올리브영', '올영', 'oliveyoung', 'olive young'],
 };
+const CHUNGBUK_BOUNDARY_STYLE = {
+  fillOpacity: 0.14,
+  outerStrokeOpacity: 0.24,
+  outerStrokeWeight: 7,
+  innerStrokeOpacity: 0.86,
+  innerStrokeWeight: 3,
+};
 
 function getCssColor(variableName) {
   return window.getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
@@ -92,6 +99,54 @@ function getApiCategory(category) {
 
 function getDisplayCategory(category) {
   return PLACE_CATEGORIES.find(item => item.value === category)?.label || '';
+}
+
+function createBoundaryOverlays(map) {
+  const boundaryColor = getCssColor('--color-chungbuk-purple');
+
+  return {
+    fill: new window.google.maps.Polygon({
+      paths: CHUNGBUK_BOUNDARY_PATH,
+      strokeOpacity: 0,
+      fillColor: boundaryColor,
+      fillOpacity: CHUNGBUK_BOUNDARY_STYLE.fillOpacity,
+      clickable: false,
+      zIndex: 1,
+      map,
+    }),
+    outerLine: new window.google.maps.Polyline({
+      path: [...CHUNGBUK_BOUNDARY_PATH, CHUNGBUK_BOUNDARY_PATH[0]],
+      strokeColor: boundaryColor,
+      strokeOpacity: CHUNGBUK_BOUNDARY_STYLE.outerStrokeOpacity,
+      strokeWeight: CHUNGBUK_BOUNDARY_STYLE.outerStrokeWeight,
+      clickable: false,
+      zIndex: 2,
+      map,
+    }),
+    innerLine: new window.google.maps.Polyline({
+      path: [...CHUNGBUK_BOUNDARY_PATH, CHUNGBUK_BOUNDARY_PATH[0]],
+      strokeColor: boundaryColor,
+      strokeOpacity: CHUNGBUK_BOUNDARY_STYLE.innerStrokeOpacity,
+      strokeWeight: CHUNGBUK_BOUNDARY_STYLE.innerStrokeWeight,
+      clickable: false,
+      zIndex: 3,
+      map,
+    }),
+  };
+}
+
+function clearBoundaryOverlays(overlays) {
+  overlays?.fill?.setMap(null);
+  overlays?.outerLine?.setMap(null);
+  overlays?.innerLine?.setMap(null);
+}
+
+function createBoundaryBounds() {
+  const bounds = new window.google.maps.LatLngBounds();
+
+  CHUNGBUK_BOUNDARY_PATH.forEach(position => bounds.extend(position));
+
+  return bounds;
 }
 
 function normalizeSearchText(value) {
@@ -262,7 +317,7 @@ export default function MapPage() {
   const navigate = useNavigate();
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const boundaryPolygonRef = useRef(null);
+  const boundaryOverlayRef = useRef(null);
   const markerInstancesRef = useRef(new Map());
   const searchAbortControllerRef = useRef(null);
   const [mapStatus, setMapStatus] = useState('loading');
@@ -332,16 +387,8 @@ export default function MapPage() {
           gestureHandling: 'greedy',
         });
 
-        boundaryPolygonRef.current = new window.google.maps.Polygon({
-          paths: CHUNGBUK_BOUNDARY_PATH,
-          strokeColor: getCssColor('--color-chungbuk-purple'),
-          strokeOpacity: 0.95,
-          strokeWeight: 4,
-          fillColor: getCssColor('--color-chungbuk-purple'),
-          fillOpacity: 0.08,
-          clickable: false,
-          map: mapInstanceRef.current,
-        });
+        boundaryOverlayRef.current = createBoundaryOverlays(mapInstanceRef.current);
+        mapInstanceRef.current.fitBounds(createBoundaryBounds(), 44);
 
         setMapStatus('ready');
       } catch (error) {
@@ -362,8 +409,8 @@ export default function MapPage() {
 
     return () => {
       isCancelled = true;
-      boundaryPolygonRef.current?.setMap(null);
-      boundaryPolygonRef.current = null;
+      clearBoundaryOverlays(boundaryOverlayRef.current);
+      boundaryOverlayRef.current = null;
     };
   }, []);
 
