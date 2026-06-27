@@ -356,15 +356,30 @@
   gap: 0;
 }
 
-.placeItem {
+.placeItem,
+.selectedPlaceItem {
   display: grid;
   grid-template-columns: 3.8rem minmax(0, 1fr);
   gap: 1.2rem;
+  width: 100%;
   padding: 1.5rem 1.7rem;
+  border: 0;
   border-bottom: 1px solid var(--color-slate-100);
+  background: var(--color-white);
+  text-align: left;
 }
 
-.placeItem:last-child {
+.placeItem:hover,
+.selectedPlaceItem {
+  background: var(--color-brand-primary-bg-faint);
+}
+
+.selectedPlaceItem {
+  border-left: 0.4rem solid var(--color-chungbuk-purple);
+}
+
+.placeItem:last-child,
+.selectedPlaceItem:last-child {
   border-bottom: 0;
 }
 
@@ -382,6 +397,7 @@
 }
 
 .placeBody {
+  display: block;
   min-width: 0;
 }
 
@@ -404,7 +420,8 @@
   font-weight: 900;
 }
 
-.placeBody h4 {
+.placeBody strong {
+  display: block;
   margin: 0;
   color: var(--color-slate-950);
   font-size: 1.58rem;
@@ -414,7 +431,17 @@
 }
 
 .address {
+  display: block;
   color: var(--color-slate-500) !important;
+}
+
+.placeDescription {
+  display: block;
+  margin: 0.8rem 0 0;
+  color: var(--color-slate-600);
+  font-size: 1.34rem;
+  font-weight: 700;
+  line-height: 1.65;
 }
 
 .reasonList {
@@ -559,108 +586,72 @@
   position: relative;
   min-height: 75rem;
   overflow: hidden;
-  background:
-    linear-gradient(var(--color-map-overlay), var(--color-map-overlay)),
-    var(--color-detail-map-bg);
+  background: var(--color-detail-map-bg);
 }
 
-.mapGrid {
+.googleMap {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, var(--color-detail-grid-line) 1px, transparent 1px),
-    linear-gradient(var(--color-detail-grid-line) 1px, transparent 1px);
-  background-size: 4.8rem 4.8rem;
+  width: 100%;
+  height: 100%;
 }
 
-.routePreview {
-  position: absolute;
-  inset: 0;
-}
-
-.routePreview::before {
-  position: absolute;
-  top: 30%;
-  left: 22%;
-  width: 48%;
-  height: 34%;
-  border: 0.4rem solid var(--color-brand-primary-border-strong);
-  border-right-color: transparent;
-  border-bottom-color: transparent;
-  border-radius: 46% 42% 36% 44%;
-  content: '';
-  transform: rotate(-10deg);
-}
-
-.routePoint {
+.mapState,
+.mapNotice {
   position: absolute;
   display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  max-width: 22rem;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--color-brand-primary-border-soft);
-  border-radius: 0.8rem;
-  background: var(--color-white);
-  box-shadow: 0 1rem 2.6rem var(--color-shadow-card);
-}
-
-.routePoint span {
-  display: inline-flex;
-  flex: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 50%;
-  background: var(--color-chungbuk-purple);
-  color: var(--color-white);
-  font-size: 1.25rem;
-  font-weight: 900;
+  gap: 1rem;
+  text-align: center;
 }
 
-.routePoint strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--color-slate-800);
-  font-size: 1.22rem;
-  font-weight: 900;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.mapState {
+  inset: 0;
+  padding: 3rem;
+  background:
+    linear-gradient(var(--color-map-overlay), var(--color-map-overlay)),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 1.2rem,
+      var(--color-map-grid-line) 1.2rem,
+      var(--color-map-grid-line) 2.4rem
+    );
 }
 
-.mapEmptyText {
-  position: absolute;
+.mapNotice {
   right: 3rem;
   bottom: 3rem;
   left: 3rem;
-  display: flex;
-  flex-direction: column;
   align-items: flex-start;
-  gap: 0.8rem;
   max-width: 54rem;
   padding: 2rem;
   border: 1px solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-card-bg-translucent);
   box-shadow: 0 1.6rem 4rem var(--color-shadow-map-soft);
+  text-align: left;
 }
 
-.mapEmptyText svg {
+.mapState svg,
+.mapNotice svg {
   width: 2.4rem;
   height: 2.4rem;
   color: var(--color-chungbuk-purple);
 }
 
-.mapEmptyText strong {
+.mapState strong,
+.mapNotice strong {
   color: var(--color-chungbuk-dark-blue);
   font-size: 1.65rem;
   font-weight: 900;
   line-height: 1.4;
 }
 
-.mapEmptyText p {
+.mapState p,
+.mapNotice p {
   margin: 0;
   color: var(--color-slate-500);
   font-size: 1.34rem;
@@ -751,17 +742,14 @@
     min-height: 38rem;
   }
 
-  .mapEmptyText {
+  .mapNotice {
     right: 1.4rem;
     bottom: 1.4rem;
     left: 1.4rem;
   }
 
-  .routePoint {
-    max-width: 15rem;
-  }
-
-  .placeItem {
+  .placeItem,
+  .selectedPlaceItem {
     grid-template-columns: 3.4rem minmax(0, 1fr);
     padding: 1.4rem;
   }

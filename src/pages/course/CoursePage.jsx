@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FiCalendar,
   FiClock,
@@ -9,7 +9,13 @@ import {
   FiNavigation,
 } from 'react-icons/fi';
 import { requestRouteRecommendation } from '../../api/routeRecommendationApi';
+import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import styles from './CoursePage.module.css';
+
+const CHUNGBUK_CENTER = {
+  lat: 36.6357,
+  lng: 127.4917,
+};
 
 const REGION_OPTIONS = [
   '청주',
@@ -103,19 +109,33 @@ function stringify(value) {
   return String(value);
 }
 
+function toFiniteNumber(value) {
+  const number = Number(value);
+
+  return Number.isFinite(number) ? number : null;
+}
+
 function normalizeItineraryItem(item, index) {
   const place = item?.place || item?.placeName || item?.name || item?.title;
+  const latitude = toFiniteNumber(item?.latitude);
+  const longitude = toFiniteNumber(item?.longitude);
 
   return {
+    placeId: stringify(item?.placeId || item?.id) || `course-place-${index + 1}`,
     order: Number(item?.order) || index + 1,
     day: Number(item?.day) || 1,
     time: item?.time || item?.startTime || item?.arrivalTime || `${String(9 + index).padStart(2, '0')}:00`,
+    startTime: stringify(item?.startTime),
+    endTime: stringify(item?.endTime),
     title: stringify(place) || `추천 장소 ${index + 1}`,
     category: stringify(item?.category) || '추천 장소',
     address: stringify(item?.address),
+    imageUrl: stringify(item?.imageUrl || item?.photoUrl),
     description: stringify(item?.description || item?.activity || item?.recommendationReason || item?.reason),
     weatherReason: stringify(item?.weatherReason || item?.weatherReflectionReason || item?.weatherNote),
     moveTip: stringify(item?.moveTip || item?.transportTip || item?.travelTip),
+    latitude,
+    longitude,
   };
 }
 
@@ -133,6 +153,10 @@ function normalizeRecommendation(response) {
   };
 }
 
+function getMappablePlaces(items) {
+  return items.filter(item => item.latitude !== null && item.longitude !== null);
+}
+
 function groupItineraryByDay(items) {
   return items.reduce((groups, item) => {
     const dayKey = `Day ${item.day}`;
@@ -142,6 +166,29 @@ function groupItineraryByDay(items) {
       [dayKey]: [...(groups[dayKey] || []), item],
     };
   }, {});
+}
+
+function getCssColor(variableName) {
+  return window.getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+}
+
+function createNumberMarkerIcon(order, isSelected = false) {
+  const color = getCssColor(isSelected ? '--color-chungbuk-cyan' : '--color-chungbuk-purple');
+  const strokeColor = getCssColor('--color-white');
+  const size = isSelected ? 48 : 42;
+  const height = isSelected ? 58 : 52;
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 42 52">
+        <path fill="${color}" stroke="${strokeColor}" stroke-width="4" d="M21 2C10.51 2 2 10.51 2 21c0 13.68 19 28 19 28s19-14.32 19-28C40 10.51 31.49 2 21 2Z"/>
+        <circle cx="21" cy="21" r="11" fill="${strokeColor}"/>
+        <text x="21" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="${color}">${order}</text>
+      </svg>
+    `)}`,
+    scaledSize: new window.google.maps.Size(size, height),
+    anchor: new window.google.maps.Point(size / 2, height),
+  };
 }
 
 function SelectField({ id, label, value, options, onChange }) {
@@ -223,7 +270,7 @@ function SummaryTab({ result }) {
   );
 }
 
-function ItineraryTab({ result }) {
+function ItineraryTab({ result, selectedPlaceId, onSelectPlace }) {
   const groupedItems = groupItineraryByDay(result.itinerary);
   const dayEntries = Object.entries(groupedItems);
 
@@ -242,24 +289,33 @@ function ItineraryTab({ result }) {
         <section key={day} className={styles.daySection}>
           <h3>{day}</h3>
           <div className={styles.placeList}>
-            {items.map((item, index) => (
-              <article key={`${day}-${item.title}-${index}`} className={styles.placeItem}>
-                <div className={styles.placeOrder}>{item.order}</div>
-                <div className={styles.placeBody}>
-                  <div className={styles.placeMeta}>
-                    <span>{item.time}</span>
-                    <span>{item.category}</span>
-                  </div>
-                  <h4>{item.title}</h4>
-                  {item.address && <p className={styles.address}>{item.address}</p>}
-                  {item.description && <p>{item.description}</p>}
-                  <div className={styles.reasonList}>
-                    {item.weatherReason && <span>날씨 반영: {item.weatherReason}</span>}
-                    {item.moveTip && <span>이동 팁: {item.moveTip}</span>}
-                  </div>
-                </div>
-              </article>
-            ))}
+            {items.map((item, index) => {
+              const isSelected = selectedPlaceId === item.placeId;
+
+              return (
+                <button
+                  key={`${day}-${item.placeId}-${index}`}
+                  type="button"
+                  className={isSelected ? styles.selectedPlaceItem : styles.placeItem}
+                  onClick={() => onSelectPlace(item)}
+                >
+                  <span className={styles.placeOrder}>{item.order}</span>
+                  <span className={styles.placeBody}>
+                    <span className={styles.placeMeta}>
+                      <span>{item.time}</span>
+                      <span>{item.category}</span>
+                    </span>
+                    <strong>{item.title}</strong>
+                    {item.address && <span className={styles.address}>{item.address}</span>}
+                    {item.description && <span className={styles.placeDescription}>{item.description}</span>}
+                    <span className={styles.reasonList}>
+                      {item.weatherReason && <span>날씨 반영: {item.weatherReason}</span>}
+                      {item.moveTip && <span>이동 팁: {item.moveTip}</span>}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
       ))}
@@ -308,7 +364,7 @@ function TalkTab({ result }) {
   );
 }
 
-function PlannerTabs({ result }) {
+function PlannerTabs({ result, selectedPlaceId, onSelectPlace }) {
   const [activeTab, setActiveTab] = useState('summary');
   const activeItem = TAB_ITEMS.find(item => item.id === activeTab) || TAB_ITEMS[0];
 
@@ -341,52 +397,218 @@ function PlannerTabs({ result }) {
       </div>
 
       {activeTab === 'summary' && <SummaryTab result={result} />}
-      {activeTab === 'itinerary' && <ItineraryTab result={result} />}
+      {activeTab === 'itinerary' && (
+        <ItineraryTab
+          result={result}
+          selectedPlaceId={selectedPlaceId}
+          onSelectPlace={onSelectPlace}
+        />
+      )}
       {activeTab === 'articles' && <ArticlesTab result={result} />}
       {activeTab === 'talk' && <TalkTab result={result} />}
     </section>
   );
 }
 
-function PlannerMapPreview({ result }) {
+function PlannerMap({ result, selectedPlaceId, onSelectPlace }) {
+  const mapElementRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerInstancesRef = useRef(new Map());
+  const routeLineRef = useRef(null);
+  const [mapStatus, setMapStatus] = useState('loading');
+  const [mapErrorMessage, setMapErrorMessage] = useState('');
   const places = result?.itinerary || [];
+  const mappablePlaces = useMemo(() => getMappablePlaces(places), [places]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function initializeMap() {
+      try {
+        const { Map } = await importGoogleMapsLibrary('maps');
+
+        if (isCancelled || !mapElementRef.current || mapInstanceRef.current) {
+          return;
+        }
+
+        mapInstanceRef.current = new Map(mapElementRef.current, {
+          center: CHUNGBUK_CENTER,
+          zoom: 9,
+          mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || undefined,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          cameraControl: false,
+          gestureHandling: 'greedy',
+        });
+
+        setMapStatus('ready');
+      } catch (error) {
+        if (isCancelled) {
+          return;
+        }
+
+        setMapErrorMessage(
+          error instanceof Error
+            ? error.message
+            : 'Google 지도를 불러오는 중 오류가 발생했습니다.',
+        );
+        setMapStatus('error');
+      }
+    }
+
+    initializeMap();
+
+    return () => {
+      isCancelled = true;
+      markerInstancesRef.current.forEach(marker => marker.setMap(null));
+      markerInstancesRef.current.clear();
+      routeLineRef.current?.setMap(null);
+      routeLineRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mapStatus !== 'ready' || !mapInstanceRef.current) {
+      return undefined;
+    }
+
+    const markerInstances = markerInstancesRef.current;
+    const routePath = mappablePlaces.map(place => ({
+      lat: place.latitude,
+      lng: place.longitude,
+    }));
+    const bounds = new window.google.maps.LatLngBounds();
+
+    markerInstances.forEach(marker => marker.setMap(null));
+    markerInstances.clear();
+    routeLineRef.current?.setMap(null);
+    routeLineRef.current = null;
+
+    mappablePlaces.forEach(place => {
+      const position = {
+        lat: place.latitude,
+        lng: place.longitude,
+      };
+
+      const marker = new window.google.maps.Marker({
+        map: mapInstanceRef.current,
+        position,
+        title: place.title,
+        icon: createNumberMarkerIcon(place.order, selectedPlaceId === place.placeId),
+        zIndex: selectedPlaceId === place.placeId ? 1000 : place.order,
+      });
+
+      marker.addListener('click', () => onSelectPlace(place));
+      markerInstances.set(place.placeId, marker);
+      bounds.extend(position);
+    });
+
+    if (routePath.length >= 2) {
+      routeLineRef.current = new window.google.maps.Polyline({
+        map: mapInstanceRef.current,
+        path: routePath,
+        strokeColor: getCssColor('--color-chungbuk-purple'),
+        strokeOpacity: 0.82,
+        strokeWeight: 5,
+      });
+    }
+
+    if (routePath.length === 1) {
+      mapInstanceRef.current.setCenter(bounds.getCenter());
+      mapInstanceRef.current.setZoom(14);
+    } else if (routePath.length > 1) {
+      mapInstanceRef.current.fitBounds(bounds, 72);
+    } else {
+      mapInstanceRef.current.setCenter(CHUNGBUK_CENTER);
+      mapInstanceRef.current.setZoom(9);
+    }
+
+    return () => {
+      markerInstances.forEach(marker => marker.setMap(null));
+      markerInstances.clear();
+      routeLineRef.current?.setMap(null);
+      routeLineRef.current = null;
+    };
+  }, [mapStatus, mappablePlaces, onSelectPlace, selectedPlaceId]);
+
+  useEffect(() => {
+    if (mapStatus !== 'ready') {
+      return;
+    }
+
+    markerInstancesRef.current.forEach((marker, placeId) => {
+      const place = mappablePlaces.find(item => item.placeId === placeId);
+      const isSelected = selectedPlaceId === placeId;
+
+      if (!place) {
+        return;
+      }
+
+      marker.setIcon(createNumberMarkerIcon(place.order, isSelected));
+      marker.setZIndex(isSelected ? 1000 : place.order);
+
+      if (isSelected) {
+        mapInstanceRef.current?.panTo({
+          lat: place.latitude,
+          lng: place.longitude,
+        });
+      }
+    });
+  }, [mapStatus, mappablePlaces, selectedPlaceId]);
 
   return (
     <section className={styles.mapPanel} aria-label="AI 추천 코스 지도">
       <div className={styles.mapToolbar}>
         <div>
           <span>Route Map</span>
-          <strong>{places.length > 0 ? `${places.length}개 추천 지점` : '추천 지점 대기 중'}</strong>
+          <strong>
+            {mappablePlaces.length > 0
+              ? `${mappablePlaces.length}개 지도 표시 지점`
+              : '지도 표시 지점 대기 중'}
+          </strong>
         </div>
         <button type="button" disabled>
           <FiMap aria-hidden="true" />
-          지도 연결 준비
+          Google Map
         </button>
       </div>
 
       <div className={styles.mapCanvas}>
-        <div className={styles.mapGrid} aria-hidden="true" />
-        <div className={styles.routePreview}>
-          {places.slice(0, 5).map((place, index) => (
-            <div
-              key={`${place.title}-${index}`}
-              className={styles.routePoint}
-              style={{
-                left: `${18 + (index % 3) * 27}%`,
-                top: `${22 + Math.floor(index / 3) * 33 + (index % 2) * 8}%`,
-              }}
-            >
-              <span>{index + 1}</span>
-              <strong>{place.title}</strong>
-            </div>
-          ))}
-        </div>
+        <div ref={mapElementRef} className={styles.googleMap} aria-label="추천 코스 Google 지도" />
 
-        <div className={styles.mapEmptyText}>
-          <FiMapPin aria-hidden="true" />
-          <strong>다음 커밋에서 Google Map 마커와 동선을 연결합니다.</strong>
-          <p>이번 커밋에서는 예시 화면 방향에 맞춰 지도형 플래너 레이아웃을 먼저 구성했습니다.</p>
-        </div>
+        {mapStatus !== 'ready' && (
+          <div className={styles.mapState} role={mapStatus === 'error' ? 'alert' : 'status'}>
+            {mapStatus === 'loading' ? (
+              <>
+                <span className={styles.spinner} aria-hidden="true" />
+                <strong>지도를 불러오고 있습니다.</strong>
+              </>
+            ) : (
+              <>
+                <FiMapPin aria-hidden="true" />
+                <strong>지도를 표시할 수 없습니다.</strong>
+                <p>{mapErrorMessage}</p>
+              </>
+            )}
+          </div>
+        )}
+
+        {mapStatus === 'ready' && places.length > 0 && mappablePlaces.length === 0 && (
+          <div className={styles.mapNotice}>
+            <FiMapPin aria-hidden="true" />
+            <strong>좌표가 있는 추천 장소가 없습니다.</strong>
+            <p>일정 목록은 표시되며, 좌표가 포함된 응답이 오면 지도에 마커가 표시됩니다.</p>
+          </div>
+        )}
+
+        {mapStatus === 'ready' && places.length === 0 && (
+          <div className={styles.mapNotice}>
+            <FiMapPin aria-hidden="true" />
+            <strong>추천 결과를 기다리고 있습니다.</strong>
+            <p>여행 조건을 입력하면 지도에 추천 장소와 이동 동선이 표시됩니다.</p>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -394,6 +616,7 @@ function PlannerMapPreview({ result }) {
 
 export default function CoursePage() {
   const [formValues, setFormValues] = useState(INITIAL_FORM);
+  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
   const [resultState, setResultState] = useState({
     status: 'idle',
     data: null,
@@ -404,6 +627,10 @@ export default function CoursePage() {
     () => (resultState.data ? normalizeRecommendation(resultState.data) : null),
     [resultState.data],
   );
+
+  const handleSelectPlace = useCallback(place => {
+    setSelectedPlaceId(place?.placeId || null);
+  }, []);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -432,6 +659,7 @@ export default function CoursePage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    setSelectedPlaceId(null);
     setResultState(previous => ({
       ...previous,
       status: 'loading',
@@ -599,14 +827,22 @@ export default function CoursePage() {
           </form>
 
           {normalizedResult ? (
-            <PlannerTabs result={normalizedResult} />
+            <PlannerTabs
+              result={normalizedResult}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={handleSelectPlace}
+            />
           ) : (
             <StatusPanel status={resultState.status} error={resultState.error} />
           )}
         </aside>
 
         <div className={styles.mapColumn}>
-          <PlannerMapPreview result={normalizedResult} />
+          <PlannerMap
+            result={normalizedResult}
+            selectedPlaceId={selectedPlaceId}
+            onSelectPlace={handleSelectPlace}
+          />
         </div>
       </div>
     </section>
