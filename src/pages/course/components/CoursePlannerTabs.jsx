@@ -154,27 +154,34 @@ function ItineraryTab({ result, selectedPlaceId, onSelectPlace }) {
   );
 }
 
-function ArticlesTab({ result }) {
-  return (
-    <div className={styles.infoStack}>
-      <section className={styles.infoNotice}>
-        <h3>연관 기사</h3>
-        <p>추천된 장소와 지역 정보를 연결해 보여줄 영역입니다. 현재 커밋에서는 탭 구조만 준비했습니다.</p>
-      </section>
-      {result.weatherNotes.slice(0, 2).map((note, index) => (
-        <article key={`${stringify(note)}-${index}`} className={styles.infoItem}>
-          <span>날씨 기반 참고</span>
-          <strong>{stringify(note)}</strong>
-        </article>
-      ))}
-    </div>
-  );
+function getMoveTipItems(result) {
+  const groupedTips = result.itinerary.reduce((groups, item) => {
+    if (!item.moveTip) {
+      return groups;
+    }
+
+    const normalizedTip = item.moveTip.trim();
+    const previousGroup = groups.get(normalizedTip) || [];
+
+    groups.set(normalizedTip, [...previousGroup, item.title]);
+
+    return groups;
+  }, new Map());
+
+  return Array.from(groupedTips.entries()).map(([tip, placeNames], index) => ({
+    id: `move-tip-${index + 1}`,
+    triggerCondition: placeNames.length > 1 ? '공통 이동 팁' : '이동 팁',
+    replaceFrom: '',
+    replaceTo: placeNames.length > 1 ? `${placeNames.length}개 장소 공통` : placeNames[0],
+    reason: tip,
+  }));
 }
 
 function TalkTab({ result }) {
   const planBItems = result.planBOptions.length > 0
     ? result.planBOptions
     : result.planB.map(normalizePlanBOption);
+  const talkItems = planBItems.length > 0 ? planBItems : getMoveTipItems(result);
 
   return (
     <div className={styles.infoStack}>
@@ -182,14 +189,16 @@ function TalkTab({ result }) {
         <h3>여행톡</h3>
         <p>여행자가 코스 선택 전에 확인할 수 있는 짧은 안내와 대체 코스를 모아 보여줍니다.</p>
       </section>
-      {planBItems.length > 0 ? (
-        planBItems.map((item, index) => (
+      {talkItems.length > 0 ? (
+        talkItems.map((item, index) => (
           <article key={item.id || `${stringify(item)}-${index}`} className={styles.planBCard}>
             <span>{item.triggerCondition || `대체 코스 ${index + 1}`}</span>
-            {item.replaceFrom || item.replaceTo ? (
+            {item.replaceFrom && item.replaceTo ? (
               <strong>
                 {item.replaceFrom || '기존 장소'} → {item.replaceTo || '대체 장소'}
               </strong>
+            ) : item.replaceTo ? (
+              <strong>{item.replaceTo}</strong>
             ) : (
               <strong>대체 코스 {index + 1}</strong>
             )}
@@ -246,7 +255,6 @@ export default function CoursePlannerTabs({ result, selectedPlaceId, onSelectPla
           onSelectPlace={onSelectPlace}
         />
       )}
-      {activeTab === 'articles' && <ArticlesTab result={result} />}
       {activeTab === 'talk' && <TalkTab result={result} />}
     </section>
   );
