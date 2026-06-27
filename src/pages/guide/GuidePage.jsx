@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
   FiMap,
-  FiMessageCircle,
-  FiSun,
   FiCompass,
   FiArrowRight,
 } from 'react-icons/fi';

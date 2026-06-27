@@ -43,6 +43,8 @@
 .formPanel {
   position: sticky;
   top: 10.8rem;
+  max-height: calc(100vh - 13.2rem);
+  overflow: auto;
   padding: 2.4rem;
 }
 
@@ -802,6 +804,7 @@
 
   .formPanel {
     position: static;
+    max-height: none;
   }
 
   .mapPanel {
