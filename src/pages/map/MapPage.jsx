@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { CHUNGBUK_BOUNDARY_PATH } from '../../data/chungbukBoundary';
+import { CHUNGBUK_REGION_BOUNDARY_PATHS } from '../../data/chungbukRegionBoundaries';
 import {
   CHUNGBUK_REGIONS,
   getChungbukRegionLabel,
@@ -42,6 +43,14 @@ const CHUNGBUK_BOUNDARY_STYLE = {
   outerStrokeWeight: 7,
   innerStrokeOpacity: 0.86,
   innerStrokeWeight: 3,
+};
+const SELECTED_REGION_BOUNDARY_STYLE = {
+  fillOpacity: 0.28,
+  outerStrokeOpacity: 0.28,
+  outerStrokeWeight: 8,
+  innerStrokeOpacity: 0.96,
+  innerStrokeWeight: 3,
+  zoom: 10,
 };
 
 function getCssColor(variableName) {
@@ -135,7 +144,57 @@ function createBoundaryOverlays(map) {
   };
 }
 
+function createClosedPath(path) {
+  if (path.length === 0) {
+    return [];
+  }
+
+  return [...path, path[0]];
+}
+
+function createRegionBoundaryOverlays(map, paths) {
+  const boundaryColor = getCssColor('--color-chungbuk-purple');
+  const outlinePath = paths.reduce((largestPath, path) => (
+    path.length > largestPath.length ? path : largestPath
+  ), []);
+
+  return [
+    new window.google.maps.Polygon({
+      paths: outlinePath,
+      strokeOpacity: 0,
+      fillColor: boundaryColor,
+      fillOpacity: SELECTED_REGION_BOUNDARY_STYLE.fillOpacity,
+      clickable: false,
+      zIndex: 4,
+      map,
+    }),
+    new window.google.maps.Polyline({
+      path: createClosedPath(outlinePath),
+      strokeColor: boundaryColor,
+      strokeOpacity: SELECTED_REGION_BOUNDARY_STYLE.outerStrokeOpacity,
+      strokeWeight: SELECTED_REGION_BOUNDARY_STYLE.outerStrokeWeight,
+      clickable: false,
+      zIndex: 5,
+      map,
+    }),
+    new window.google.maps.Polyline({
+      path: createClosedPath(outlinePath),
+      strokeColor: boundaryColor,
+      strokeOpacity: SELECTED_REGION_BOUNDARY_STYLE.innerStrokeOpacity,
+      strokeWeight: SELECTED_REGION_BOUNDARY_STYLE.innerStrokeWeight,
+      clickable: false,
+      zIndex: 6,
+      map,
+    }),
+  ];
+}
+
 function clearBoundaryOverlays(overlays) {
+  if (Array.isArray(overlays)) {
+    overlays.forEach(overlay => overlay.setMap(null));
+    return;
+  }
+
   overlays?.fill?.setMap(null);
   overlays?.outerLine?.setMap(null);
   overlays?.innerLine?.setMap(null);
@@ -145,6 +204,14 @@ function createBoundaryBounds() {
   const bounds = new window.google.maps.LatLngBounds();
 
   CHUNGBUK_BOUNDARY_PATH.forEach(position => bounds.extend(position));
+
+  return bounds;
+}
+
+function createPathsBounds(paths) {
+  const bounds = new window.google.maps.LatLngBounds();
+
+  paths.flat().forEach(position => bounds.extend(position));
 
   return bounds;
 }
@@ -318,6 +385,7 @@ export default function MapPage() {
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const boundaryOverlayRef = useRef(null);
+  const selectedRegionOverlayRef = useRef([]);
   const markerInstancesRef = useRef(new Map());
   const searchAbortControllerRef = useRef(null);
   const [mapStatus, setMapStatus] = useState('loading');
@@ -410,9 +478,45 @@ export default function MapPage() {
     return () => {
       isCancelled = true;
       clearBoundaryOverlays(boundaryOverlayRef.current);
+      clearBoundaryOverlays(selectedRegionOverlayRef.current);
       boundaryOverlayRef.current = null;
+      selectedRegionOverlayRef.current = [];
     };
   }, []);
+
+  useEffect(() => {
+    if (mapStatus !== 'ready' || !mapInstanceRef.current) {
+      return;
+    }
+
+    clearBoundaryOverlays(selectedRegionOverlayRef.current);
+    selectedRegionOverlayRef.current = [];
+
+    if (region === 'ALL') {
+      if (!boundaryOverlayRef.current) {
+        boundaryOverlayRef.current = createBoundaryOverlays(mapInstanceRef.current);
+      }
+
+      mapInstanceRef.current.fitBounds(createBoundaryBounds(), 44);
+      return;
+    }
+
+    clearBoundaryOverlays(boundaryOverlayRef.current);
+    boundaryOverlayRef.current = null;
+
+    const selectedRegionPaths = CHUNGBUK_REGION_BOUNDARY_PATHS[region];
+
+    if (!selectedRegionPaths) {
+      return;
+    }
+
+    selectedRegionOverlayRef.current = createRegionBoundaryOverlays(
+      mapInstanceRef.current,
+      selectedRegionPaths,
+    );
+    mapInstanceRef.current.panTo(createPathsBounds(selectedRegionPaths).getCenter());
+    mapInstanceRef.current.setZoom(SELECTED_REGION_BOUNDARY_STYLE.zoom);
+  }, [mapStatus, region]);
 
   const handleSelectPlace = useCallback((place, scrollToResult = false) => {
     if (!place?.placeId) {
