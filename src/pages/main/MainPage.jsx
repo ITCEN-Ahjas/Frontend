@@ -1,58 +1,101 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { FiArrowRight, FiMapPin, FiSearch } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   mainFeatureCards,
   mainPopularRegions,
   mainSearchKeywords,
-  mainTodayStats,
   mainWeatherCards,
 } from './mainPageMock';
 import styles from './MainPage.module.css';
 
 export default function MainPage() {
-  const primaryFeature = mainFeatureCards[0];
   const featuredRegion = mainPopularRegions[0];
   const primaryWeather = mainWeatherCards[0];
+  const navigate = useNavigate();
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  function handleSearchSubmit(event) {
+    event.preventDefault();
+
+    const keyword = searchKeyword.trim();
+    const query = keyword ? `?keyword=${encodeURIComponent(keyword)}` : '';
+
+    navigate(`/map${query}`);
+  }
 
   return (
     <section className={styles.page}>
-      <div className={styles.inner}>
-        <div className={styles.headerBlock}>
-          <span className={styles.eyebrow}>Chungbuk Travel</span>
-          <h1>충북 여행을 한 화면에서 시작하세요</h1>
-          <p>
-            메인페이지 화면 구조와 데이터 형태를 먼저 고정하기 위한 mock 기반
-            기본 화면입니다.
-          </p>
-        </div>
-
-        <div className={styles.previewGrid}>
-          <Link to={primaryFeature.href} className={styles.previewCard}>
-            <span>{primaryFeature.label}</span>
-            <strong>{primaryFeature.title}</strong>
-            <p>{primaryFeature.description}</p>
-          </Link>
-
-          <Link to={featuredRegion.href} className={styles.previewCard}>
-            <span>인기 지역</span>
-            <strong>{featuredRegion.name}</strong>
-            <p>{featuredRegion.description}</p>
-          </Link>
-
-          <div className={styles.previewCard}>
-            <span>오늘의 날씨</span>
-            <strong>{primaryWeather.region}</strong>
+      <div className={styles.hero}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroCopy}>
+            <span className={styles.eyebrow}>Chungbuk Travel Guide</span>
+            <h1>오늘의 충북 여행을 바로 찾아보세요</h1>
             <p>
-              {primaryWeather.temperature} · {primaryWeather.condition}
+              날씨, 지역, 취향에 맞춰 코스를 추천받고 충북의 축제, 체험, 숙박,
+              여행 장소를 한 화면에서 시작할 수 있습니다.
             </p>
+          </div>
+
+          <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
+            <label className={styles.searchLabel}>
+              <FiSearch aria-hidden="true" />
+              <input
+                type="search"
+                value={searchKeyword}
+                onChange={event => setSearchKeyword(event.target.value)}
+                placeholder="지역, 장소, 음식, 체험을 검색해보세요"
+                aria-label="충북 여행 검색어"
+              />
+            </label>
+            <button type="submit">
+              검색
+              <FiArrowRight aria-hidden="true" />
+            </button>
+          </form>
+
+          <div className={styles.keywordRow} aria-label="추천 검색어">
+            {mainSearchKeywords.map(keyword => (
+              <Link key={keyword.id} to={keyword.href}>
+                {keyword.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className={styles.featureGrid}>
+            {mainFeatureCards.map(feature => (
+              <Link key={feature.id} to={feature.href} className={styles.featureCard}>
+                <span>{feature.label}</span>
+                <strong>{feature.title}</strong>
+                <p>{feature.description}</p>
+              </Link>
+            ))}
           </div>
         </div>
 
-        <div className={styles.dataSummary} aria-label="메인페이지 mock 데이터 요약">
-          <span>기능 카드 {mainFeatureCards.length}개</span>
-          <span>인기 지역 {mainPopularRegions.length}개</span>
-          <span>추천 키워드 {mainSearchKeywords.length}개</span>
-          <span>오늘의 충북 {mainTodayStats.length}개</span>
-          <span>날씨 카드 {mainWeatherCards.length}개</span>
+        <div className={styles.heroVisual} aria-label="충북 여행 메인 요약">
+          <div className={styles.mapPanel}>
+            <div className={styles.regionBadge}>
+              <FiMapPin aria-hidden="true" />
+              {featuredRegion.name}
+            </div>
+            <strong>{featuredRegion.description}</strong>
+            <span>{featuredRegion.placeCount} places</span>
+          </div>
+
+          <div className={styles.weatherPanel}>
+            <span>Today</span>
+            <strong>{primaryWeather.temperature}</strong>
+            <p>
+              {primaryWeather.region} · {primaryWeather.condition}
+            </p>
+          </div>
+
+          <div className={styles.routePanel}>
+            <span>AI Route</span>
+            <strong>3시간 충북 코스</strong>
+            <p>날씨와 이동 흐름을 고려한 추천 일정</p>
+          </div>
         </div>
       </div>
     </section>
