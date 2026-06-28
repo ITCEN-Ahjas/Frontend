@@ -58,18 +58,28 @@ function getCssColor(variableName) {
 }
 
 function createMarkerIcon(isSelected = false) {
-  const color = getCssColor(isSelected ? '--color-chungbuk-cyan' : '--color-chungbuk-purple');
+  const fillColor = getCssColor('--color-chungbuk-purple');
+  const selectedFillColor = getCssColor('--color-chungbuk-cyan');
   const strokeColor = getCssColor('--color-white');
+  const shadowColor = 'rgba(49, 46, 129, 0.32)';
+  const markerFillColor = isSelected ? selectedFillColor : fillColor;
+  const width = isSelected ? 44 : 36;
+  const height = isSelected ? 54 : 44;
+  const viewBoxWidth = 48;
+  const viewBoxHeight = 58;
 
   return {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52">
-        <path fill="${color}" stroke="${strokeColor}" stroke-width="4" d="M20 2C10.06 2 2 10.06 2 20c0 13.5 18 29 18 29s18-15.5 18-29C38 10.06 29.94 2 20 2Z"/>
-        <circle cx="20" cy="20" r="6.5" fill="${strokeColor}"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="${viewBoxWidth}" height="${viewBoxHeight}" viewBox="0 0 ${viewBoxWidth} ${viewBoxHeight}">
+        <ellipse cx="24" cy="53" rx="10.8" ry="3.4" fill="${shadowColor}"/>
+        <path fill="${markerFillColor}" d="M24 1.5C12.7 1.5 3.6 10.4 3.6 21.5c0 14.2 15.9 26.7 19.4 33.5.4.8 1.6.8 2 0 3.5-6.8 19.4-19.3 19.4-33.5C44.4 10.4 35.3 1.5 24 1.5Z"/>
+        <circle cx="24" cy="21" r="9.3" fill="${strokeColor}"/>
+        <circle cx="24" cy="21" r="4.6" fill="${markerFillColor}"/>
+        ${isSelected ? `<circle cx="24" cy="21" r="13.3" fill="none" stroke="${markerFillColor}" stroke-width="2.6" opacity="0.46"/>` : ''}
       </svg>
     `)}`,
-    scaledSize: new window.google.maps.Size(isSelected ? 44 : 38, isSelected ? 57 : 49),
-    anchor: new window.google.maps.Point(isSelected ? 22 : 19, isSelected ? 57 : 49),
+    scaledSize: new window.google.maps.Size(width, height),
+    anchor: new window.google.maps.Point(width / 2, height - 3),
   };
 }
 
