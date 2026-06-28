@@ -6,11 +6,11 @@ import {
   FiClock,
   FiExternalLink,
   FiInfo,
-  FiMapPin,
   FiPhone,
 } from 'react-icons/fi';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchAccommodationDetail } from '../../api/lodgingApi';
+import DetailLocationMap from '../../components/DetailLocationMap';
 import styles from './LodgingDetailPage.module.css';
 
 const DEFAULT_IMAGE_TEXT = 'CHUNGBUK STAY';
@@ -85,8 +85,8 @@ function getLodgingDetail(rawDetail, fallbackItem) {
     roomCount: pickText(detail.roomCount),
     infoCenter: pickText(detail.infoCenter),
     rooms: Array.isArray(detail.rooms) ? detail.rooms : [],
-    mapX: detail.mapX ?? '',
-    mapY: detail.mapY ?? '',
+    mapX: detail.mapX ?? fallback.mapX ?? '',
+    mapY: detail.mapY ?? fallback.mapY ?? '',
   };
 }
 
@@ -285,14 +285,16 @@ export default function LodgingDetailPage() {
         <h2>위치 안내</h2>
 
         <div className={styles.locationBox}>
-          <div className={styles.mapPreview}>
-            <FiMapPin className={styles.mapPin} aria-hidden="true" />
-          </div>
+          <DetailLocationMap
+            className={styles.mapPreview}
+            latitude={detail.mapY}
+            longitude={detail.mapX}
+            title={detail.title}
+            address={detail.address}
+          />
 
           <div className={styles.locationContent}>
             <strong>주소</strong>
-
-            <p>Google Maps 연동 예정</p>
 
             {detail.address && <p className={styles.addressText}>{detail.address}</p>}
 
