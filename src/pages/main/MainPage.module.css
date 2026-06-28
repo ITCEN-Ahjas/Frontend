@@ -1,82 +1,85 @@
 .page {
   width: 100%;
   min-height: calc(100vh - 7.6rem);
-  background: var(--color-page-bg);
+  padding: 2.8rem var(--layout-side-padding) 5.2rem;
+  background: linear-gradient(180deg, var(--color-white), var(--color-page-bg) 48rem);
 }
 
-.hero {
+.heroCard,
+.quickOverview,
+.weatherOverview,
+.featureStrip {
   width: 100%;
   max-width: 172rem;
   margin: 0 auto;
-  padding: 4.8rem var(--layout-side-padding) 5.6rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 1.8rem;
+  background: var(--color-white);
+  box-shadow: 0 1.4rem 4rem var(--color-shadow-map-soft);
+}
+
+.heroCard {
+  min-height: 33rem;
+  padding: 3.6rem 2.8rem 3.2rem 5.6rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(38rem, 54rem);
-  gap: 3.2rem;
-  align-items: stretch;
+  grid-template-columns: minmax(36rem, 0.72fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: center;
+  overflow: hidden;
 }
 
 .heroContent {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
-.heroCopy {
-  max-width: 76rem;
-}
-
-.eyebrow {
-  display: inline-flex;
-  margin-bottom: 1.2rem;
-  color: var(--color-chungbuk-purple);
-  font-size: 1.25rem;
-  font-weight: 900;
-}
-
-.heroCopy h1 {
+.heroContent h1 {
   color: var(--color-slate-950);
-  font-size: 5.6rem;
+  font-size: 4.8rem;
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 1.15;
   letter-spacing: 0;
   word-break: keep-all;
 }
 
-.heroCopy p {
-  margin-top: 2rem;
+.heroContent h1 span {
+  color: var(--color-chungbuk-purple);
+}
+
+.heroContent p {
+  max-width: 58rem;
+  margin-top: 1.6rem;
   color: var(--color-slate-600);
-  font-size: 1.85rem;
-  font-weight: 700;
-  line-height: 1.75;
+  font-size: 1.55rem;
+  font-weight: 750;
+  line-height: 1.7;
   word-break: keep-all;
 }
 
 .searchForm {
-  width: min(100%, 78rem);
-  margin-top: 3.2rem;
+  width: min(100%, 50rem);
+  margin-top: 2.8rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) 8.8rem;
+  gap: 0;
 }
 
 .searchLabel {
   min-width: 0;
-  height: 6.4rem;
+  height: 5.8rem;
   display: flex;
   align-items: center;
-  gap: 1.2rem;
-  padding: 0 2rem;
+  gap: 1rem;
+  padding: 0 1.8rem;
   border: 1px solid var(--color-slate-200);
-  border-radius: 0.8rem;
+  border-right: 0;
+  border-radius: 0.8rem 0 0 0.8rem;
   background: var(--color-white);
-  box-shadow: 0 1rem 2.8rem var(--color-shadow-map-soft);
 }
 
 .searchLabel svg {
   flex: 0 0 auto;
-  color: var(--color-chungbuk-purple);
-  font-size: 2.1rem;
+  color: var(--color-slate-400);
+  font-size: 1.9rem;
 }
 
 .searchLabel input {
@@ -86,7 +89,7 @@
   outline: 0;
   background: transparent;
   color: var(--color-slate-900);
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   font-weight: 800;
 }
 
@@ -95,207 +98,351 @@
 }
 
 .searchForm button {
-  height: 6.4rem;
-  padding: 0 2.4rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  border-radius: 0.8rem;
+  height: 5.8rem;
+  border-radius: 0 0.8rem 0.8rem 0;
   background: var(--color-chungbuk-purple);
   color: var(--color-white);
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   font-weight: 900;
 }
 
-.keywordRow {
-  margin-top: 1.4rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
+.heroVisual {
+  width: 100%;
+  min-height: 25rem;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  background: linear-gradient(135deg, var(--color-brand-primary-bg), var(--color-white));
 }
 
-.keywordRow a {
-  min-height: 3.8rem;
-  padding: 0 1.4rem;
+.heroImage {
+  width: 100%;
+  height: 100%;
+  min-height: 25rem;
+  display: block;
+  object-fit: cover;
+}
+
+.contentStack {
+  width: 100%;
+  max-width: 172rem;
+  margin: 1.8rem auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.quickOverview {
+  min-height: 13rem;
+  padding: 2.4rem 2.8rem;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.1fr 1fr;
+  gap: 2.4rem;
+  align-items: center;
+}
+
+.quickColumn {
+  min-width: 0;
+  position: relative;
+}
+
+.quickColumn + .quickColumn,
+.tipColumn {
+  border-left: 1px solid var(--color-slate-200);
+  padding-left: 2.4rem;
+}
+
+.quickTitle {
+  display: block;
+  margin-bottom: 1.4rem;
+  color: var(--color-slate-950);
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.quickContent,
+.tipColumn {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.quickIcon {
+  width: 4.8rem;
+  height: 4.8rem;
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 0.8rem;
-  background: var(--color-white);
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-brand-primary-bg);
+  color: var(--color-chungbuk-purple);
+  font-size: 2.1rem;
+  font-weight: 900;
+}
+
+.quickContent span,
+.tipColumn span {
+  color: var(--color-slate-700);
+  font-size: 1.28rem;
+  font-weight: 900;
+}
+
+.chipRow,
+.statRow {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chipRow a,
+.statRow a {
+  min-height: 3rem;
+  padding: 0 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
+  font-size: 1.18rem;
+  font-weight: 850;
+}
+
+.statRow strong {
+  margin-left: 0.4rem;
+  color: var(--color-chungbuk-cyan);
+}
+
+.arrowLink,
+.tipColumn > svg {
+  color: var(--color-chungbuk-purple);
+  font-size: 1.9rem;
+}
+
+.tipColumn {
+  color: inherit;
+}
+
+.tipColumn p {
+  margin-top: 0.7rem;
+  color: var(--color-slate-600);
+  font-size: 1.3rem;
+  font-weight: 750;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.weatherOverview {
+  min-height: 18rem;
+  padding: 2.4rem 2.8rem;
+  display: grid;
+  grid-template-columns: 34rem 25rem minmax(0, 1fr);
+  gap: 2.4rem;
+  align-items: center;
+}
+
+.weatherMain h2 {
+  color: var(--color-slate-950);
+  font-size: 2.2rem;
+  font-weight: 900;
+}
+
+.weatherMain > div:first-child span {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-chungbuk-purple);
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.weatherTemperature {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1.4rem;
+  align-items: center;
+}
+
+.weatherTemperature svg {
+  grid-row: span 2;
+  color: #f5b323;
+  font-size: 6.4rem;
+}
+
+.weatherTemperature strong {
+  color: var(--color-slate-950);
+  font-size: 4.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.weatherTemperature p {
+  margin-top: 0.4rem;
   color: var(--color-slate-600);
   font-size: 1.35rem;
   font-weight: 850;
 }
 
-.featureGrid {
-  margin-top: 2.4rem;
+.weatherDetails {
+  display: grid;
+  gap: 1rem;
+  padding-left: 2.4rem;
+  border-left: 1px solid var(--color-slate-200);
+}
+
+.weatherDetails div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.weatherDetails span {
+  color: var(--color-slate-500);
+  font-size: 1.25rem;
+  font-weight: 850;
+}
+
+.weatherDetails strong {
+  color: var(--color-slate-800);
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.weatherTimes {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding-left: 2.4rem;
+  border-left: 1px solid var(--color-slate-200);
+}
+
+.weatherTimes a {
+  min-height: 10.6rem;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.4rem;
+  background: var(--color-slate-50);
+  color: var(--color-slate-700);
+  text-align: center;
+}
+
+.weatherTimes svg {
+  color: var(--color-chungbuk-purple);
+  font-size: 2.6rem;
+}
+
+.weatherTimes span {
+  margin-top: 0.8rem;
+  color: var(--color-slate-500);
+  font-size: 1.15rem;
+  font-weight: 850;
+}
+
+.weatherTimes strong {
+  margin-top: 0.4rem;
+  color: var(--color-slate-950);
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.weatherTimes p {
+  margin-top: 0.3rem;
+  color: var(--color-slate-500);
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.weatherTimes .weatherTip {
+  background: var(--color-brand-primary-bg);
+  color: var(--color-chungbuk-purple);
+}
+
+.featureStrip {
+  padding: 1.6rem;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.featureCard {
-  min-height: 15.2rem;
-  padding: 1.8rem;
+.featureStrip a {
+  min-height: 8.8rem;
+  padding: 1.6rem;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 0.8rem;
-  background: var(--color-white);
+  justify-content: center;
+  border-radius: 1.2rem;
+  background: var(--color-slate-50);
 }
 
-.featureCard span,
-.mapPanel span,
-.weatherPanel span,
-.routePanel span {
+.featureStrip span {
   color: var(--color-chungbuk-purple);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 900;
 }
 
-.featureCard strong {
-  margin-top: 0.9rem;
+.featureStrip strong {
+  margin-top: 0.5rem;
   color: var(--color-slate-950);
-  font-size: 1.62rem;
-  font-weight: 900;
-  line-height: 1.25;
-  word-break: keep-all;
-}
-
-.featureCard p {
-  margin-top: auto;
-  padding-top: 1.2rem;
-  color: var(--color-slate-600);
-  font-size: 1.28rem;
-  font-weight: 700;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-.heroVisual {
-  position: relative;
-  min-height: 60rem;
-  display: grid;
-  grid-template-columns: 1fr;
-  align-content: end;
-  gap: 1.4rem;
-  padding: 2rem;
-  overflow: hidden;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 0.8rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.2)),
-    radial-gradient(circle at 28% 26%, var(--color-detail-radial-cyan), transparent 22rem),
-    radial-gradient(circle at 68% 18%, var(--color-detail-radial-purple), transparent 24rem),
-    linear-gradient(110deg, transparent 49%, var(--color-detail-grid-line-strong) 49% 51%, transparent 51%) 0
-      0 / 9rem 9rem,
-    linear-gradient(20deg, transparent 49%, var(--color-detail-grid-line) 49% 51%, transparent 51%) 0
-      0 / 12rem 12rem,
-    var(--color-white);
-  box-shadow: 0 1.4rem 3.8rem var(--color-shadow-map-soft);
-}
-
-.mapPanel,
-.weatherPanel,
-.routePanel {
-  position: relative;
-  padding: 2rem;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 0.8rem;
-  background: var(--color-white);
-  box-shadow: 0 0.8rem 2.4rem var(--color-shadow-map-soft);
-}
-
-.regionBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  color: var(--color-chungbuk-purple);
-  font-size: 1.35rem;
-  font-weight: 900;
-}
-
-.mapPanel strong,
-.routePanel strong {
-  display: block;
-  margin-top: 1rem;
-  color: var(--color-slate-950);
-  font-size: 2rem;
+  font-size: 1.45rem;
   font-weight: 900;
   line-height: 1.35;
   word-break: keep-all;
 }
 
-.mapPanel > span {
-  display: inline-flex;
-  margin-top: 1.2rem;
-  color: var(--color-slate-600);
-  font-size: 1.25rem;
-  font-weight: 850;
-}
-
-.weatherPanel strong {
-  display: block;
-  margin-top: 0.6rem;
-  color: var(--color-slate-950);
-  font-size: 4.4rem;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.weatherPanel p,
-.routePanel p {
-  margin-top: 1rem;
-  color: var(--color-slate-600);
-  font-size: 1.35rem;
-  font-weight: 750;
-  line-height: 1.55;
-}
-
 @media (max-width: 1180px) {
-  .hero {
+  .heroCard,
+  .weatherOverview {
     grid-template-columns: 1fr;
   }
 
-  .heroVisual {
-    min-height: 38rem;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: end;
-  }
-}
-
-@media (max-width: 900px) {
-  .hero {
-    padding-top: 4.8rem;
-  }
-
-  .heroCopy h1 {
-    font-size: 3.8rem;
-  }
-
-  .featureGrid,
-  .heroVisual {
+  .quickOverview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .quickColumn + .quickColumn,
+  .tipColumn,
+  .weatherDetails,
+  .weatherTimes {
+    border-left: 0;
+    padding-left: 0;
+  }
 }
 
-@media (max-width: 640px) {
-  .hero {
-    padding-top: 3.6rem;
+@media (max-width: 760px) {
+  .page {
+    padding-top: 1.6rem;
   }
 
-  .heroCopy h1 {
-    font-size: 3.1rem;
+  .heroCard {
+    padding: 2.4rem;
+    grid-template-columns: 1fr;
+  }
+
+  .heroContent h1 {
+    font-size: 3.4rem;
   }
 
   .searchForm,
-  .featureGrid,
-  .heroVisual {
+  .quickOverview,
+  .weatherTimes,
+  .featureStrip {
     grid-template-columns: 1fr;
   }
 
+  .searchLabel {
+    border-right: 1px solid var(--color-slate-200);
+    border-radius: 0.8rem;
+  }
+
   .searchForm button {
-    width: 100%;
+    border-radius: 0.8rem;
   }
 }
