@@ -1,0 +1,39 @@
+.mapShell {
+  position: relative;
+  min-height: 25rem;
+  overflow: hidden;
+  background: var(--color-detail-map-bg);
+}
+
+.mapCanvas {
+  position: absolute;
+  inset: 0;
+}
+
+.mapFallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background:
+    linear-gradient(110deg, transparent 49%, var(--color-detail-grid-line-strong) 49% 51%, transparent 51%) 0
+      0 / 9rem 9rem,
+    linear-gradient(20deg, transparent 49%, var(--color-detail-grid-line) 49% 51%, transparent 51%) 0
+      0 / 12rem 12rem,
+    radial-gradient(circle at 24% 40%, var(--color-detail-radial-cyan), transparent 24rem),
+    radial-gradient(circle at 72% 46%, var(--color-detail-radial-purple), transparent 18rem),
+    var(--color-detail-map-bg);
+  color: var(--color-slate-700);
+  font-size: 1.45rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+.mapPin {
+  color: var(--color-chungbuk-purple);
+  font-size: 4rem;
+  filter: drop-shadow(0 1rem 1.5rem var(--color-shadow-purple-strong));
+}

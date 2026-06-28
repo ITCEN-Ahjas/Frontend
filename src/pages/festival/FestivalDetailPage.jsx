@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchFestivalDetail } from '../../api/festivalApi';
+import DetailLocationMap from '../../components/DetailLocationMap';
 import styles from './FestivalDetailPage.module.css';
 import { formatPeriod } from './utils/festivalFormat';
 
@@ -556,16 +557,18 @@ export default function FestivalDetailPage() {
         <h2>위치 안내</h2>
 
         <div className={styles.locationBox}>
-          <div className={styles.mapPreview}>
-            <FiMapPin className={styles.mapPin} aria-hidden="true" />
-          </div>
+          <DetailLocationMap
+            className={styles.mapPreview}
+            latitude={detail.mapY}
+            longitude={detail.mapX}
+            title={detail.title}
+            address={detail.address}
+          />
 
           <div className={styles.locationContent}>
             <strong>{detail.place && detail.place !== detail.address ? '장소' : '주소'}</strong>
 
             {detail.place && detail.place !== detail.address && <p>{detail.place}</p>}
-
-            <p>Google Maps 연동 예정</p>
 
             {detail.address && <p className={styles.addressText}>{detail.address}</p>}
 
