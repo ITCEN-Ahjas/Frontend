@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useReducer } from 'react';
+import { motion } from 'framer-motion';
 import {
   FiArrowLeft,
   FiCalendar,
@@ -11,6 +12,7 @@ import {
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchAccommodationDetail } from '../../api/lodgingApi';
 import DetailLocationMap from '../../components/DetailLocationMap';
+import { pageFade } from '../../shared/animation/pageMotion';
 import styles from './LodgingDetailPage.module.css';
 
 const DEFAULT_IMAGE_TEXT = 'CHUNGBUK STAY';
@@ -196,7 +198,12 @@ export default function LodgingDetailPage() {
   const introText = pickText(detail.description, detail.overview) || '소개 정보가 없습니다.';
 
   return (
-    <div className={styles.page}>
+    <motion.div
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <div className={styles.breadcrumb}>
         <Link to="/">홈</Link>
         <FiChevronRight aria-hidden="true" />
@@ -331,6 +338,6 @@ export default function LodgingDetailPage() {
           </a>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

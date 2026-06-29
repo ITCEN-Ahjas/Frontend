@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useReducer } from 'react';
+import { motion } from 'framer-motion';
 import {
   FiArrowLeft,
   FiCalendar,
@@ -12,6 +13,7 @@ import {
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchFestivalDetail } from '../../api/festivalApi';
 import DetailLocationMap from '../../components/DetailLocationMap';
+import { pageFade } from '../../shared/animation/pageMotion';
 import styles from './FestivalDetailPage.module.css';
 import { formatPeriod } from './utils/festivalFormat';
 
@@ -494,7 +496,12 @@ export default function FestivalDetailPage() {
   const introText = pickText(detail.description, detail.overview, buildFallbackDescription(detail));
 
   return (
-    <div className={styles.page}>
+    <motion.div
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <div className={styles.breadcrumb}>
         <Link to="/">홈</Link>
         <FiChevronRight aria-hidden="true" />
@@ -613,6 +620,6 @@ export default function FestivalDetailPage() {
           </a>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

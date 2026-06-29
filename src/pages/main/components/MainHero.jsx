@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { FiSearch } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { riseIn, softScaleIn } from '../../../shared/animation/pageMotion';
 import styles from '../MainPage.module.css';
 
 export default function MainHero({ heroImageSrc }) {
@@ -17,8 +19,13 @@ export default function MainHero({ heroImageSrc }) {
   }
 
   return (
-    <div className={styles.heroCard}>
-      <div className={styles.heroContent}>
+    <motion.div
+      className={styles.heroCard}
+      initial="hidden"
+      animate="visible"
+      variants={riseIn}
+    >
+      <motion.div className={styles.heroContent} variants={riseIn}>
         <h1>
           충북 여행을 <span>한눈에</span>
         </h1>
@@ -37,11 +44,11 @@ export default function MainHero({ heroImageSrc }) {
           </label>
           <button type="submit">검색</button>
         </form>
-      </div>
+      </motion.div>
 
-      <div className={styles.heroVisual} aria-label="충북 여행 대표 이미지">
+      <motion.div className={styles.heroVisual} aria-label="충북 여행 대표 이미지" variants={softScaleIn}>
         <img src={heroImageSrc} alt="" className={styles.heroImage} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

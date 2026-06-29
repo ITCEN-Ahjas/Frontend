@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
+import { motion } from 'framer-motion';
 import { FiArrowLeft, FiChevronRight, FiExternalLink, FiStar } from 'react-icons/fi';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { createPlacePhotoUrl, fetchPlaceDetail } from '../../api/placeApi';
+import { pageFade } from '../../shared/animation/pageMotion';
 import styles from './PlaceDetailPage.module.css';
 
 const DEFAULT_IMAGE_TEXT = 'CHUNGBUK PLACE';
@@ -283,7 +285,12 @@ export default function PlaceDetailPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <motion.div
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <div className={styles.breadcrumb}>
         <Link to="/">홈</Link>
         <FiChevronRight aria-hidden="true" />
@@ -458,6 +465,6 @@ export default function PlaceDetailPage() {
           </a>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

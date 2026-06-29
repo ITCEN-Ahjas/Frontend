@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { fetchPlaces, PLACE_CATEGORIES } from '../../api/placeApi';
 import { CHUNGBUK_BOUNDARY_PATH } from '../../data/chungbukBoundary';
@@ -11,6 +12,7 @@ import { importGoogleMapsLibrary } from '../../lib/googleMapsLoader';
 import PlaceResultList from './components/PlaceResultList/PlaceResultList';
 import PlaceSearchPanel from './components/PlaceSearchPanel/PlaceSearchPanel';
 import SelectedPlaceCard from './components/SelectedPlaceCard/SelectedPlaceCard';
+import { listStagger, pageFade, riseIn } from '../../shared/animation/pageMotion';
 import styles from './MapPage.module.css';
 
 const CHUNGBUK_CENTER = {
@@ -718,9 +720,26 @@ export default function MapPage() {
   }
 
   return (
-    <section className={styles.page}>
-      <div className={styles.content}>
-        <div className={styles.sidebar}>
+    <motion.section
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
+      <section className={styles.hero}>
+        <motion.div className={styles.heroInner} variants={riseIn}>
+          <motion.div className={styles.heroText} variants={riseIn}>
+            <h1 className={styles.heroTitle}>충북 지도</h1>
+            <p className={styles.heroDescription}>
+              충북의 관광지, 음식점, 쇼핑 장소를 지도에서 찾아보세요.
+            </p>
+            <p className={styles.heroSubDescription}>Search places and plan your route in Chungbuk.</p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      <motion.div className={styles.content} variants={listStagger}>
+        <motion.div className={styles.sidebar} variants={riseIn}>
           <PlaceSearchPanel
             keyword={keyword}
             category={category}
@@ -745,9 +764,9 @@ export default function MapPage() {
             onRetry={handleRetry}
             onLoadMore={handleLoadMore}
           />
-        </div>
+        </motion.div>
 
-        <div className={styles.mapColumn}>
+        <motion.div className={styles.mapColumn} variants={riseIn}>
           <div className={styles.mapCard}>
             <div
               ref={mapElementRef}
@@ -783,8 +802,8 @@ export default function MapPage() {
               onClear={() => setSelectedPlaceId(null)}
             />
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

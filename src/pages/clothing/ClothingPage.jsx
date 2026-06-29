@@ -1,6 +1,7 @@
 import {
   createElement,
 } from 'react';
+import { motion } from 'framer-motion';
 import {
   FiBattery,
   FiCircle,
@@ -18,6 +19,7 @@ import {
   FiWind,
 } from 'react-icons/fi';
 import { useOutfitRecommendation } from '../../hooks/useOutfitRecommendation';
+import { listStagger, pageFade, riseIn, softScaleIn } from '../../shared/animation/pageMotion';
 import styles from './ClothingPage.module.css';
 
 const OUTFIT_CARD_LABELS = [
@@ -176,33 +178,6 @@ function OutfitIllustration({ type }) {
   );
 }
 
-function HeroArtwork() {
-  return (
-    <svg className={styles.heroArtwork} viewBox="0 0 760 330" aria-hidden="true">
-      <path d="M0 255 105 178l90 58 118-96 119 84 101-70 127 101H0Z" fill="var(--color-illustration-mountain)" />
-      <path d="M0 274 101 221l91 42 115-56 116 44 104-45 133 68H0Z" fill="var(--color-illustration-mountain-deep)" />
-      <path d="M318 165h185v102H318z" fill="var(--color-illustration-building)" />
-      <path d="M304 166 410 109l106 57-15 14H319l-15-14Z" fill="var(--color-illustration-roof)" />
-      <path d="M320 159h180l-90-48-90 48Z" fill="var(--color-illustration-roof-light)" />
-      <path d="M410 178c-24 0-43 21-43 47v42h86v-42c0-26-19-47-43-47Z" fill="var(--color-illustration-door)" />
-      <path d="M410 191c-16 0-29 14-29 31v45h58v-45c0-17-13-31-29-31Z" fill="var(--color-illustration-door-light)" />
-      <path d="M313 177h195" stroke="var(--color-illustration-accent)" strokeWidth="6" />
-      <path d="M610 50h10v143h-10z" fill="var(--color-illustration-pole)" />
-      <path d="m594 51 21-38 21 38H594Z" fill="var(--color-illustration-pole)" />
-      <path
-        d="M171 166v90M153 190v66M560 175v83M578 198v60"
-        stroke="var(--color-illustration-tree)"
-        strokeLinecap="round"
-        strokeWidth="11"
-      />
-      <circle cx="171" cy="145" r="29" fill="var(--color-illustration-tree-light)" />
-      <circle cx="153" cy="175" r="22" fill="var(--color-illustration-tree-soft)" />
-      <circle cx="560" cy="153" r="30" fill="var(--color-illustration-tree-alt)" />
-      <circle cx="578" cy="178" r="22" fill="var(--color-illustration-tree-alt-soft)" />
-    </svg>
-  );
-}
-
 function LoadingSkeleton() {
   return (
     <div className={styles.skeletonStack}>
@@ -263,24 +238,26 @@ export default function ClothingPage() {
   };
 
   return (
-    <main className={styles.page}>
+    <motion.main
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <section className={styles.hero}>
-        <div className={styles.heroInner}>
-          <div className={styles.heroCopy}>
-            <p className={styles.heroEyebrow}>TIME-SLOT WEATHER GUIDE</p>
-            <h1>AI 옷차림 추천</h1>
-            <p>
-              충북 여행 시간대와 현재 거주 도시의 날씨를 비교해
-              <br />
-              지금 필요한 옷차림과 준비물을 안내합니다.
+        <motion.div className={styles.heroInner} variants={riseIn}>
+          <motion.div className={styles.heroText} variants={riseIn}>
+            <h1 className={styles.heroTitle}>AI 옷차림 추천</h1>
+            <p className={styles.heroDescription}>
+              충북 여행 시간대와 현재 거주 도시의 날씨를 비교해 준비물을 안내합니다.
             </p>
-          </div>
-          <HeroArtwork />
-        </div>
+            <p className={styles.heroSubDescription}>Get outfit guidance for Chungbuk travel weather.</p>
+          </motion.div>
+        </motion.div>
       </section>
 
-      <div className={styles.content}>
-        <section className={styles.locationSelectionCard}>
+      <motion.div className={styles.content} variants={listStagger}>
+        <motion.section className={styles.locationSelectionCard} variants={riseIn}>
           <div className={styles.locationSelectionHeader}>
             <div>
               <p className={styles.sectionEyebrow}>TRAVEL &amp; RESIDENCE</p>
@@ -368,23 +345,23 @@ export default function ClothingPage() {
               </small>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {isRecommendationsLoading && !hasData && <LoadingSkeleton />}
 
         {recommendationsError && !hasData && (
-          <section className={styles.errorBox}>
+          <motion.section className={styles.errorBox} variants={riseIn}>
             <h2>옷차림 추천을 불러오지 못했습니다.</h2>
             <p>{recommendationsError}</p>
             <button type="button" className={styles.retryButton} onClick={retryRecommendations}>
               다시 불러오기
             </button>
-          </section>
+          </motion.section>
         )}
 
         {hasData && (
           <>
-            <section className={styles.weatherInsightSection}>
+            <motion.section className={styles.weatherInsightSection} variants={riseIn}>
               <div className={styles.weatherInsightHeader}>
                 <div>
                   <p className={styles.weatherInsightEyebrow}>여행지 체감 날씨 안내</p>
@@ -428,9 +405,9 @@ export default function ClothingPage() {
                   )}
                 </div>
               </div>
-            </section>
+            </motion.section>
 
-            <section className={styles.timeSlotSection}>
+            <motion.section className={styles.timeSlotSection} variants={riseIn}>
               <div className={styles.sectionHeader}>
                 <div>
                   <h2>여행 시간대를 선택해 주세요</h2>
@@ -467,9 +444,9 @@ export default function ClothingPage() {
                   );
                 })}
               </div>
-            </section>
+            </motion.section>
 
-            <section className={styles.weatherSection}>
+            <motion.section className={styles.weatherSection} variants={riseIn}>
               <div className={styles.selectedTimeHeader}>
                 <div className={styles.locationInfo}>
                   <FiMapPin className={styles.locationPin} aria-hidden="true" />
@@ -528,34 +505,35 @@ export default function ClothingPage() {
                 </article>
               </div>
 
-            </section>
+            </motion.section>
 
             {recommendationsError && (
-              <section className={styles.inlineErrorBox}>
+              <motion.section className={styles.inlineErrorBox} variants={riseIn}>
                 <p>{recommendationsError}</p>
                 <button type="button" onClick={retryRecommendations}>
                   다시 시도
                 </button>
-              </section>
+              </motion.section>
             )}
 
-            <section className={styles.recommendationSection}>
+            <motion.section className={styles.recommendationSection} variants={riseIn}>
               <div className={styles.recommendationHeader}>
                 <div>
                   <h2>{activeRecommendation.timeSlotName}에 추천하는 옷차림</h2>
                 </div>
               </div>
 
-              <div className={styles.outfitGrid}>
+              <motion.div className={styles.outfitGrid} variants={listStagger}>
                 {OUTFIT_CARD_LABELS.map(({ key, label }) => {
                   const outfit = activeRecommendation.outfitCards[key];
 
                   return (
-                    <article
+                    <motion.article
                       key={key}
                       className={[styles.outfitCard, styles[`outfitCard${key}`]]
                         .filter(Boolean)
                         .join(' ')}
+                      variants={softScaleIn}
                     >
                       <p className={styles.outfitLabel}>{label}</p>
                       <div className={styles.outfitArtworkWrap}>
@@ -563,50 +541,51 @@ export default function ClothingPage() {
                       </div>
                       <h3>{outfit.name}</h3>
                       <p className={styles.outfitDescription}>{outfit.description}</p>
-                    </article>
+                    </motion.article>
                   );
                 })}
-              </div>
-            </section>
+              </motion.div>
+            </motion.section>
 
-            <section className={styles.preparationSection}>
+            <motion.section className={styles.preparationSection} variants={riseIn}>
               <div className={styles.preparationHeader}>
                 <div>
                   <h2>하루 동안 챙기면 좋은 준비물</h2>
                 </div>
               </div>
 
-              <div
+              <motion.div
                 className={[
                   styles.preparationGrid,
                   styles[`preparationGridCount${Math.min(dailyPreparationItems.length, 6)}`],
                 ]
                   .filter(Boolean)
                   .join(' ')}
+                variants={listStagger}
               >
                 {dailyPreparationItems.map(item => {
                   const PreparationIcon = getPreparationIcon(item.code);
 
                   return (
-                    <article key={item.code} className={styles.preparationItem}>
+                    <motion.article key={item.code} className={styles.preparationItem} variants={softScaleIn}>
                       <PreparationIcon className={styles.preparationIcon} aria-hidden="true" />
                     <div>
                       <h3>{item.name}</h3>
                       <p>{item.description}</p>
                     </div>
-                    </article>
+                    </motion.article>
                   );
                 })}
-              </div>
-            </section>
+              </motion.div>
+            </motion.section>
 
-            <div className={styles.weatherNotice}>
+            <motion.div className={styles.weatherNotice} variants={riseIn}>
               <FiInfo aria-hidden="true" />
               날씨 정보는 변동될 수 있으니, 출발 전 최신 예보를 한 번 더 확인해 주세요.
-            </div>
+            </motion.div>
           </>
         )}
-      </div>
-    </main>
+      </motion.div>
+    </motion.main>
   );
 }

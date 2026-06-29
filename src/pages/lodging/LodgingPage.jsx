@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ensureFestivalInitialized, fetchExperienceList } from '../../api/festivalApi';
 import { fetchAccommodationList } from '../../api/lodgingApi';
+import { listStagger, pageFade, riseIn } from '../../shared/animation/pageMotion';
 import LodgingFilterPanel from './components/LodgingFilterPanel';
 import LodgingGrid from './components/LodgingGrid';
 import LodgingHero from './components/LodgingHero';
@@ -179,46 +181,59 @@ export default function LodgingPage() {
   };
 
   return (
-    <div className={styles.page}>
+    <motion.div
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <LodgingHero />
 
-      <main className={styles.content}>
-        <LodgingFilterPanel
-          keyword={keyword}
-          regionOptions={regionOptions}
-          typeOptions={TYPE_OPTIONS}
-          selectedRegion={selectedRegion}
-          selectedType={selectedType}
-          onKeywordChange={value => {
-            setKeyword(value);
-            setCurrentPage(1);
-          }}
-          onRegionChange={value => {
-            setSelectedRegion(value);
-            setCurrentPage(1);
-          }}
-          onTypeChange={value => {
-            setSelectedType(value);
-            setCurrentPage(1);
-          }}
-          onReset={resetFilters}
-        />
+      <motion.main className={styles.content} variants={listStagger}>
+        <motion.div variants={riseIn}>
+          <LodgingFilterPanel
+            keyword={keyword}
+            regionOptions={regionOptions}
+            typeOptions={TYPE_OPTIONS}
+            selectedRegion={selectedRegion}
+            selectedType={selectedType}
+            onKeywordChange={value => {
+              setKeyword(value);
+              setCurrentPage(1);
+            }}
+            onRegionChange={value => {
+              setSelectedRegion(value);
+              setCurrentPage(1);
+            }}
+            onTypeChange={value => {
+              setSelectedType(value);
+              setCurrentPage(1);
+            }}
+            onReset={resetFilters}
+          />
+        </motion.div>
 
-        <LodgingSectionHeader count={filteredItems.length} />
+        <motion.div variants={riseIn}>
+          <LodgingSectionHeader count={filteredItems.length} />
+        </motion.div>
 
-        <LodgingGrid
-          lodgings={pagedItems}
-          loading={loading}
-          errorMessage={errorMessage}
-          onClickDetail={handleClickDetail}
-        />
+        <motion.div variants={riseIn}>
+          <LodgingGrid
+            lodgings={pagedItems}
+            loading={loading}
+            errorMessage={errorMessage}
+            onClickDetail={handleClickDetail}
+          />
+        </motion.div>
 
-        <LodgingPagination
-          currentPage={safeCurrentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      </main>
-    </div>
+        <motion.div variants={riseIn}>
+          <LodgingPagination
+            currentPage={safeCurrentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </motion.div>
+      </motion.main>
+    </motion.div>
   );
 }

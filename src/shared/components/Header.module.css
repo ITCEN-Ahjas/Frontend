@@ -14,7 +14,7 @@
   max-width: var(--layout-max-width);
   height: 7.6rem;
   margin: 0 auto;
-  padding: 0 var(--layout-side-padding);
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -110,6 +110,7 @@
 @media (max-width: 900px) {
   .inner {
     height: 6.4rem;
+    padding: 0 var(--layout-side-padding);
   }
 
   .nav {

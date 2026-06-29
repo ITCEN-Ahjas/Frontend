@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useReducer } from 'react';
+import { motion } from 'framer-motion';
 import { fetchMainSummary } from '../../api/mainApi';
 import mainHeroImage from '../../assets/main-hero.png';
+import { listStagger, pageFade, riseIn } from '../../shared/animation/pageMotion';
 import MainFeatureStrip from './components/MainFeatureStrip';
 import MainHero from './components/MainHero';
 import MainQuickOverview from './components/MainQuickOverview';
@@ -109,24 +111,38 @@ export default function MainPage() {
   }, []);
 
   return (
-    <section className={styles.page}>
+    <motion.section
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <MainHero heroImageSrc={mainHeroImage} />
 
-      <div className={styles.contentStack}>
+      <motion.div className={styles.contentStack} variants={listStagger}>
         {(state.loading || state.errorMessage) && (
-          <div className={state.errorMessage ? styles.statusBannerError : styles.statusBanner}>
+          <motion.div
+            className={state.errorMessage ? styles.statusBannerError : styles.statusBanner}
+            variants={riseIn}
+          >
             {state.errorMessage || '메인페이지 정보를 불러오는 중입니다.'}
-          </div>
+          </motion.div>
         )}
 
-        <MainQuickOverview
-          popularRegions={mainData.popularRegions}
-          searchKeywords={mainData.keywords}
-          todayStats={mainData.todayStats}
-        />
-        <MainWeatherOverview weather={mainData.weather} />
-        <MainFeatureStrip featureCards={mainData.featureCards} />
-      </div>
-    </section>
+        <motion.div variants={riseIn}>
+          <MainQuickOverview
+            popularRegions={mainData.popularRegions}
+            searchKeywords={mainData.keywords}
+            todayStats={mainData.todayStats}
+          />
+        </motion.div>
+        <motion.div variants={riseIn}>
+          <MainWeatherOverview weather={mainData.weather} />
+        </motion.div>
+        <motion.div variants={riseIn}>
+          <MainFeatureStrip featureCards={mainData.featureCards} />
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

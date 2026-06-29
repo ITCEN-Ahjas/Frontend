@@ -127,12 +127,12 @@ export default function FloatingChatbot() {
           to   { opacity: 1; transform: translateY(0); }
         }
         .cb-sample:hover  { background: var(--color-slate-100) !important; transform: translateX(2px); }
-        .cb-suggest:hover { background: var(--color-success-hover) !important; transform: translateX(2px); }
-        .cb-send:hover:not(:disabled) { background: var(--color-success-dark) !important; transform: scale(1.06); }
+        .cb-suggest:hover { background: var(--color-brand-primary-bg) !important; transform: translateX(2px); }
+        .cb-send:hover:not(:disabled) { background: var(--color-brand-primary-dark) !important; transform: scale(1.06); }
         .cb-close:hover { background: var(--color-chat-inverse-bg-hover) !important; }
         @keyframes fabPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45), 0 8px 28px rgba(16,185,129,0.35); }
-          55% { box-shadow: 0 0 0 10px rgba(16,185,129,0), 0 8px 28px rgba(16,185,129,0.35); }
+          0%, 100% { box-shadow: 0 0 0 0 var(--color-shadow-purple-strong), 0 8px 28px var(--color-shadow-purple-strong); }
+          55% { box-shadow: 0 0 0 10px transparent, 0 8px 28px var(--color-shadow-purple-strong); }
         }
         .cb-fab { animation: fabPulse 2.6s ease-in-out infinite; }
         .cb-fab:hover { filter: brightness(1.08) !important; transform: scale(1.04) !important; animation: none !important; }
@@ -227,9 +227,9 @@ export default function FloatingChatbot() {
             }}>
               <div className="cb-bot-icon" style={{
                 width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                background: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))',
+                background: 'linear-gradient(135deg,var(--color-gradient-purple-start),var(--color-gradient-purple-end))',
                 display: 'grid', placeItems: 'center',
-                boxShadow: '0 4px 14px var(--color-shadow-success-strong)',
+                boxShadow: '0 4px 14px var(--color-shadow-purple-strong)',
               }}>
                 <FiMessageCircle aria-hidden="true" />
               </div>
@@ -238,7 +238,7 @@ export default function FloatingChatbot() {
                   충북 여행 AI
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', boxShadow: '0 0 5px var(--color-success)' }} />
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-chungbuk-purple)', boxShadow: '0 0 5px var(--color-chungbuk-purple)' }} />
                   <span style={{ fontSize: 11, color: 'var(--color-chat-inverse-faint)' }}>지금 바로 답변 가능</span>
                 </div>
               </div>
@@ -280,9 +280,9 @@ export default function FloatingChatbot() {
                   {msg.role === 'ai' && (
                     <div className="cb-message-icon" style={{
                       width: 30, height: 30, borderRadius: 10, flexShrink: 0,
-                      background: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))',
+                      background: 'linear-gradient(135deg,var(--color-gradient-purple-start),var(--color-gradient-purple-end))',
                       display: 'grid', placeItems: 'center',
-                      boxShadow: '0 2px 8px var(--color-shadow-success-light)',
+                      boxShadow: '0 2px 8px var(--color-shadow-purple-soft)',
                     }}>
                       <FiMessageCircle aria-hidden="true" />
                     </div>
@@ -312,7 +312,7 @@ export default function FloatingChatbot() {
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
                   <div className="cb-message-icon" style={{
                     width: 30, height: 30, borderRadius: 10, flexShrink: 0,
-                    background: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))',
+                    background: 'linear-gradient(135deg,var(--color-gradient-purple-start),var(--color-gradient-purple-end))',
                     display: 'grid', placeItems: 'center',
                   }}>
                     <FiMessageCircle aria-hidden="true" />
@@ -324,7 +324,7 @@ export default function FloatingChatbot() {
                   }}>
                     {[0, 1, 2].map(i => (
                       <div key={i} style={{
-                        width: 7, height: 7, borderRadius: '50%', background: 'var(--color-success)',
+                        width: 7, height: 7, borderRadius: '50%', background: 'var(--color-chungbuk-purple)',
                         animation: `dotBounce 1.1s ease-in-out ${i * 0.16}s infinite`,
                       }} />
                     ))}
@@ -361,23 +361,23 @@ export default function FloatingChatbot() {
               {/* 추천 질문 */}
               {suggested.length > 0 && !loading && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', paddingLeft: 2, letterSpacing: '0.2px' }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-chungbuk-purple)', paddingLeft: 2, letterSpacing: '0.2px' }}>
                     <FiHelpCircle aria-hidden="true" />
                     이런 것도 궁금하지 않으세요?
                   </span>
                   {suggested.map(q => (
                     <button key={q} className="cb-suggest" onClick={() => handleSend(q)} style={{
-                      background: 'var(--color-success-soft)',
-                      border: '1.5px solid var(--color-success-border)',
+                      background: 'var(--color-brand-primary-bg-soft)',
+                      border: '1.5px solid var(--color-brand-primary-border)',
                       borderRadius: 13,
                       padding: '11px 15px',
                       fontSize: 13,
                       fontWeight: 500,
                       textAlign: 'left',
                       cursor: 'pointer',
-                      color: 'var(--color-success-deep)',
+                      color: 'var(--color-chungbuk-purple)',
                       transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 4px var(--color-shadow-success-soft)',
+                      boxShadow: '0 1px 4px var(--color-shadow-purple-soft)',
                     }}>
                       {q}
                     </button>
@@ -418,7 +418,7 @@ export default function FloatingChatbot() {
                   transition: 'border 0.2s, background 0.2s',
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = 'var(--color-success)';
+                  e.target.style.borderColor = 'var(--color-chungbuk-purple)';
                   e.target.style.background = 'var(--color-white)';
                 }}
                 onBlur={e => {
@@ -432,12 +432,12 @@ export default function FloatingChatbot() {
                 disabled={loading || !input.trim()}
                 style={{
                   width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                  background: loading || !input.trim() ? 'var(--color-slate-200)' : 'var(--color-success)',
+                  background: loading || !input.trim() ? 'var(--color-slate-200)' : 'var(--color-chungbuk-purple)',
                   border: 'none',
                   display: 'grid', placeItems: 'center',
                   cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
-                  boxShadow: !loading && input.trim() ? '0 4px 14px var(--color-shadow-success)' : 'none',
+                  boxShadow: !loading && input.trim() ? '0 4px 14px var(--color-shadow-purple)' : 'none',
                 }}
               >
                 <FiSend aria-hidden="true" />
@@ -457,7 +457,7 @@ export default function FloatingChatbot() {
             padding: open ? '0 20px' : '0 18px',
             background: open
               ? 'rgba(15,23,42,0.9)'
-              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              : 'linear-gradient(135deg, var(--color-gradient-purple-start) 0%, var(--color-gradient-purple-end) 100%)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,

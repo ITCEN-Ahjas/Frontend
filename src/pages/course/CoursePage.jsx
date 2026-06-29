@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { requestRouteRecommendation } from '../../api/routeRecommendationApi';
+import { listStagger, pageFade, riseIn } from '../../shared/animation/pageMotion';
 import CoursePlannerMap from './components/CoursePlannerMap';
 import CoursePlannerTabs from './components/CoursePlannerTabs';
 import CoursePreferenceForm from './components/CoursePreferenceForm';
@@ -78,9 +80,26 @@ export default function CoursePage() {
   }
 
   return (
-    <section className={styles.page}>
-      <div className={styles.content}>
-        <aside className={styles.sidebar}>
+    <motion.section
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
+      <section className={styles.hero}>
+        <motion.div className={styles.heroInner} variants={riseIn}>
+          <motion.div className={styles.heroText} variants={riseIn}>
+            <h1 className={styles.heroTitle}>AI 여행 코스 추천</h1>
+            <p className={styles.heroDescription}>
+              취향과 일정에 맞춰 충북 여행 코스를 추천받아보세요.
+            </p>
+            <p className={styles.heroSubDescription}>Build a Chungbuk route with AI recommendations.</p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      <motion.div className={styles.content} variants={listStagger}>
+        <motion.aside className={styles.sidebar} variants={riseIn}>
           <CoursePreferenceForm
             formValues={formValues}
             isLoading={resultState.status === 'loading'}
@@ -88,17 +107,17 @@ export default function CoursePage() {
             onSubmit={handleSubmit}
             onToggleInterest={toggleInterest}
           />
-        </aside>
+        </motion.aside>
 
-        <div className={styles.mapColumn}>
+        <motion.div className={styles.mapColumn} variants={riseIn}>
           <CoursePlannerMap
             result={normalizedResult}
             selectedPlaceId={selectedPlaceId}
             onSelectPlace={handleSelectPlace}
           />
-        </div>
+        </motion.div>
 
-        <aside className={styles.resultColumn}>
+        <motion.aside className={styles.resultColumn} variants={riseIn}>
           {normalizedResult ? (
             <CoursePlannerTabs
               result={normalizedResult}
@@ -108,8 +127,8 @@ export default function CoursePage() {
           ) : (
             <CourseStatusPanel status={resultState.status} error={resultState.error} />
           )}
-        </aside>
-      </div>
-    </section>
+        </motion.aside>
+      </motion.div>
+    </motion.section>
   );
 }

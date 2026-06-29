@@ -1,33 +1,42 @@
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
-  FiMap,
-  FiCompass,
   FiArrowRight,
+  FiCalendar,
+  FiCloud,
+  FiHome,
+  FiMap,
+  FiMapPin,
+  FiMessageCircle,
+  FiSearch,
+  FiThermometer,
+  FiUserCheck,
 } from 'react-icons/fi';
+import { listStagger, pageFade, riseIn, softScaleIn } from '../../shared/animation/pageMotion';
 import styles from './GuidePage.module.css';
 
 const QUICK_CARDS = [
   {
-    icon: '🗺️',
-    bg: '#ecfdf5',
+    Icon: FiMap,
+    iconClass: styles.quickIconFestival,
     title: '축제 · 체험',
     desc: '충북 곳곳의 축제와 체험 프로그램을 한눈에',
   },
   {
-    icon: '🏕️',
-    bg: '#eff6ff',
+    Icon: FiHome,
+    iconClass: styles.quickIconLodging,
     title: '숙소 · 캠핑',
     desc: '숙박시설과 캠핑장 정보를 한 곳에서 검색',
   },
   {
-    icon: '🌤️',
-    bg: '#fffbeb',
+    Icon: FiCloud,
+    iconClass: styles.quickIconWeather,
     title: '날씨 · 옷차림',
     desc: '지역별 날씨와 AI 기반 옷차림 추천',
   },
   {
-    icon: '🤖',
-    bg: '#fdf4ff',
+    Icon: FiMessageCircle,
+    iconClass: styles.quickIconAi,
     title: 'AI 여행 도우미',
     desc: '궁금한 것을 물어보면 AI가 바로 답변',
   },
@@ -54,32 +63,32 @@ const STEPS = [
 
 const FEATURES = [
   {
-    emoji: '🔍',
+    Icon: FiSearch,
     title: '키워드 검색',
     text: '숙소명, 캠핑장명, 지역명 등으로 빠르게 원하는 정보를 찾을 수 있어요.',
   },
   {
-    emoji: '📍',
+    Icon: FiMapPin,
     title: '지역 필터',
     text: '충북 11개 시·군을 선택해 해당 지역 정보만 골라서 볼 수 있어요.',
   },
   {
-    emoji: '🎪',
+    Icon: FiCalendar,
     title: '유형별 분류',
     text: '숙소와 캠핑장, 축제와 체험을 유형별로 구분해서 탐색할 수 있어요.',
   },
   {
-    emoji: '🌡️',
+    Icon: FiThermometer,
     title: '실시간 날씨',
     text: '지역별 현재 날씨와 기온, 예보를 실시간으로 확인할 수 있어요.',
   },
   {
-    emoji: '👔',
+    Icon: FiUserCheck,
     title: 'AI 옷차림 추천',
     text: '현재 날씨와 체감온도를 분석해 최적의 옷차림을 추천해 드려요.',
   },
   {
-    emoji: '💬',
+    Icon: FiMessageCircle,
     title: 'AI 채팅 도우미',
     text: '충북 여행에 관한 어떤 질문이든 AI가 친절하게 답변해 드려요.',
   },
@@ -92,7 +101,7 @@ const FAQS = [
   },
   {
     q: 'AI 도우미는 어떤 질문을 할 수 있나요?',
-    a: '충북 여행지 추천, 축제 일정, 맛집, 교통편, 날씨 등 여행과 관련된 모든 것을 자유롭게 물어보세요. 오른쪽 하단 초록색 "AI 여행 도우미" 버튼을 누르면 바로 시작할 수 있어요.',
+    a: '충북 여행지 추천, 축제 일정, 맛집, 교통편, 날씨 등 여행과 관련된 모든 것을 자유롭게 물어보세요. 오른쪽 하단 보라색 "AI 여행 도우미" 버튼을 누르면 바로 시작할 수 있어요.',
   },
   {
     q: '날씨 정보는 얼마나 자주 업데이트되나요?',
@@ -108,79 +117,84 @@ export default function GuidePage() {
   const navigate = useNavigate();
 
   return (
-    <div className={styles.page}>
+    <motion.div
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       {/* Hero */}
       <div className={styles.hero}>
-        <div className={styles.heroTag}>
-          <FiCompass size={13} aria-hidden="true" />
-          이용 안내
-        </div>
-        <h1 className={styles.heroTitle}>충북 여행 플랫폼<br />이렇게 이용하세요</h1>
-        <p className={styles.heroSub}>
-          충청북도 11개 시·군의 축제, 숙소, 캠핑, 날씨, AI 도우미까지<br />
-          여행에 필요한 모든 정보를 한 곳에서 확인하세요.
-        </p>
+        <motion.div className={styles.heroInner} variants={riseIn}>
+          <motion.div className={styles.heroText} variants={riseIn}>
+            <h1 className={styles.heroTitle}>충북 여행 플랫폼 이렇게 이용하세요</h1>
+            <p className={styles.heroSub}>
+              충청북도 11개 시·군의 축제, 숙소, 캠핑, 날씨, AI 도우미까지<br />
+              여행에 필요한 모든 정보를 한 곳에서 확인하세요.
+            </p>
+          </motion.div>
+        </motion.div>
       </div>
 
-      <div className={styles.content}>
+      <motion.div className={styles.content} variants={listStagger}>
         {/* Quick cards */}
-        <div className={styles.quickRow}>
+        <motion.div className={styles.quickRow} variants={listStagger}>
           {QUICK_CARDS.map(card => (
-            <div key={card.title} className={styles.quickCard}>
-              <div className={styles.quickIcon} style={{ background: card.bg }}>
-                {card.icon}
+            <motion.div key={card.title} className={styles.quickCard} variants={softScaleIn}>
+              <div className={`${styles.quickIcon} ${card.iconClass}`}>
+                <card.Icon aria-hidden="true" />
               </div>
               <div className={styles.quickTitle}>{card.title}</div>
               <div className={styles.quickDesc}>{card.desc}</div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* How to use */}
-        <section className={styles.section}>
+        <motion.section className={styles.section} variants={riseIn}>
           <h2 className={styles.sectionTitle}>이용 방법</h2>
-          <div className={styles.stepList}>
+          <motion.div className={styles.stepList} variants={listStagger}>
             {STEPS.map((step, i) => (
-              <div key={step.heading} className={styles.stepCard}>
+              <motion.div key={step.heading} className={styles.stepCard} variants={riseIn}>
                 <div className={styles.stepNum}>{i + 1}</div>
                 <div className={styles.stepBody}>
                   <div className={styles.stepHeading}>{step.heading}</div>
                   <div className={styles.stepText}>{step.text}</div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* Features */}
-        <section className={styles.section}>
+        <motion.section className={styles.section} variants={riseIn}>
           <h2 className={styles.sectionTitle}>주요 기능</h2>
-          <div className={styles.featureGrid}>
+          <motion.div className={styles.featureGrid} variants={listStagger}>
             {FEATURES.map(f => (
-              <div key={f.title} className={styles.featureCard}>
-                <span className={styles.featureEmoji}>{f.emoji}</span>
+              <motion.div key={f.title} className={styles.featureCard} variants={softScaleIn}>
+                <f.Icon className={styles.featureIcon} aria-hidden="true" />
                 <div className={styles.featureTitle}>{f.title}</div>
                 <div className={styles.featureText}>{f.text}</div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* FAQ */}
-        <section className={styles.section}>
+        <motion.section className={styles.section} variants={riseIn}>
           <h2 className={styles.sectionTitle}>자주 묻는 질문</h2>
-          <div className={styles.faqList}>
+          <motion.div className={styles.faqList} variants={listStagger}>
             {FAQS.map(faq => (
-              <div key={faq.q} className={styles.faqItem}>
+              <motion.div key={faq.q} className={styles.faqItem} variants={riseIn}>
                 <div className={styles.faqQ}>{faq.q}</div>
                 <div className={styles.faqA}>{faq.a}</div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* CTA */}
-        <div className={styles.ctaBar}>
+        <motion.div className={styles.ctaBar} variants={riseIn}>
           <div className={styles.ctaTitle}>지금 바로 충북 여행을 시작해보세요</div>
           <div className={styles.ctaSub}>축제, 숙소, 캠핑, 날씨 정보가 모두 준비되어 있어요.</div>
           <button
@@ -192,8 +206,8 @@ export default function GuidePage() {
             축제·체험 둘러보기
             <FiArrowRight size={14} aria-hidden="true" />
           </button>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

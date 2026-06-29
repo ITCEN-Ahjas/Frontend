@@ -1,21 +1,25 @@
 .hero {
   width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-page-bg-soft) 48%, var(--color-page-bg-cool) 100%);
 }
 
 .inner {
   width: 100%;
-  max-width: var(--layout-max-width);
   min-height: 22rem;
   margin: 0 auto;
-  padding: 0 var(--layout-side-padding);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  padding: 0 var(--layout-side-padding);
+  background: var(--color-page-bg);
 }
 
 .text {
+  position: relative;
+  z-index: 1;
   max-width: 72rem;
 }
 

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchExperienceList, fetchFestivalList } from '../../api/festivalApi';
+import { listStagger, pageFade, riseIn } from '../../shared/animation/pageMotion';
 import FestivalFilterPanel from './components/FestivalFilterPanel';
 import FestivalGrid from './components/FestivalGrid';
 import FestivalHero from './components/FestivalHero';
@@ -718,46 +720,59 @@ export default function FestivalPage() {
   };
 
   return (
-    <div className={styles.page}>
+    <motion.div
+      className={styles.page}
+      initial="hidden"
+      animate="visible"
+      variants={pageFade}
+    >
       <FestivalHero />
 
-      <main className={styles.content}>
-        <FestivalFilterPanel
-          keyword={keyword}
-          regionOptions={regionOptions}
-          categoryOptions={categoryOptions}
-          selectedRegion={selectedRegion}
-          selectedCategory={selectedCategory}
-          onKeywordChange={value => {
-            setKeyword(value);
-            setCurrentPage(1);
-          }}
-          onRegionChange={value => {
-            setSelectedRegion(value);
-            setCurrentPage(1);
-          }}
-          onCategoryChange={value => {
-            setSelectedCategory(value);
-            setCurrentPage(1);
-          }}
-          onReset={resetFilters}
-        />
+      <motion.main className={styles.content} variants={listStagger}>
+        <motion.div variants={riseIn}>
+          <FestivalFilterPanel
+            keyword={keyword}
+            regionOptions={regionOptions}
+            categoryOptions={categoryOptions}
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+            onKeywordChange={value => {
+              setKeyword(value);
+              setCurrentPage(1);
+            }}
+            onRegionChange={value => {
+              setSelectedRegion(value);
+              setCurrentPage(1);
+            }}
+            onCategoryChange={value => {
+              setSelectedCategory(value);
+              setCurrentPage(1);
+            }}
+            onReset={resetFilters}
+          />
+        </motion.div>
 
-        <FestivalSectionHeader count={filteredFestivals.length} />
+        <motion.div variants={riseIn}>
+          <FestivalSectionHeader count={filteredFestivals.length} />
+        </motion.div>
 
-        <FestivalGrid
-          festivals={pagedFestivals}
-          loading={loading}
-          errorMessage={errorMessage}
-          onClickDetail={handleClickDetail}
-        />
+        <motion.div variants={riseIn}>
+          <FestivalGrid
+            festivals={pagedFestivals}
+            loading={loading}
+            errorMessage={errorMessage}
+            onClickDetail={handleClickDetail}
+          />
+        </motion.div>
 
-        <FestivalPagination
-          currentPage={safeCurrentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      </main>
-    </div>
+        <motion.div variants={riseIn}>
+          <FestivalPagination
+            currentPage={safeCurrentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </motion.div>
+      </motion.main>
+    </motion.div>
   );
 }
