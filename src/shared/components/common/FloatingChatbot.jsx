@@ -8,6 +8,90 @@ const SAMPLES = [
   '청주에서 아이랑 가기 좋은 곳은?',
 ];
 
+const FAB_HEIGHT = 52;
+const FAB_HALF_HEIGHT = FAB_HEIGHT / 2;
+const PANEL_BOTTOM_GAP = 80;
+const PANEL_CHROME_HEIGHT = 140;
+const VIEWPORT_MARGIN = 12;
+const MOBILE_BREAKPOINT = 900;
+const MOBILE_HEADER_HEIGHT = 64;
+
+function clamp(value, min, max) {
+  if (min > max) {
+    return (min + max) / 2;
+  }
+
+  return Math.min(Math.max(value, min), max);
+}
+
+function rem(value) {
+  return `${value / 10}rem`;
+}
+
+function getMaxPanelSize() {
+  return {
+    width: Math.max(300, Math.min(600, window.innerWidth - VIEWPORT_MARGIN * 2)),
+    height: Math.max(
+      180,
+      Math.min(
+        600,
+        window.innerHeight - PANEL_BOTTOM_GAP - PANEL_CHROME_HEIGHT - FAB_HEIGHT - VIEWPORT_MARGIN * 2,
+      ),
+    ),
+  };
+}
+
+function clampPanelSize(size) {
+  const maxSize = getMaxPanelSize();
+  const minWidth = Math.min(300, maxSize.width);
+  const minHeight = Math.min(280, maxSize.height);
+
+  return {
+    width: clamp(size.width, minWidth, maxSize.width),
+    height: clamp(size.height, minHeight, maxSize.height),
+  };
+}
+
+function isSameBox(first, second) {
+  return first.width === second.width && first.height === second.height;
+}
+
+function isSamePosition(first, second) {
+  return first.x === second.x && first.y === second.y;
+}
+
+function clampPosition(nextPos, size, isOpen) {
+  const minFabY = window.innerWidth <= MOBILE_BREAKPOINT
+    ? MOBILE_HEADER_HEIGHT + FAB_HALF_HEIGHT + VIEWPORT_MARGIN
+    : FAB_HALF_HEIGHT + VIEWPORT_MARGIN;
+
+  if (!isOpen) {
+    return {
+      x: clamp(nextPos.x, 80, window.innerWidth - 80),
+      y: clamp(nextPos.y, minFabY, window.innerHeight - FAB_HALF_HEIGHT - VIEWPORT_MARGIN),
+    };
+  }
+
+  const panelSize = clampPanelSize(size);
+  const visiblePanelWidth = Math.min(panelSize.width, window.innerWidth * 0.9);
+  const panelFullHeight = panelSize.height + PANEL_CHROME_HEIGHT;
+
+  return {
+    x: clamp(nextPos.x, visiblePanelWidth - 80 + VIEWPORT_MARGIN, window.innerWidth - VIEWPORT_MARGIN),
+    y: clamp(
+      nextPos.y,
+      panelFullHeight + PANEL_BOTTOM_GAP + FAB_HALF_HEIGHT + VIEWPORT_MARGIN,
+      window.innerHeight - FAB_HALF_HEIGHT - VIEWPORT_MARGIN,
+    ),
+  };
+}
+
+function getTouchPoint(event) {
+  const touch = event.touches?.[0] || event.changedTouches?.[0];
+
+  return touch ? { clientX: touch.clientX, clientY: touch.clientY } : null;
+}
+
 export default function FloatingChatbot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -41,6 +125,18 @@ export default function FloatingChatbot() {
     e.preventDefault();
   }, [pos]);
 
+  const onTouchStart = useCallback(e => {
+    const point = getTouchPoint(e);
+
+    if (!point) {
+      return;
+    }
+
+    dragging.current = true;
+    hasDragged.current = false;
+    offset.current = { x: point.clientX - pos.x, y: point.clientY - pos.y };
+  }, [pos]);
+
   const onResizeMouseDown = useCallback(e => {
     e.stopPropagation();
     resizing.current = true;
@@ -55,31 +151,105 @@ export default function FloatingChatbot() {
     const onMouseMove = e => {
       if (dragging.current) {
         hasDragged.current = true;
-        setPos({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
+        setPos(clampPosition(
+          { x: e.clientX - offset.current.x, y: e.clientY - offset.current.y },
+          panelSize,
+          open,
+        ));
       }
       if (resizing.current) {
         const dx = resizeStart.current.x - e.clientX;
         const dy = resizeStart.current.y - e.clientY;
-        setPanelSize({
-          width: Math.max(300, Math.min(600, resizeStart.current.w + dx)),
-          height: Math.max(280, Math.min(600, resizeStart.current.h + dy)),
+        const nextSize = clampPanelSize({
+          width: resizeStart.current.w + dx,
+          height: resizeStart.current.h + dy,
         });
+
+        setPanelSize(nextSize);
+        setPos(previous => clampPosition(previous, nextSize, open));
       }
     };
     const onMouseUp = () => {
       dragging.current = false;
       resizing.current = false;
     };
+    const onTouchMove = e => {
+      if (!dragging.current) {
+        return;
+      }
+
+      const point = getTouchPoint(e);
+
+      if (!point) {
+        return;
+      }
+
+      hasDragged.current = true;
+      setPos(clampPosition(
+        { x: point.clientX - offset.current.x, y: point.clientY - offset.current.y },
+        panelSize,
+        open,
+      ));
+      e.preventDefault();
+    };
+    const onTouchEnd = () => {
+      dragging.current = false;
+    };
+
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+    window.addEventListener('resize', onMouseUp);
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+      window.removeEventListener('resize', onMouseUp);
     };
-  }, []);
+  }, [open, panelSize]);
+
+  useEffect(() => {
+    const onResize = () => {
+      const nextSize = clampPanelSize(panelSize);
+
+      setPanelSize(previous => (isSameBox(previous, nextSize) ? previous : nextSize));
+      setPos(previous => {
+        const nextPos = clampPosition(previous, nextSize, open);
+
+        return isSamePosition(previous, nextPos) ? previous : nextPos;
+      });
+    };
+
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [open, panelSize]);
 
   const handleToggle = () => {
-    if (!hasDragged.current) setOpen(p => !p);
+    if (hasDragged.current) {
+      return;
+    }
+
+    const nextOpen = !open;
+
+    if (nextOpen) {
+      const nextSize = clampPanelSize(panelSize);
+
+      setPanelSize(previous => (isSameBox(previous, nextSize) ? previous : nextSize));
+      setPos(previous => {
+        const nextPos = clampPosition(previous, nextSize, true);
+
+        return isSamePosition(previous, nextPos) ? previous : nextPos;
+      });
+    }
+
+    setOpen(nextOpen);
   };
 
   const buildHistory = msgs =>
@@ -116,81 +286,103 @@ export default function FloatingChatbot() {
       <style>{`
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-          40% { transform: translateY(-5px); opacity: 1; }
+          40% { transform: translateY(-0.5rem); opacity: 1; }
         }
         @keyframes panelIn {
-          from { opacity: 0; transform: translateY(16px) scale(0.96); }
+          from { opacity: 0; transform: translateY(1.6rem) scale(0.96); }
           to   { opacity: 1; transform: translateY(0)  scale(1); }
         }
         @keyframes msgIn {
-          from { opacity: 0; transform: translateY(6px); }
+          from { opacity: 0; transform: translateY(0.6rem); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .cb-sample:hover  { background: var(--color-slate-100) !important; transform: translateX(2px); }
-        .cb-suggest:hover { background: var(--color-brand-primary-bg) !important; transform: translateX(2px); }
+        .cb-sample:hover  { background: var(--color-slate-100) !important; transform: translateX(0.2rem); }
+        .cb-suggest:hover { background: var(--color-brand-primary-bg) !important; transform: translateX(0.2rem); }
         .cb-send:hover:not(:disabled) { background: var(--color-brand-primary-dark) !important; transform: scale(1.06); }
         .cb-close:hover { background: var(--color-chat-inverse-bg-hover) !important; }
         @keyframes fabPulse {
-          0%, 100% { box-shadow: 0 0 0 0 var(--color-shadow-purple-strong), 0 8px 28px var(--color-shadow-purple-strong); }
-          55% { box-shadow: 0 0 0 10px transparent, 0 8px 28px var(--color-shadow-purple-strong); }
+          0%, 100% { box-shadow: 0 0 0 0 var(--color-shadow-purple-strong), 0 0.8rem 2.8rem var(--color-shadow-purple-strong); }
+          55% { box-shadow: 0 0 0 1rem transparent, 0 0.8rem 2.8rem var(--color-shadow-purple-strong); }
         }
         .cb-fab { animation: fabPulse 2.6s ease-in-out infinite; }
         .cb-fab:hover { filter: brightness(1.08) !important; transform: scale(1.04) !important; animation: none !important; }
         .cb-fab svg {
-          width: 22px;
-          height: 22px;
+          width: 2.2rem;
+          height: 2.2rem;
           color: var(--color-white);
           stroke-width: 2.2;
         }
         .cb-close svg {
-          width: 18px;
-          height: 18px;
+          width: 1.8rem;
+          height: 1.8rem;
           color: var(--color-chat-inverse-muted);
           stroke-width: 2.4;
         }
         .cb-send svg {
-          width: 19px;
-          height: 19px;
+          width: 1.9rem;
+          height: 1.9rem;
           color: var(--color-white);
           stroke-width: 2.4;
         }
         .cb-bot-icon svg {
-          width: 22px;
-          height: 22px;
+          width: 2.2rem;
+          height: 2.2rem;
           color: var(--color-white);
           stroke-width: 2.2;
         }
         .cb-message-icon svg {
-          width: 17px;
-          height: 17px;
+          width: 1.7rem;
+          height: 1.7rem;
           color: var(--color-white);
           stroke-width: 2.2;
         }
         .cb-resize-icon svg {
-          width: 12px;
-          height: 12px;
+          width: 1.2rem;
+          height: 1.2rem;
           color: var(--color-slate-300);
           stroke-width: 2;
         }
         .cb-msg { animation: msgIn 0.2s ease; }
-        .cb-scroll::-webkit-scrollbar { width: 4px; }
+        .cb-scroll::-webkit-scrollbar { width: 0.4rem; }
         .cb-scroll::-webkit-scrollbar-track { background: transparent; }
-        .cb-scroll::-webkit-scrollbar-thumb { background: var(--color-slate-200); border-radius: 4px; }
+        .cb-scroll::-webkit-scrollbar-thumb { background: var(--color-slate-200); border-radius: 0.4rem; }
+        @media (max-width: 56.25rem) {
+          body.mobile-menu-open .cb-floating-root {
+            opacity: 0;
+            pointer-events: none;
+          }
+
+          .cb-fab {
+            width: 5.2rem !important;
+            padding: 0 !important;
+            justify-content: center !important;
+          }
+
+          .cb-fab-label,
+          .cb-fab-close-label {
+            display: none !important;
+          }
+
+          .cb-fab-icon {
+            width: 3.2rem !important;
+            height: 3.2rem !important;
+          }
+        }
       `}</style>
 
-      <div style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 9999, transform: 'translate(-50%,-50%)' }}>
+      <div className="cb-floating-root" style={{ position: 'fixed', left: rem(pos.x), top: rem(pos.y), zIndex: 9999, transform: 'translate(-50%,-50%)' }}>
 
         {/* ── 패널 ── */}
         {open && (
           <div style={{
             position: 'absolute',
-            bottom: 80,
+            bottom: '8rem',
             right: 0,
-            width: `min(${panelSize.width}px, 90vw)`,
-            borderRadius: 24,
+            width: `min(${rem(panelSize.width)}, 90vw)`,
+            borderRadius: '2.4rem',
             background: 'var(--color-white)',
-            boxShadow: '0 32px 80px var(--color-shadow-black-medium), 0 2px 8px var(--color-shadow-black-faint)',
-            border: '1px solid var(--color-border-muted)',
+            boxShadow: '0 3.2rem 8rem var(--color-shadow-black-medium), 0 0.2rem 0.8rem var(--color-shadow-black-faint)',
+            border: '0.1rem solid var(--color-border-muted)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -205,8 +397,8 @@ export default function FloatingChatbot() {
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                width: 20,
-                height: 20,
+                width: '2rem',
+                height: '2rem',
                 cursor: 'nw-resize',
                 zIndex: 10,
                 display: 'flex',
@@ -219,27 +411,27 @@ export default function FloatingChatbot() {
 
             {/* 헤더 */}
             <div style={{
-              padding: '16px 18px',
+              padding: '1.6rem 1.8rem',
               background: 'var(--color-slate-900)',
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
+              gap: '1.2rem',
             }}>
               <div className="cb-bot-icon" style={{
-                width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+                width: '4rem', height: '4rem', borderRadius: '1.2rem', flexShrink: 0,
                 background: 'linear-gradient(135deg,var(--color-gradient-purple-start),var(--color-gradient-purple-end))',
                 display: 'grid', placeItems: 'center',
-                boxShadow: '0 4px 14px var(--color-shadow-purple-strong)',
+                boxShadow: '0 0.4rem 1.4rem var(--color-shadow-purple-strong)',
               }}>
                 <FiMessageCircle aria-hidden="true" />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--color-white)', letterSpacing: '-0.2px' }}>
+                <p style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-white)', letterSpacing: '-0.02rem' }}>
                   충북 여행 AI
                 </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-chungbuk-purple)', boxShadow: '0 0 5px var(--color-chungbuk-purple)' }} />
-                  <span style={{ fontSize: 11, color: 'var(--color-chat-inverse-faint)' }}>지금 바로 답변 가능</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
+                  <div style={{ width: '0.6rem', height: '0.6rem', borderRadius: '50%', background: 'var(--color-chungbuk-purple)', boxShadow: '0 0 0.5rem var(--color-chungbuk-purple)' }} />
+                  <span style={{ fontSize: '1.1rem', color: 'var(--color-chat-inverse-faint)' }}>지금 바로 답변 가능</span>
                 </div>
               </div>
               <button
@@ -249,11 +441,11 @@ export default function FloatingChatbot() {
                 onClick={() => setOpen(false)}
                 style={{
                 background: 'var(--color-chat-inverse-bg)',
-                border: '1px solid var(--color-chat-inverse-border)',
-                borderRadius: 10, width: 32, height: 32,
+                border: '0.1rem solid var(--color-chat-inverse-border)',
+                borderRadius: '1rem', width: '3.2rem', height: '3.2rem',
                 display: 'grid', placeItems: 'center',
                 cursor: 'pointer', color: 'var(--color-chat-inverse-weak)',
-                fontSize: 13, flexShrink: 0,
+                fontSize: '1.3rem', flexShrink: 0,
                 transition: 'background 0.15s',
               }}>
                 <FiX aria-hidden="true" />
@@ -262,45 +454,45 @@ export default function FloatingChatbot() {
 
             {/* 메시지 */}
             <div className="cb-scroll" style={{
-              height: panelSize.height,
+              height: rem(panelSize.height),
               overflowY: 'auto',
               background: 'var(--color-slate-50)',
-              padding: '18px 14px',
+              padding: '1.8rem 1.4rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: 14,
+              gap: '1.4rem',
             }}>
               {messages.map((msg, i) => (
                 <div key={i} className="cb-msg" style={{
                   display: 'flex',
                   flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
                   alignItems: 'flex-end',
-                  gap: 8,
+                  gap: '0.8rem',
                 }}>
                   {msg.role === 'ai' && (
                     <div className="cb-message-icon" style={{
-                      width: 30, height: 30, borderRadius: 10, flexShrink: 0,
+                      width: '3rem', height: '3rem', borderRadius: '1rem', flexShrink: 0,
                       background: 'linear-gradient(135deg,var(--color-gradient-purple-start),var(--color-gradient-purple-end))',
                       display: 'grid', placeItems: 'center',
-                      boxShadow: '0 2px 8px var(--color-shadow-purple-soft)',
+                      boxShadow: '0 0.2rem 0.8rem var(--color-shadow-purple-soft)',
                     }}>
                       <FiMessageCircle aria-hidden="true" />
                     </div>
                   )}
                   <div style={{
                     maxWidth: '72%',
-                    padding: '11px 14px',
-                    borderRadius: msg.role === 'user' ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
+                    padding: '1.1rem 1.4rem',
+                    borderRadius: msg.role === 'user' ? '1.8rem 0.4rem 1.8rem 1.8rem' : '0.4rem 1.8rem 1.8rem 1.8rem',
                     background: msg.role === 'user' ? 'var(--color-slate-900)' : 'var(--color-white)',
                     color: msg.role === 'user' ? 'var(--color-slate-50)' : 'var(--color-slate-800)',
-                    fontSize: 13.5,
+                    fontSize: '1.35rem',
                     lineHeight: 1.7,
                     fontWeight: 400,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                     boxShadow: msg.role === 'ai'
-                      ? '0 2px 10px var(--color-shadow-black-soft)'
-                      : '0 2px 10px var(--color-shadow-slate-strong)',
+                      ? '0 0.2rem 1rem var(--color-shadow-black-soft)'
+                      : '0 0.2rem 1rem var(--color-shadow-slate-strong)',
                   }}>
                     {msg.text}
                   </div>
@@ -309,22 +501,22 @@ export default function FloatingChatbot() {
 
               {/* 로딩 */}
               {loading && (
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.8rem' }}>
                   <div className="cb-message-icon" style={{
-                    width: 30, height: 30, borderRadius: 10, flexShrink: 0,
+                    width: '3rem', height: '3rem', borderRadius: '1rem', flexShrink: 0,
                     background: 'linear-gradient(135deg,var(--color-gradient-purple-start),var(--color-gradient-purple-end))',
                     display: 'grid', placeItems: 'center',
                   }}>
                     <FiMessageCircle aria-hidden="true" />
                   </div>
                   <div style={{
-                    background: 'var(--color-white)', borderRadius: '4px 18px 18px 18px',
-                    padding: '14px 18px', display: 'flex', gap: 5, alignItems: 'center',
-                    boxShadow: '0 2px 10px var(--color-shadow-black-soft)',
+                    background: 'var(--color-white)', borderRadius: '0.4rem 1.8rem 1.8rem 1.8rem',
+                    padding: '1.4rem 1.8rem', display: 'flex', gap: '0.5rem', alignItems: 'center',
+                    boxShadow: '0 0.2rem 1rem var(--color-shadow-black-soft)',
                   }}>
                     {[0, 1, 2].map(i => (
                       <div key={i} style={{
-                        width: 7, height: 7, borderRadius: '50%', background: 'var(--color-chungbuk-purple)',
+                        width: '0.7rem', height: '0.7rem', borderRadius: '50%', background: 'var(--color-chungbuk-purple)',
                         animation: `dotBounce 1.1s ease-in-out ${i * 0.16}s infinite`,
                       }} />
                     ))}
@@ -334,23 +526,23 @@ export default function FloatingChatbot() {
 
               {/* 샘플 질문 */}
               {messages.length <= 1 && !loading && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-slate-400)', paddingLeft: 2, letterSpacing: '0.2px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginTop: '0.4rem' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-slate-400)', paddingLeft: '0.2rem', letterSpacing: '0.02rem' }}>
                     이런 질문은 어떠세요?
                   </span>
                   {SAMPLES.map(q => (
                     <button key={q} className="cb-sample" onClick={() => handleSend(q)} style={{
                       background: 'var(--color-white)',
-                      border: '1.5px solid var(--color-slate-200)',
-                      borderRadius: 13,
-                      padding: '11px 15px',
-                      fontSize: 13,
+                      border: '0.15rem solid var(--color-slate-200)',
+                      borderRadius: '1.3rem',
+                      padding: '1.1rem 1.5rem',
+                      fontSize: '1.3rem',
                       fontWeight: 500,
                       textAlign: 'left',
                       cursor: 'pointer',
                       color: 'var(--color-slate-700)',
                       transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 4px var(--color-shadow-black-subtle)',
+                      boxShadow: '0 0.1rem 0.4rem var(--color-shadow-black-subtle)',
                     }}>
                       {q}
                     </button>
@@ -360,24 +552,24 @@ export default function FloatingChatbot() {
 
               {/* 추천 질문 */}
               {suggested.length > 0 && !loading && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-chungbuk-purple)', paddingLeft: 2, letterSpacing: '0.2px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginTop: '0.4rem' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-chungbuk-purple)', paddingLeft: '0.2rem', letterSpacing: '0.02rem' }}>
                     <FiHelpCircle aria-hidden="true" />
                     이런 것도 궁금하지 않으세요?
                   </span>
                   {suggested.map(q => (
                     <button key={q} className="cb-suggest" onClick={() => handleSend(q)} style={{
                       background: 'var(--color-brand-primary-bg-soft)',
-                      border: '1.5px solid var(--color-brand-primary-border)',
-                      borderRadius: 13,
-                      padding: '11px 15px',
-                      fontSize: 13,
+                      border: '0.15rem solid var(--color-brand-primary-border)',
+                      borderRadius: '1.3rem',
+                      padding: '1.1rem 1.5rem',
+                      fontSize: '1.3rem',
                       fontWeight: 500,
                       textAlign: 'left',
                       cursor: 'pointer',
                       color: 'var(--color-chungbuk-purple)',
                       transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 4px var(--color-shadow-purple-soft)',
+                      boxShadow: '0 0.1rem 0.4rem var(--color-shadow-purple-soft)',
                     }}>
                       {q}
                     </button>
@@ -390,11 +582,11 @@ export default function FloatingChatbot() {
 
             {/* 입력 영역 */}
             <div style={{
-              padding: '12px 14px',
+              padding: '1.2rem 1.4rem',
               background: 'var(--color-white)',
-              borderTop: '1px solid var(--color-slate-100)',
+              borderTop: '0.1rem solid var(--color-slate-100)',
               display: 'flex',
-              gap: 8,
+              gap: '0.8rem',
               alignItems: 'flex-end',
             }}>
               <input
@@ -407,10 +599,10 @@ export default function FloatingChatbot() {
                 style={{
                   flex: 1,
                   background: 'var(--color-slate-100)',
-                  border: '1.5px solid transparent',
-                  borderRadius: 14,
-                  padding: '11px 16px',
-                  fontSize: 13.5,
+                  border: '0.15rem solid transparent',
+                  borderRadius: '1.4rem',
+                  padding: '1.1rem 1.6rem',
+                  fontSize: '1.35rem',
                   color: 'var(--color-slate-800)',
                   outline: 'none',
                   resize: 'none',
@@ -431,13 +623,13 @@ export default function FloatingChatbot() {
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim()}
                 style={{
-                  width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                  width: '4.4rem', height: '4.4rem', borderRadius: '1.4rem', flexShrink: 0,
                   background: loading || !input.trim() ? 'var(--color-slate-200)' : 'var(--color-chungbuk-purple)',
                   border: 'none',
                   display: 'grid', placeItems: 'center',
                   cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
-                  boxShadow: !loading && input.trim() ? '0 4px 14px var(--color-shadow-purple)' : 'none',
+                  boxShadow: !loading && input.trim() ? '0 0.4rem 1.4rem var(--color-shadow-purple)' : 'none',
                 }}
               >
                 <FiSend aria-hidden="true" />
@@ -450,44 +642,46 @@ export default function FloatingChatbot() {
         <div
           className="cb-fab"
           onMouseDown={onMouseDown}
+          onTouchStart={onTouchStart}
           onClick={handleToggle}
           style={{
-            height: 52,
+            height: '5.2rem',
             borderRadius: 999,
-            padding: open ? '0 20px' : '0 18px',
+            padding: open ? '0 2rem' : '0 1.8rem',
             background: open
-              ? 'rgba(15,23,42,0.9)'
+              ? 'var(--color-chat-fab-open-bg)'
               : 'linear-gradient(135deg, var(--color-gradient-purple-start) 0%, var(--color-gradient-purple-end) 100%)',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: '1rem',
             cursor: 'grab',
+            touchAction: 'none',
             userSelect: 'none',
             transition: 'background 0.2s ease, filter 0.2s ease, transform 0.2s ease',
-            backdropFilter: open ? 'blur(8px)' : 'none',
-            border: open ? '1.5px solid rgba(255,255,255,0.12)' : 'none',
+            backdropFilter: open ? 'blur(0.8rem)' : 'none',
+            border: open ? '0.15rem solid var(--color-chat-fab-open-border)' : 'none',
             whiteSpace: 'nowrap',
           }}
         >
           {open ? (
             <>
-              <FiX aria-hidden="true" style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.75)', flexShrink: 0 }} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>닫기</span>
+              <FiX aria-hidden="true" style={{ width: '1.8rem', height: '1.8rem', color: 'var(--color-chat-inverse-muted)', flexShrink: 0 }} />
+              <span className="cb-fab-close-label" style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--color-chat-fab-label)' }}>닫기</span>
             </>
           ) : (
             <>
-              <div style={{
-                width: 30, height: 30, borderRadius: 10, flexShrink: 0,
-                background: 'rgba(255,255,255,0.2)',
+              <div className="cb-fab-icon" style={{
+                width: '3rem', height: '3rem', borderRadius: '1rem', flexShrink: 0,
+                background: 'var(--color-chat-fab-icon-bg)',
                 display: 'grid', placeItems: 'center',
               }}>
                 <FiMessageCircle aria-hidden="true" />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <span style={{ fontSize: 12, fontWeight: 800, color: '#fff', letterSpacing: '-0.2px', lineHeight: 1 }}>
+              <div className="cb-fab-label" style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-white)', letterSpacing: '-0.02rem', lineHeight: 1 }}>
                   AI 여행 도우미
                 </span>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>
+                <span style={{ fontSize: '1rem', color: 'var(--color-chat-inverse-muted)', lineHeight: 1 }}>
                   충북 여행 질문하기
                 </span>
               </div>

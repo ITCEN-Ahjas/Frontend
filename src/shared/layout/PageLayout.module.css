@@ -10,3 +10,9 @@
   width: 100%;
   overflow-x: hidden;
 }
+
+@media (max-width: 56.25rem) {
+  .main {
+    padding-top: 6.4rem;
+  }
+}

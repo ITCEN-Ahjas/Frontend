@@ -79,7 +79,7 @@
 .errorPanel,
 .emptyPanel,
 .mapPanel {
-  border: 1px solid var(--color-border-muted-alpha-strong);
+  border: 0.1rem solid var(--color-border-muted-alpha-strong);
   border-radius: 0.8rem;
   background: var(--color-white);
   box-shadow: 0 1.8rem 4.4rem var(--color-shadow-map-soft);
@@ -152,7 +152,7 @@
   width: 100%;
   min-height: 4.6rem;
   padding: 0 1.3rem;
-  border: 1px solid var(--color-slate-300);
+  border: 0.1rem solid var(--color-slate-300);
   border-radius: 0.8rem;
   outline: 0;
   background: var(--color-white);
@@ -200,7 +200,7 @@
   min-width: 0;
   min-height: 4rem;
   padding: 0 1rem;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-slate-50);
   color: var(--color-slate-700);
@@ -258,10 +258,10 @@
 
 .tabList {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
   padding: 0.6rem;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-slate-50);
 }
@@ -274,7 +274,7 @@
   gap: 0.55rem;
   min-width: 0;
   min-height: 3.8rem;
-  border: 1px solid transparent;
+  border: 0.1rem solid transparent;
   border-radius: 0.8rem;
   background: transparent;
   color: var(--color-slate-500);
@@ -317,7 +317,7 @@
 .infoNotice,
 .infoItem,
 .daySection {
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-white);
 }
@@ -378,7 +378,7 @@
 .summaryStats div {
   min-width: 0;
   padding: 1.5rem;
-  border: 1px solid var(--color-brand-primary-border-soft);
+  border: 0.1rem solid var(--color-brand-primary-border-soft);
   border-radius: 0.8rem;
   background: var(--color-brand-primary-bg-faint);
 }
@@ -436,7 +436,7 @@
 
 .daySection h3 {
   padding: 1.5rem 1.7rem;
-  border-bottom: 1px solid var(--color-slate-200);
+  border-bottom: 0.1rem solid var(--color-slate-200);
   background: var(--color-slate-50);
 }
 
@@ -453,7 +453,7 @@
   width: 100%;
   padding: 1.5rem 1.7rem;
   border: 0;
-  border-bottom: 1px solid var(--color-slate-100);
+  border-bottom: 0.1rem solid var(--color-slate-100);
   background: var(--color-white);
   text-align: left;
 }
@@ -496,7 +496,7 @@
   aspect-ratio: 16 / 9;
   margin-bottom: 1.1rem;
   overflow: hidden;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-slate-50);
 }
@@ -571,7 +571,7 @@
   display: grid;
   gap: 0.35rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-slate-50);
   color: var(--color-slate-700);
@@ -589,7 +589,7 @@
 .infoItem,
 .planBCard {
   padding: 1.5rem;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-white);
 }
@@ -689,7 +689,7 @@
   justify-content: space-between;
   gap: 1.4rem;
   padding: 1.8rem 2rem;
-  border-bottom: 1px solid var(--color-slate-200);
+  border-bottom: 0.1rem solid var(--color-slate-200);
 }
 
 .mapToolbar div {
@@ -712,7 +712,7 @@
   gap: 0.7rem;
   min-height: 4rem;
   padding: 0 1.4rem;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-slate-50);
   color: var(--color-slate-500);
@@ -770,7 +770,7 @@
   align-items: flex-start;
   max-width: 54rem;
   padding: 2rem;
-  border: 1px solid var(--color-slate-200);
+  border: 0.1rem solid var(--color-slate-200);
   border-radius: 0.8rem;
   background: var(--color-card-bg-translucent);
   box-shadow: 0 1.6rem 4rem var(--color-shadow-map-soft);
@@ -807,7 +807,7 @@
   }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 67.5rem) {
   .content {
     grid-template-columns: minmax(32rem, 38rem) minmax(0, 1fr);
     max-width: var(--layout-max-width);
@@ -828,11 +828,11 @@
   }
 
   .tabList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 56.25rem) {
   .page {
     min-height: calc(100vh - 6.4rem);
   }
@@ -863,13 +863,30 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 40rem) {
   .heroInner {
-    min-height: 20rem;
+    min-height: 17.6rem;
   }
 
   .heroTitle {
-    font-size: 3.8rem;
+    font-size: 3.3rem;
+    line-height: 1.14;
+    letter-spacing: -0.04em;
+    word-break: keep-all;
+  }
+
+  .heroDescription {
+    margin-top: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+
+  .heroSubDescription {
+    margin-top: 1rem;
+    font-size: 1.35rem;
+    line-height: 1.45;
+    word-break: keep-all;
   }
 
   .content {

@@ -220,6 +220,10 @@
   --color-chat-inverse-bg-hover: rgba(255, 255, 255, 0.15);
   --color-chat-inverse-border: rgba(255, 255, 255, 0.1);
   --color-chat-fab-border: rgba(255, 255, 255, 0.07);
+  --color-chat-fab-open-bg: rgba(15, 23, 42, 0.9);
+  --color-chat-fab-open-border: rgba(255, 255, 255, 0.12);
+  --color-chat-fab-icon-bg: rgba(255, 255, 255, 0.2);
+  --color-chat-fab-label: rgba(255, 255, 255, 0.7);
 
   --color-purple-bg-soft: #f3f0ff;
   --color-purple-bg-muted: #f0edff;
@@ -267,7 +271,7 @@ html {
 }
 
 body {
-  min-width: 320px;
+  min-width: 32rem;
   min-height: 100vh;
   overflow-x: hidden;
   font-family:
@@ -297,7 +301,7 @@ button {
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   :root {
     --layout-side-padding: 2.4rem;
   }

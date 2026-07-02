@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { TAB_ITEMS } from '../coursePlannerConfig';
 import {
   groupItineraryByDay,
-  normalizePlanBOption,
   stringify,
 } from '../courseRecommendationNormalizer';
 import styles from '../CoursePage.module.css';
@@ -154,67 +153,6 @@ function ItineraryTab({ result, selectedPlaceId, onSelectPlace }) {
   );
 }
 
-function getMoveTipItems(result) {
-  const groupedTips = result.itinerary.reduce((groups, item) => {
-    if (!item.moveTip) {
-      return groups;
-    }
-
-    const normalizedTip = item.moveTip.trim();
-    const previousGroup = groups.get(normalizedTip) || [];
-
-    groups.set(normalizedTip, [...previousGroup, item.title]);
-
-    return groups;
-  }, new Map());
-
-  return Array.from(groupedTips.entries()).map(([tip, placeNames], index) => ({
-    id: `move-tip-${index + 1}`,
-    triggerCondition: placeNames.length > 1 ? '공통 이동 팁' : '이동 팁',
-    replaceFrom: '',
-    replaceTo: placeNames.length > 1 ? `${placeNames.length}개 장소 공통` : placeNames[0],
-    reason: tip,
-  }));
-}
-
-function TalkTab({ result }) {
-  const planBItems = result.planBOptions.length > 0
-    ? result.planBOptions
-    : result.planB.map(normalizePlanBOption);
-  const talkItems = planBItems.length > 0 ? planBItems : getMoveTipItems(result);
-
-  return (
-    <div className={styles.infoStack}>
-      <section className={styles.infoNotice}>
-        <h3>여행톡</h3>
-        <p>여행자가 코스 선택 전에 확인할 수 있는 짧은 안내와 대체 코스를 모아 보여줍니다.</p>
-      </section>
-      {talkItems.length > 0 ? (
-        talkItems.map((item, index) => (
-          <article key={item.id || `${stringify(item)}-${index}`} className={styles.planBCard}>
-            <span>{item.triggerCondition || `대체 코스 ${index + 1}`}</span>
-            {item.replaceFrom && item.replaceTo ? (
-              <strong>
-                {item.replaceFrom || '기존 장소'} → {item.replaceTo || '대체 장소'}
-              </strong>
-            ) : item.replaceTo ? (
-              <strong>{item.replaceTo}</strong>
-            ) : (
-              <strong>대체 코스 {index + 1}</strong>
-            )}
-            {item.reason && <p>{item.reason}</p>}
-          </article>
-        ))
-      ) : (
-        <article className={styles.planBCard}>
-          <span>대체 코스</span>
-          <strong>응답에 대체 코스가 포함되면 이 영역에 표시됩니다.</strong>
-        </article>
-      )}
-    </div>
-  );
-}
-
 export default function CoursePlannerTabs({ result, selectedPlaceId, onSelectPlace }) {
   const [activeTab, setActiveTab] = useState('summary');
   const activeItem = TAB_ITEMS.find(item => item.id === activeTab) || TAB_ITEMS[0];
@@ -255,7 +193,6 @@ export default function CoursePlannerTabs({ result, selectedPlaceId, onSelectPla
           onSelectPlace={onSelectPlace}
         />
       )}
-      {activeTab === 'talk' && <TalkTab result={result} />}
     </section>
   );
 }

@@ -441,10 +441,30 @@
   .heroCard {
     padding: 2.4rem;
     grid-template-columns: 1fr;
+    gap: 2.2rem;
   }
 
   .heroContent h1 {
-    font-size: 3.4rem;
+    font-size: 3.2rem;
+    line-height: 1.16;
+    letter-spacing: -0.035em;
+    word-break: keep-all;
+  }
+
+  .heroContent p {
+    margin-top: 1.3rem;
+    font-size: 1.42rem;
+    line-height: 1.58;
+    word-break: keep-all;
+  }
+
+  .quickTitle {
+    font-size: 1.55rem;
+  }
+
+  .tipColumn p {
+    font-size: 1.24rem;
+    line-height: 1.5;
   }
 
   .searchForm,

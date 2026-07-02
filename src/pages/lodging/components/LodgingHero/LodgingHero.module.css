@@ -47,10 +47,27 @@
 
 @media (max-width: 768px) {
   .inner {
-    min-height: 20rem;
+    min-height: 17.6rem;
   }
 
   .title {
-    font-size: 3.8rem;
+    font-size: 3.4rem;
+    line-height: 1.12;
+    letter-spacing: -0.04em;
+    word-break: keep-all;
+  }
+
+  .description {
+    margin-top: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+
+  .subDescription {
+    margin-top: 1rem;
+    font-size: 1.35rem;
+    line-height: 1.45;
+    word-break: keep-all;
   }
 }

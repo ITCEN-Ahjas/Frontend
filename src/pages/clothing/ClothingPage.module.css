@@ -920,11 +920,28 @@
 
 @media (max-width: 720px) {
   .heroInner {
-    min-height: 20rem;
+    min-height: 17.6rem;
   }
 
   .heroTitle {
-    font-size: 3.8rem;
+    font-size: 3.4rem;
+    line-height: 1.12;
+    letter-spacing: -0.04em;
+    word-break: keep-all;
+  }
+
+  .heroDescription {
+    margin-top: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+
+  .heroSubDescription {
+    margin-top: 1rem;
+    font-size: 1.35rem;
+    line-height: 1.45;
+    word-break: keep-all;
   }
 
   .content {
@@ -942,6 +959,23 @@
   .skeletonOutfit {
     padding: 22px 18px;
     border-radius: 18px;
+  }
+
+  .locationSelectionHeader h2,
+  .sectionHeader h2,
+  .selectedTimeHeader h2,
+  .recommendationHeader h2,
+  .preparationHeader h2,
+  .weatherInsightHeader h2 {
+    font-size: 19px;
+    line-height: 1.32;
+    letter-spacing: -0.035em;
+    word-break: keep-all;
+  }
+
+  .sectionEyebrow {
+    font-size: 11px;
+    line-height: 1.2;
   }
 
   .locationSelectionHeader,
@@ -987,5 +1021,13 @@
 
   .outfitCard {
     min-height: auto;
+  }
+
+  .selectionField > span,
+  .selectionFieldLabel,
+  .selectionField small,
+  .residenceSelectionField > small {
+    line-height: 1.45;
+    word-break: keep-all;
   }
 }

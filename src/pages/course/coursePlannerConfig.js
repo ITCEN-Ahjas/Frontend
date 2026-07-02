@@ -1,6 +1,5 @@
 import {
   FiMap,
-  FiMessageCircle,
   FiNavigation,
 } from 'react-icons/fi';
 
@@ -59,7 +58,6 @@ export const SELECT_OPTIONS = {
 export const TAB_ITEMS = [
   { id: 'summary', label: '여행 요약', icon: FiMap },
   { id: 'itinerary', label: '세부 일정', icon: FiNavigation },
-  { id: 'talk', label: '여행톡', icon: FiMessageCircle },
 ];
 
 export const INITIAL_FORM = {
