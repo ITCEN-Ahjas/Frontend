@@ -1,6 +1,8 @@
 .layout {
   min-height: 100vh;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
   background: var(--color-page-bg);
   color: var(--color-chungbuk-dark-blue);
@@ -8,6 +10,7 @@
 
 .main {
   width: 100%;
+  flex: 1 0 auto;
   overflow-x: hidden;
 }
 
